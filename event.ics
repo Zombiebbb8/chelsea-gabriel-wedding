@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Chelsea & Gabriel Wedding//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+DTSTART:20270320T100000Z
+DTEND:20270320T220000Z
+SUMMARY:Chelsea & Gabriel's Wedding
+DESCRIPTION:You are invited to celebrate the wedding of Chelsea & Gabriel in Enugu\, Nigeria. Traditional ceremony at 11:00 AM · Reception from 12:00 PM.
+LOCATION:Enugu\, Nigeria
+STATUS:CONFIRMED
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR
