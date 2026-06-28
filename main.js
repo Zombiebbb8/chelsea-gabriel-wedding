@@ -10,6 +10,11 @@ const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 let supabase;
 try{supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON)}catch(e){console.warn('Supabase init failed',e)}
 
+/* ═══ TURNSTILE ═══ */
+let turnstileToken=null;
+function onTurnstileSuccess(token){turnstileToken=token;}
+function onTurnstileExpired(){turnstileToken=null;}
+
 /* ═══ GUEST PERSONALIZATION ═══ */
 const urlParams=new URLSearchParams(location.search);
 const guestName=urlParams.get('guest');
@@ -551,25 +556,34 @@ async function submitRSVP(e){
   const emailRe=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if(!emailRe.test(email)){showToast('Please enter a valid email address.');return}
 
+  // Turnstile check
+  if(!turnstileToken){
+    showToast('Please complete the verification check above.');
+    return;
+  }
+
   const btn=document.getElementById('rsvpBtn');
   btn.classList.add('saving');
   btn.querySelector('span').textContent='Saving…';
 
-  const {error}=await supabase.from('rsvps').insert({
-    first_name:first,
-    last_name:last,
-    email:email,
-    attending:attending,
-    guests:guests,
-    meal_preference:meal,
-    message:msg,
-    phone:phone
+  // ── All-in-one: verify Turnstile + save to DB + notify Gabriel (edge function) ──
+  const {data:fnData,error:fnErr}=await supabase.functions.invoke('rsvp-notify',{
+    body:{
+      turnstile_token:turnstileToken,
+      record:{first_name:first,last_name:last,email:email,attending:attending,guests:guests,meal_preference:meal,message:msg,phone:phone,song_request:song}
+    }
   });
-  if(error){
+  const apiError=fnErr?.message||fnData?.error;
+  if(apiError){
     btn.classList.remove('saving');
     btn.querySelector('span').textContent='Confirm My Attendance';
-    console.error('RSVP error:',error);
-    showToast(error.message||'Something went wrong. Please try again.');
+    if(apiError.includes('Verification')){
+      showToast('Verification expired. Please try again.');
+      if(window.turnstile)window.turnstile.reset();
+      turnstileToken=null;
+    }else{
+      showToast(apiError||'Something went wrong. Please try again.');
+    }
     return;
   }
   document.getElementById('rsvpForm').style.display='none';
@@ -577,7 +591,7 @@ async function submitRSVP(e){
   setLang(currentLang);
   launchConfetti();
   showToast(attending==='yes'?'We can\'t wait to see you! 💛':'We\'ll miss you!');
-  // ── Guest confirmation email via EmailJS (sends from Gmail, no domain needed) ──
+  // ── Guest confirmation email via EmailJS ──
   if(email && typeof emailjs!=='undefined' && EJS_PUBLIC_KEY!=='YOUR_PUBLIC_KEY'){
     const guestCnt=guests||1;
     const guestLine=guestCnt>1?` (+${guestCnt-1} guest${guestCnt>2?'s':''})` :'';
@@ -592,11 +606,6 @@ async function submitRSVP(e){
       personal_message: msg||''
     },EJS_PUBLIC_KEY).catch(err=>console.warn('EmailJS:',err));
   }
-
-  // ── Notify Gabriel via edge function (Resend → breezymail20@gmail.com, always works) ──
-  supabase.functions.invoke('rsvp-notify',{
-    body:{record:{first_name:first,last_name:last,email:email,attending:attending,guests:guests,meal_preference:meal,message:msg,phone:phone,song_request:song}}
-  }).catch(()=>{});
 }
 
 document.body.style.overflow='hidden';

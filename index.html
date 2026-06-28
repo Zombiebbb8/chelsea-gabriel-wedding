@@ -998,6 +998,10 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
       <div class="f-grp reveal"><label class="f-lbl" for="f-msg" data-en="A message for the couple" data-ig="Ozi nye di na nwunye" data-yo="Ìfọ̀rọ̀wánilẹ̀nu sí tọkọtaya">A message for the couple</label><textarea class="f-ta" id="f-msg" placeholder="Write your wishes here..."></textarea></div>
       <!-- Honeypot — hidden from real users, bots fill it in -->
       <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none" aria-hidden="true"><input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off" value=""/></div>
+      <!-- Turnstile bot protection -->
+      <div class="f-grp reveal" style="display:flex;justify-content:center;margin:0.5rem 0">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAADsdSSbo8_rGS38K" data-callback="onTurnstileSuccess" data-expired-callback="onTurnstileExpired" data-theme="light"></div>
+      </div>
       <button class="rsvp-btn reveal" id="rsvpBtn" onclick="submitRSVP(event)"><span data-en="Confirm My Attendance" data-ig="Kwado Ịbịa M" data-yo="Jẹ̀rìí sí Ìwà Mi">Confirm My Attendance</span></button>
       <div class="rsvp-actions reveal">
         <div class="cal-group">
@@ -1531,5 +1535,6 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>
