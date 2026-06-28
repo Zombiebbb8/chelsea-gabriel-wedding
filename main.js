@@ -255,6 +255,12 @@ async function initNames3D(){
   if(typeof THREE==='undefined')return;
   const oldCanvas=document.getElementById('names-3d-canvas');
   if(oldCanvas)oldCanvas.remove();
+  // On portrait mobile the horizontal FOV is too narrow for the wide particle canvas —
+  // restore the CSS shimmer text fallback which is fully visible on small screens.
+  if(window.innerWidth<600){
+    document.getElementById('hero')?.classList.remove('has-3d-names');
+    return;
+  }
 
   const hero=document.getElementById('hero');
   const namesEl=hero.querySelector('.h-names');
