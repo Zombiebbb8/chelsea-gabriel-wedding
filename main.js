@@ -1,9 +1,3 @@
-/* ═══ EMAILJS ═══ */
-const EJS_SERVICE          = 'service_bygu9jf';
-const EJS_TEMPLATE_CONFIRM = 'template_ldt4nlf';
-const EJS_TEMPLATE_DECLINE = 'template_ldt4nlf';
-const EJS_PUBLIC_KEY       = 'FP-wRyFf4WJMPkVKR';
-
 /* ═══ SUPABASE ═══ */
 const SUPABASE_URL='https://nakadctpdszskvooftln.supabase.co';
 const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ha2FkY3RwZHN6c2t2b29mdGxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMDExMzcsImV4cCI6MjA5Mzg3NzEzN30.iNYd01ff_TKKmGRb0pTB3fch_EIavoGaOnXAJt36jms';
@@ -591,21 +585,6 @@ async function submitRSVP(e){
   setLang(currentLang);
   launchConfetti();
   showToast(attending==='yes'?'We can\'t wait to see you! 💛':'We\'ll miss you!');
-  // ── Guest confirmation email via EmailJS ──
-  if(email && typeof emailjs!=='undefined' && EJS_PUBLIC_KEY!=='YOUR_PUBLIC_KEY'){
-    const guestCnt=guests||1;
-    const guestLine=guestCnt>1?` (+${guestCnt-1} guest${guestCnt>2?'s':''})` :'';
-    const tmpl=attending==='yes'?EJS_TEMPLATE_CONFIRM:EJS_TEMPLATE_DECLINE;
-    emailjs.send(EJS_SERVICE,tmpl,{
-      to_email:    email,
-      to_name:     [first,last].filter(Boolean).join(' '),
-      first_name:  first,
-      meal_preference: meal||'No preference',
-      guest_line:  guestLine,
-      song_request: song||'',
-      personal_message: msg||''
-    },EJS_PUBLIC_KEY).catch(err=>console.warn('EmailJS:',err));
-  }
 }
 
 document.body.style.overflow='hidden';
