@@ -144,23 +144,23 @@ nav.compact{padding:8px 20px}
 }
 
 /* HERO */
-#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:140px 32px 100px;position:relative;overflow:hidden;background:var(--cream)}
-#hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 55% 45% at 15% 20%,rgba(107,112,69,.09) 0%,transparent 60%),radial-gradient(ellipse 55% 45% at 85% 80%,rgba(107,112,69,.07) 0%,transparent 60%)}
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:140px 32px 100px;position:relative;overflow:hidden;background-image:url('photos/gallery-6.jpg');background-size:cover;background-position:center top}
+#hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(10,9,5,.55) 0%,rgba(10,9,5,.45) 50%,rgba(10,9,5,.62) 100%)}
 .hc{position:absolute;width:140px;height:140px;opacity:.22}
 .hc.tl{top:24px;left:24px}.hc.tr{top:24px;right:24px;transform:scaleX(-1)}
 .hc.bl{bottom:80px;left:24px;transform:scaleY(-1)}.hc.br{bottom:80px;right:24px;transform:scale(-1)}
-.h-eyebrow{font-size:.72rem;font-weight:300;letter-spacing:.38em;text-transform:uppercase;color:var(--olive-dk);margin-bottom:22px;opacity:0;animation:riseIn .9s var(--ease) .3s forwards}
+.h-eyebrow{font-size:.72rem;font-weight:300;letter-spacing:.38em;text-transform:uppercase;color:rgba(220,210,180,.75);margin-bottom:22px;opacity:0;animation:riseIn .9s var(--ease) .3s forwards}
 /* Shimmer gold text */
 .h-names{font-family:'Great Vibes',cursive;font-size:clamp(4.5rem,13vw,10rem);line-height:1.05;opacity:0;animation:riseIn 1.2s var(--ease) .6s forwards;background:linear-gradient(90deg,var(--ink) 0%,var(--gold-dk) 22%,var(--gold-lt) 35%,#fff8e0 50%,var(--gold-lt) 65%,var(--gold-dk) 78%,var(--ink) 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:riseIn 1.2s var(--ease) .6s forwards,shimmer 6s linear 2s infinite}
 @keyframes shimmer{to{background-position:200% center}}
-.h-amp{font-family:'Great Vibes',cursive;font-size:clamp(2rem,5.5vw,4.2rem);color:var(--olive);display:block;line-height:1.1;-webkit-text-fill-color:var(--olive)}
+.h-amp{font-family:'Great Vibes',cursive;font-size:clamp(2rem,5.5vw,4.2rem);color:var(--gold-lt);display:block;line-height:1.1;-webkit-text-fill-color:var(--gold-lt)}
 .h-rule{display:flex;align-items:center;gap:16px;width:min(300px,70%);margin:28px auto;opacity:0;animation:riseIn .8s var(--ease) 1s forwards}
 .h-rule span{flex:1;height:1px;background:linear-gradient(to right,transparent,var(--olive-lt),transparent)}
 .h-rule i{width:7px;height:7px;background:var(--olive);transform:rotate(45deg);flex-shrink:0}
-.h-date{font-family:'Cormorant Garamond',serif;font-size:1.22rem;font-style:italic;font-weight:400;color:var(--muted);letter-spacing:.12em;line-height:2;opacity:0;animation:riseIn .8s var(--ease) 1.2s forwards}
+.h-date{font-family:'Cormorant Garamond',serif;font-size:1.22rem;font-style:italic;font-weight:400;color:rgba(230,218,185,.8);letter-spacing:.12em;line-height:2;opacity:0;animation:riseIn .8s var(--ease) 1.2s forwards}
 .h-loc{font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--olive-dk);margin-top:14px;opacity:0;animation:riseIn .7s var(--ease) 1.5s forwards}
 .h-scroll{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;animation:fadeIn 1s ease 2.4s forwards}
-.h-scroll p{font-size:.55rem;letter-spacing:.38em;text-transform:uppercase;color:rgba(107,112,69,.4)}
+.h-scroll p{font-size:.55rem;letter-spacing:.38em;text-transform:uppercase;color:rgba(220,210,180,.4)}
 .h-scroll-bar{width:1px;height:44px;background:linear-gradient(to bottom,var(--olive),transparent);animation:barDrop 2.6s ease-in-out infinite}
 @keyframes barDrop{0%{transform:scaleY(0);transform-origin:top;opacity:0}40%{transform:scaleY(1);transform-origin:top;opacity:1}60%{transform:scaleY(1);transform-origin:bottom;opacity:1}100%{transform:scaleY(0);transform-origin:bottom;opacity:0}}
 @keyframes riseIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
