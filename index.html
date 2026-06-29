@@ -578,6 +578,26 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   .cal-opt{border-right:none;border-bottom:1px solid rgba(107,112,69,.18);justify-content:center}
   .cal-opt:last-child{border-bottom:none}
 }
+
+/* ═══ GUEST PORTAL BANNER ═══ */
+#guest-portal-banner{background:linear-gradient(to right,var(--olive-dk),var(--olive));border-bottom:1px solid rgba(201,168,76,.28);padding:0 24px;max-height:0;overflow:hidden;transition:max-height .6s var(--ease),padding .6s var(--ease)}
+#guest-portal-banner.visible{max-height:64px;padding-top:11px;padding-bottom:11px}
+.gp-inner{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1100px;margin:0 auto;gap:10px;flex-wrap:wrap}
+.gp-name{font-family:'Cormorant Garamond',serif;font-size:.97rem;color:var(--cream);font-style:italic;letter-spacing:.04em}
+.gp-sep{color:rgba(200,204,154,.3);margin:0 9px}
+.gp-status{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(200,204,154,.6)}
+.gp-badge{display:flex;align-items:center;gap:7px;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(200,204,154,.42)}
+.gp-dot{width:5px;height:5px;border-radius:50%;background:var(--gold-lt);box-shadow:0 0 5px var(--gold);flex-shrink:0}
+
+/* ═══ LOCKED SECTION CARDS ═══ */
+.locked-card{max-width:500px;margin:36px auto;padding:50px 32px;text-align:center;border:1px dashed rgba(201,168,76,.2);cursor:pointer;transition:border-color .3s,background .3s}
+.locked-card:hover{border-color:rgba(201,168,76,.42);background:rgba(201,168,76,.025)}
+.locked-icon{font-size:1.65rem;opacity:.35;margin-bottom:18px;display:block}
+.locked-title{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-style:italic;color:var(--text);margin-bottom:8px}
+.locked-unlock{font-size:.59rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;opacity:.6;display:block}
+.locked-msg{font-size:.82rem;color:var(--muted);line-height:1.7}
+.locked-cta{display:inline-block;margin-top:22px;padding:9px 26px;border:1px solid rgba(201,168,76,.3);color:rgba(201,168,76,.6);font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;font-family:'Jost',sans-serif;transition:all .3s}
+.locked-card:hover .locked-cta{background:rgba(201,168,76,.1);border-color:var(--gold);color:var(--gold)}
 </style>
 </head>
 <body>
@@ -680,6 +700,22 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 
 <!-- ══════════════════ MAIN SITE ══════════════════ -->
 <div id="site">
+
+<!-- GUEST PORTAL BANNER -->
+<div id="guest-portal-banner">
+  <div class="gp-inner">
+    <div>
+      <span class="gp-name" id="gp-name">Welcome</span>
+      <span class="gp-sep">·</span>
+      <span class="gp-status" id="gp-status">Confirmed Guest</span>
+    </div>
+    <div class="gp-badge">
+      <span class="gp-dot"></span>
+      <span id="gp-countdown">loading</span>
+    </div>
+  </div>
+</div>
+
 <div id="petalLayer"></div>
 <nav id="mainNav">
   <span class="nav-mono">C &amp; G</span>
@@ -921,22 +957,14 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   <span class="s-eye reveal" data-en="The Day" data-ig="Ụbọchị Ememe" data-yo="Ọjọ́ Àyẹyẹ">The Day</span>
   <h2 class="s-title reveal" data-en="Day <em>Timeline</em>" data-ig="<em>Usoro</em> Ụbọchị" data-yo="Ìgbésẹ̀ <em>Ọjọ́</em>">Day <em>Timeline</em></h2>
   <div class="s-rule reveal"><span></span><i></i><span></span></div>
-  <div class="tl-wrap">
-    <div class="tl-row reveal"><div class="tl-time">12:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Guest Arrival</h4><p>Welcome &amp; seating</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">12:45 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Arrival of the Groom</h4><p>The groom makes his entrance</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">1:10 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Opening Prayer &amp; Welcome</h4><p>Blessings to begin the day</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">1:30 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Kola Nut Ceremony</h4><p>Traditional Igbo welcome ritual</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">2:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Bride Price Confirmation</h4><p>The sacred agreement</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">2:20 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Speeches by Elders</h4><p>Words of wisdom &amp; blessing</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">2:50 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>First Entrance of the Bride</h4><p>Chelsea walks in</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">3:10 PM</div><div class="tl-node"><div class="tl-gem tl-gem--highlight"></div></div><div class="tl-ev"><h4>Palm Wine Ceremony <span style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-family:'Jost',sans-serif;font-weight:400;margin-left:6px">Highlight</span></h4><p>The heart of the traditional celebration</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">3:40 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Couple Blessing</h4><p>United in love &amp; tradition</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">4:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Second Outfit &amp; Grand Entrance</h4><p>A new look, a grand reveal</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">4:30 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Lunch &amp; Reception</h4><p>Feast together</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">5:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Entertainment</h4><p>Music, dance &amp; celebration</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">6:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Family Photos</h4><p>Capturing the memories</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">6:45 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Open Celebration</h4><p>The dance floor is yours</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">7:45 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Official Closing</h4><p>Until we meet again</p></div></div>
+  <div id="timeline-content">
+    <div class="locked-card reveal" onclick="document.getElementById('rsvp').scrollIntoView({behavior:'smooth'})">
+      <span class="locked-icon">🔒</span>
+      <div class="locked-title">Day Timeline</div>
+      <span class="locked-unlock">Unlocks March 6, 2027 · 14 days before the wedding</span>
+      <p class="locked-msg">RSVP to receive your private access link — the full programme will be shared with confirmed guests closer to the date.</p>
+      <div class="locked-cta">Complete My RSVP</div>
+    </div>
   </div>
 </section>
 
@@ -1082,40 +1110,14 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   <span class="s-eye reveal" data-en="After the Wedding" data-ig="Mgbe Ślub gasịrị" data-yo="Lẹ́yìn Ìgbéyàwó">After the Wedding</span>
   <h2 class="s-title reveal" data-en="Share Your <em>Photos</em>" data-ig="Kere <em>Foto</em> Gị" data-yo="Pín <em>Àwọn Fọ́tò</em> Rẹ">Share Your <em>Photos</em></h2>
   <div class="s-rule reveal"><span></span><i></i><span></span></div>
-  <div class="photo-upload-wrap">
-    <p class="photo-intro reveal" data-en="After March 20, 2027 — if you captured a beautiful moment on the day, we would love to see it. Upload your photos here and help us build a shared memory of this celebration." data-ig="Mgbe Maachị 20, 2027 — ọ bụrụ na i nọchitere oge dị mma, anyị ga-aṅụrị ọchị ihụ ya. Bulite foto gị ebe a." data-yo="Lẹ́yìn Oṣù Kẹta Ọjọ́ 20, 2027 — tí o bá ya fọ́tò tó rẹwà, a fẹ́ rí i. Gbé àwọn fọ́tò rẹ sórí ní ibí.">After March 20, 2027 — if you captured a beautiful moment on the day, we would love to see it. Upload your photos here and help us build a shared memory of this celebration.</p>
-
-    <div class="upload-zone reveal" id="uploadZone">
-      <input type="file" id="photoFile" accept="image/jpeg,image/png,image/webp,image/heic" onchange="previewPhoto(this)"/>
-      <svg class="upload-icon" viewBox="0 0 44 44"><path d="M28 28l-6-6-6 6"/><line x1="22" y1="22" x2="22" y2="38"/><path d="M38 32.5a8 8 0 00-2.5-15.5H34a12 12 0 10-21 10.5"/></svg>
-      <div class="upload-text" data-en="Tap to choose a photo" data-ig="Pịa ịhọrọ foto" data-yo="Tẹ láti yan fọ́tò">Tap to choose a photo</div>
-      <div class="upload-sub">JPEG · PNG · WEBP · HEIC · Max 10MB</div>
+  <div id="photos-content">
+    <div class="locked-card reveal" onclick="document.getElementById('rsvp').scrollIntoView({behavior:'smooth'})">
+      <span class="locked-icon">🔒</span>
+      <div class="locked-title">Share Your Photos</div>
+      <span class="locked-unlock">Available from March 20, 2027 · Wedding day</span>
+      <p class="locked-msg">RSVP to receive your private access link — this section opens on the day of the celebration so you can share your photos with us.</p>
+      <div class="locked-cta">Complete My RSVP</div>
     </div>
-
-    <div class="upload-preview" id="uploadPreview">
-      <img id="previewImg" class="preview-img" src="" alt="Preview"/>
-      <div class="preview-name" id="previewName"></div>
-    </div>
-
-    <div class="upload-fields reveal">
-      <div class="upload-row">
-        <div class="up-grp">
-          <label class="up-lbl" for="up-name" data-en="Your Name" data-ig="Aha Gị" data-yo="Orúkọ Rẹ">Your Name</label>
-          <input class="up-in" id="up-name" type="text" placeholder="e.g. Aunty Ngozi"/>
-        </div>
-        <div class="up-grp">
-          <label class="up-lbl" for="up-caption" data-en="Caption (optional)" data-ig="Nkọwa (nhọrọ)" data-yo="Àkọlé (aṣayàn)">Caption (optional)</label>
-          <input class="up-in" id="up-caption" type="text" placeholder="A short description…"/>
-        </div>
-      </div>
-      <div class="upload-progress" id="uploadProgress">
-        <div class="upload-progress-bar" id="uploadProgressBar"></div>
-      </div>
-      <button class="upload-btn" id="uploadBtn" onclick="uploadPhoto()">
-        <span data-en="Share This Photo" data-ig="Keta Foto A" data-yo="Pín Fọ́tò Yìí">Share This Photo</span>
-      </button>
-    </div>
-
   </div>
 </section>
 
@@ -1206,171 +1208,17 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   <span class="s-eye reveal" data-en="Getting Here" data-ig="Ịbịa Ebe A" data-yo="Bí o ṣe wà níbí">Getting Here</span>
   <h2 class="s-title reveal" data-en="Travel &amp; <em>Stay</em>" data-ig="Njem na <em>Obibi</em>" data-yo="Ìrìnàjò àti <em>Ibùgbé</em>">Travel &amp; <em>Stay</em></h2>
   <div class="s-rule reveal"><span></span><i></i><span></span></div>
-  <p class="travel-intro reveal">We want your journey to Enugu to be as seamless as the celebration itself. Below you will find everything you need to plan your arrival and stay in the Coal City.</p>
-
-  <!-- HOTELS -->
-  <div class="travel-block reveal">
-    <div class="travel-block-title">
-      <svg viewBox="0 0 24 24"><path d="M3 22V8l9-5 9 5v14"/><path d="M9 22V12h6v10"/><rect x="9" y="12" width="6" height="10"/></svg>
-      Where to Stay
-    </div>
-    <div class="hotel-grid">
-
-      <!-- Luxury -->
-      <div class="hotel-card">
-        <div class="hotel-tier">⭑ Luxury</div>
-        <div class="hotel-name">Nike Lake Resort</div>
-        <div class="hotel-area">Nike Lake Road, Enugu · ~20 min from venue</div>
-        <div class="hotel-details">
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z"/></svg>Beautiful lakeside resort, lush grounds, pool, restaurant & bar</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke-width="1.2" fill="none"/><path d="M8 5v3.5l2.5 1.5" stroke-width="1.2" fill="none"/></svg>Best for couples & families — book early</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M2 5h12M2 8h12M2 11h12" stroke-width="1.2"/></svg>From ₦50,000 / night</div>
-        </div>
-      </div>
-
-      <div class="hotel-card">
-        <div class="hotel-tier">⭑ Luxury</div>
-        <div class="hotel-name">Transcorp Hotels Enugu</div>
-        <div class="hotel-area">1 Presidential Road, GRA · ~15 min from venue</div>
-        <div class="hotel-details">
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z"/></svg>Landmark 5-star hotel, conference facilities, pool & fine dining</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke-width="1.2" fill="none"/><path d="M8 5v3.5l2.5 1.5" stroke-width="1.2" fill="none"/></svg>Ideal for guests travelling from abroad</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M2 5h12M2 8h12M2 11h12" stroke-width="1.2"/></svg>From ₦45,000 / night</div>
-        </div>
-      </div>
-
-      <!-- Mid-range -->
-      <div class="hotel-card">
-        <div class="hotel-tier">⭑ Mid-Range</div>
-        <div class="hotel-name">Bona House</div>
-        <div class="hotel-area">Independence Layout, Enugu · ~10 min from venue</div>
-        <div class="hotel-details">
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z"/></svg>Well-located, comfortable rooms, reliable Wi-Fi & parking</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke-width="1.2" fill="none"/><path d="M8 5v3.5l2.5 1.5" stroke-width="1.2" fill="none"/></svg>Great value, popular with business & leisure guests</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M2 5h12M2 8h12M2 11h12" stroke-width="1.2"/></svg>From ₦20,000 / night</div>
-        </div>
-      </div>
-
-      <div class="hotel-card">
-        <div class="hotel-tier">⭑ Mid-Range</div>
-        <div class="hotel-name">Country Home Hotel</div>
-        <div class="hotel-area">Ogui Road, Enugu · ~12 min from venue</div>
-        <div class="hotel-details">
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z"/></svg>Warm & homely atmosphere, spacious rooms, on-site restaurant</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke-width="1.2" fill="none"/><path d="M8 5v3.5l2.5 1.5" stroke-width="1.2" fill="none"/></svg>Family-friendly, great for guests with children</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M2 5h12M2 8h12M2 11h12" stroke-width="1.2"/></svg>From ₦18,000 / night</div>
-        </div>
-      </div>
-
-      <!-- Budget -->
-      <div class="hotel-card">
-        <div class="hotel-tier">⭑ Budget</div>
-        <div class="hotel-name">Rockview Hotel</div>
-        <div class="hotel-area">New Haven, Enugu · ~8 min from venue</div>
-        <div class="hotel-details">
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z"/></svg>Clean, functional rooms, good security, easy road access</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke-width="1.2" fill="none"/><path d="M8 5v3.5l2.5 1.5" stroke-width="1.2" fill="none"/></svg>Best budget option — fill up fast, book in advance</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M2 5h12M2 8h12M2 11h12" stroke-width="1.2"/></svg>From ₦10,000 / night</div>
-        </div>
-      </div>
-
-      <div class="hotel-card">
-        <div class="hotel-tier">⭑ Budget</div>
-        <div class="hotel-name">De Wiston Hotel</div>
-        <div class="hotel-area">GRA, Enugu · ~10 min from venue</div>
-        <div class="hotel-details">
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z"/></svg>Quiet, gated property, clean rooms, generator backup & parking</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke-width="1.2" fill="none"/><path d="M8 5v3.5l2.5 1.5" stroke-width="1.2" fill="none"/></svg>Peaceful choice for guests who prefer a low-key stay</div>
-          <div class="hotel-row"><svg viewBox="0 0 16 16"><path d="M2 5h12M2 8h12M2 11h12" stroke-width="1.2"/></svg>From ₦12,000 / night</div>
-        </div>
-      </div>
-
+  <div id="travel-content">
+    <div class="locked-card reveal" onclick="document.getElementById('rsvp').scrollIntoView({behavior:'smooth'})">
+      <span class="locked-icon">🔒</span>
+      <div class="locked-title">Hotels &amp; Travel</div>
+      <span class="locked-unlock">Unlocks December 20, 2026 · 90 days before the wedding</span>
+      <p class="locked-msg">RSVP to receive your private access link — accommodation options, flight routes, and local tips will be shared with confirmed guests.</p>
+      <div class="locked-cta">Complete My RSVP</div>
     </div>
   </div>
 
-  <!-- FLIGHTS -->
-  <div class="travel-block reveal">
-    <div class="travel-block-title">
-      <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91"/><path d="M17 3l4 4-4 4M21 7H7"/></svg>
-      Getting to Enugu
-    </div>
-    <div class="flight-grid">
-      <div class="flight-card">
-        <div class="flight-route">✈ Lagos (LOS) → Enugu (ENU)</div>
-        <div class="flight-info">
-          ~45 min flight<br>
-          <strong>Airlines:</strong> Air Peace, United Nigeria, Arik Air<br>
-          <strong>Frequency:</strong> Multiple daily flights<br>
-          <strong>Tip:</strong> Book at least 4 weeks ahead for best fares
-        </div>
-      </div>
-      <div class="flight-card">
-        <div class="flight-route">✈ Abuja (ABV) → Enugu (ENU)</div>
-        <div class="flight-info">
-          ~45 min flight<br>
-          <strong>Airlines:</strong> Air Peace, United Nigeria Airlines<br>
-          <strong>Frequency:</strong> Daily flights<br>
-          <strong>Tip:</strong> Early morning flights are most reliable
-        </div>
-      </div>
-      <div class="flight-card">
-        <div class="flight-route">✈ International → Enugu</div>
-        <div class="flight-info">
-          Connect via <strong>Lagos (LOS)</strong> or <strong>Abuja (ABV)</strong><br>
-          <strong>Airport:</strong> Enugu Akanu Ibiam Int'l (ENU)<br>
-          <strong>Tip:</strong> Build in a 3-hr layover for connecting flights
-        </div>
-      </div>
-      <div class="flight-card">
-        <div class="flight-route">🚗 Port Harcourt → Enugu</div>
-        <div class="flight-info">
-          ~2.5 hr drive via Milliken Hill Road<br>
-          <strong>Tip:</strong> Road travel is smooth; depart by 7 AM to avoid traffic<br>
-          Ride services: <strong>Bolt</strong> available
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- LOCAL TIPS -->
-  <div class="travel-block reveal">
-    <div class="travel-block-title">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Good to Know
-    </div>
-    <div class="tips-grid">
-      <div class="tip-card">
-        <div class="tip-icon">🌤</div>
-        <div class="tip-title">Weather in March</div>
-        <div class="tip-body">Enugu in March is warm and dry — expect 28–33°C. Light traditional attire is ideal. Evenings cool slightly; a light wrap is useful for the night reception.</div>
-      </div>
-      <div class="tip-card">
-        <div class="tip-icon">🚖</div>
-        <div class="tip-title">Getting Around</div>
-        <div class="tip-body"><strong>Bolt</strong> and <strong>Uber</strong> operate in Enugu and are the safest and most reliable way to get around. Download the apps before you arrive.</div>
-      </div>
-      <div class="tip-card">
-        <div class="tip-icon">💴</div>
-        <div class="tip-title">Currency & Cash</div>
-        <div class="tip-body">Nigerian Naira (₦). ATMs are widely available. Most hotels accept cards. Carry some cash for local markets and smaller vendors.</div>
-      </div>
-      <div class="tip-card">
-        <div class="tip-icon">📱</div>
-        <div class="tip-title">SIM Cards</div>
-        <div class="tip-body">MTN and Airtel offer the best coverage in Enugu. Pick up a SIM at the airport or any phone shop with your passport. Data bundles are affordable.</div>
-      </div>
-      <div class="tip-card">
-        <div class="tip-icon">🏥</div>
-        <div class="tip-title">Medical & Safety</div>
-        <div class="tip-body">Enugu is one of Nigeria's safest cities. Carry any prescription medication. University of Nigeria Teaching Hospital (UNTH) is the main referral hospital.</div>
-      </div>
-      <div class="tip-card">
-        <div class="tip-icon">🍽</div>
-        <div class="tip-title">Local Food</div>
-        <div class="tip-body">Don't leave without trying <em>ofe onugbu</em> (bitter leaf soup), <em>oha soup</em>, and fresh <em>nkwobi</em>. The wedding feast will feature authentic Igbo cuisine.</div>
-      </div>
-    </div>
-  </div>
 
 </section>
 

@@ -9,10 +9,60 @@ let turnstileToken=null;
 function onTurnstileSuccess(token){turnstileToken=token;}
 function onTurnstileExpired(){turnstileToken=null;}
 
-/* ═══ GUEST PERSONALIZATION ═══ */
-const urlParams=new URLSearchParams(location.search);
-const guestName=urlParams.get('guest');
-if(guestName){document.getElementById('guest-greeting').textContent='A private invitation for '+decodeURIComponent(guestName)}
+/* ═══ GUEST PORTAL ═══ */
+const _guestToken=(new URLSearchParams(location.search)).get('guest');
+
+async function initGuestPortal(){
+  if(!_guestToken)return;
+  try{
+    const res=await fetch('https://nakadctpdszskvooftln.supabase.co/functions/v1/guest-auth',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({token:_guestToken})
+    });
+    const data=await res.json();
+    if(!data.valid)return;
+
+    const {guest,unlocked,days_until_wedding:days,content}=data;
+
+    // Show banner
+    const banner=document.getElementById('guest-portal-banner');
+    if(banner){
+      const n=document.getElementById('gp-name');
+      const s=document.getElementById('gp-status');
+      const c=document.getElementById('gp-countdown');
+      if(n)n.textContent='Welcome, '+guest.first_name;
+      if(s)s.textContent=guest.attending==='yes'?'Confirmed ✓':'Response received';
+      if(c)c.textContent=days>0?days+' days to go':'See you today!';
+      banner.classList.add('visible');
+    }
+
+    function injectSection(containerId,contentKey,unlockedDate){
+      const container=document.getElementById(containerId);
+      if(!container)return;
+      if(unlocked.includes(contentKey)&&content[contentKey]){
+        container.innerHTML=content[contentKey];
+        container.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+      }else{
+        const card=container.querySelector('.locked-card');
+        if(!card)return;
+        const msg=card.querySelector('.locked-msg');
+        const cta=card.querySelector('.locked-cta');
+        if(msg)msg.textContent='Your access is confirmed — this section opens '+unlockedDate;
+        if(cta)cta.style.display='none';
+        card.style.cursor='default';
+        card.onclick=null;
+      }
+    }
+
+    injectSection('timeline-content','timeline','March 6, 2027');
+    injectSection('travel-content','travel','December 20, 2026');
+    injectSection('photos-content','photos','March 20, 2027');
+
+  }catch(err){
+    console.warn('Guest portal init failed',err);
+  }
+}
 
 /* ═══ LANGUAGE ═══ */
 let currentLang='en';
@@ -206,6 +256,8 @@ function initSite(){
     cell.addEventListener('mouseleave',()=>{cell.style.transform=''});
   });
 
+  // Guest portal
+  initGuestPortal();
 }
 
 /* ═══ WEATHER WIDGET ═══ */
