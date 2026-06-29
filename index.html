@@ -274,6 +274,7 @@ section{padding:120px 32px}
 .tl-time{text-align:right;font-family:'Cormorant Garamond',serif;font-size:.98rem;font-style:italic;font-weight:400;color:var(--olive-dk);padding-top:2px}
 .tl-node{justify-self:center}
 .tl-gem{width:10px;height:10px;background:var(--cream);border:1px solid var(--olive);transform:rotate(45deg);transition:background .3s,box-shadow .3s}
+.tl-gem--highlight{background:var(--gold);border-color:var(--gold);box-shadow:0 0 14px rgba(201,168,76,.5)}
 .tl-row:hover .tl-gem{background:var(--olive);box-shadow:0 0 12px rgba(107,112,69,.4)}
 .tl-ev h4{font-family:'Cormorant Garamond',serif;font-size:.98rem;font-weight:400;color:var(--ink);margin-bottom:4px;letter-spacing:.04em}
 .tl-ev p{font-size:.82rem;color:var(--ink);opacity:.65;line-height:1.7}
@@ -865,7 +866,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
     <div class="d-card reveal rd1">
       <div class="d-icon"><svg viewBox="0 0 44 44" fill="none"><rect x="6" y="10" width="32" height="28" rx="2" stroke="#6b7045" stroke-width="1.2"/><line x1="6" y1="18" x2="38" y2="18" stroke="#6b7045" stroke-width="1"/><line x1="15" y1="6" x2="15" y2="14" stroke="#6b7045" stroke-width="1.2" stroke-linecap="round"/><line x1="29" y1="6" x2="29" y2="14" stroke="#6b7045" stroke-width="1.2" stroke-linecap="round"/><rect x="14" y="24" width="6" height="6" rx="1" fill="#6b7045" opacity=".5"/></svg></div>
       <div class="d-title" data-en="Date" data-ig="Ụbọchị" data-yo="Ọjọ́">Date</div>
-      <div class="d-body" data-en="Saturday<br>March 20, 2027<br>Ceremony at 11:00 AM" data-ig="Satọdee<br>March 20, 2027<br>Ememe na 11:00 ụtụtụ" data-yo="Ọjọ́Àbámẹ́ta<br>March 20, 2027<br>Àyẹyẹ ní 11:00 owúrọ̀">Saturday<br>March 20, 2027<br>Ceremony at 11:00 AM</div>
+      <div class="d-body" data-en="Saturday<br>March 20, 2027<br>Guests arrive from 12:00 PM" data-ig="Satọdee<br>March 20, 2027<br>Ndị ọbịa bịa site na 12:00 ehihie" data-yo="Ọjọ́Àbámẹ́ta<br>March 20, 2027<br>Àwọn àlejò dé láti 12:00 ọ̀sán">Saturday<br>March 20, 2027<br>Guests arrive from 12:00 PM</div>
     </div>
     <div class="d-card reveal rd2">
       <div class="d-icon"><svg viewBox="0 0 44 44" fill="none"><path d="M22 6C16.48 6 12 10.48 12 16c0 8 10 22 10 22s10-14 10-22c0-5.52-4.48-10-10-10z" stroke="#6b7045" stroke-width="1.2"/><circle cx="22" cy="16" r="4" stroke="#6b7045" stroke-width="1"/></svg></div>
@@ -875,7 +876,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
     <div class="d-card reveal rd3">
       <div class="d-icon"><svg viewBox="0 0 44 44" fill="none"><path d="M8 20 C8 20 10 16 14 16 C18 16 18 20 22 20 C26 20 26 16 30 16 C34 16 36 20 36 20" stroke="#6b7045" stroke-width="1.2" stroke-linecap="round"/><line x1="8" y1="28" x2="36" y2="28" stroke="#6b7045" stroke-width="1" opacity=".5"/><rect x="10" y="28" width="24" height="10" rx="1" stroke="#6b7045" stroke-width="1"/></svg></div>
       <div class="d-title" data-en="Reception" data-ig="Nnabata" data-yo="Àpéjọ">Reception</div>
-      <div class="d-body" data-en="Traditional at 12:00 PM<br>Dinner &amp; Dancing at 4:00 PM<br>Celebration until Evening" data-ig="Omenala na 12:00 ehihie<br>Nri na Egwu na 4:00 PM<br>Ememe ruo abalị" data-yo="Ìbílẹ̀ ní 12:00 ọ̀sán<br>Oúnjẹ àti Ijó ní 4:00 PM<br>Àyẹyẹ títí di alẹ́">Traditional at 12:00 PM<br>Dinner &amp; Dancing at 4:00 PM<br>Celebration until Evening</div>
+      <div class="d-body" data-en="Ceremony from 12:00 PM<br>Lunch &amp; Reception at 4:30 PM<br>Celebration until 7:45 PM" data-ig="Ememe site na 12:00 ehihie<br>Nri na Nnabata na 4:30 PM<br>Ememe ruo 7:45 PM" data-yo="Àyẹyẹ láti 12:00 ọ̀sán<br>Oúnjẹ àti Àpéjọ ní 4:30 PM<br>Àyẹyẹ títí 7:45 PM">Ceremony from 12:00 PM<br>Lunch &amp; Reception at 4:30 PM<br>Celebration until 7:45 PM</div>
     </div>
   </div>
 </section>
@@ -908,7 +909,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
       <div class="venue-name">Enugu, Nigeria</div>
       <div class="venue-sub" data-en="The Coal City — heart of Igbo culture and one of Nigeria's most beautiful cities in the Southeast." data-ig="Obodo Coal City — obi nke omenala Igbo na otu n'ime obodo kachasị mma n'Naịjịrịa." data-yo="Ìlú Coal — ọkàn àṣà Igbo àti ọ̀kan lára àwọn ìlú tó rẹwà jù lọ ní Ìlà-Oòrùn Nàìjíríà.">The Coal City — heart of Igbo culture and one of Nigeria's most beautiful cities in the Southeast.</div>
       <div class="v-row"><span class="v-icon"><svg viewBox="0 0 16 16"><path d="M8 1C5.24 1 3 3.24 3 6c0 4 5 9 5 9s5-5 5-9c0-2.76-2.24-5-5-5z" stroke="#8a9058" stroke-width="1.2" fill="none"/><circle cx="8" cy="6" r="1.5" stroke="#8a9058" stroke-width="1" fill="none"/></svg></span><span class="v-text" data-en="Enugu State, Eastern Nigeria" data-ig="Steeti Enugwu, Ọwịwa Anyanwụ Naịjịrịa" data-yo="Ìpínlẹ̀ Enugu, Ìlà-Oòrùn Nàìjíríà">Enugu State, Eastern Nigeria</span></div>
-      <div class="v-row"><span class="v-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="#8a9058" stroke-width="1.2" fill="none"/><polyline points="8,4 8,8 11,10" stroke="#8a9058" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg></span><span class="v-text" data-en="Ceremony at 11:00 AM · Reception from 12:00 PM" data-ig="Ememe na 11:00 ụtụtụ · Nnabata site na 12:00 ehihie" data-yo="Àyẹyẹ ní 11:00 owúrọ̀ · Àpéjọ láti 12:00 ọ̀sán">Ceremony at 11:00 AM · Reception from 12:00 PM</span></div>
+      <div class="v-row"><span class="v-icon"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="#8a9058" stroke-width="1.2" fill="none"/><polyline points="8,4 8,8 11,10" stroke="#8a9058" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg></span><span class="v-text" data-en="Guests arrive from 12:00 PM · Reception from 4:30 PM" data-ig="Ndị ọbịa bịa site na 12:00 ehihie · Nnabata site na 4:30 PM" data-yo="Àwọn àlejò dé láti 12:00 ọ̀sán · Àpéjọ láti 4:30 PM">Guests arrive from 12:00 PM · Reception from 4:30 PM</span></div>
       <div class="v-row"><span class="v-icon"><svg viewBox="0 0 16 16"><path d="M2 11l2-5h8l2 5" stroke="#8a9058" stroke-width="1.2" fill="none" stroke-linecap="round"/><rect x="1" y="11" width="14" height="4" rx="1" stroke="#8a9058" stroke-width="1.2" fill="none"/><circle cx="4" cy="15" r="1" fill="#8a9058"/><circle cx="12" cy="15" r="1" fill="#8a9058"/></svg></span><span class="v-text" data-en="Transport arrangements will be communicated" data-ig="A ga-ekwusị ihe gbasara njem" data-yo="Àwọn ètò ọkọ̀ àárò wà láti pín">Transport arrangements will be communicated</span></div>
       <a class="map-btn" href="https://maps.google.com/?q=Enugu,Nigeria" target="_blank" rel="noopener"><span data-en="Open in Google Maps" data-ig="Mepee na Google Maps" data-yo="Ṣí ní Google Maps">Open in Google Maps</span></a>
     </div>
@@ -921,11 +922,21 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   <h2 class="s-title reveal" data-en="Day <em>Timeline</em>" data-ig="<em>Usoro</em> Ụbọchị" data-yo="Ìgbésẹ̀ <em>Ọjọ́</em>">Day <em>Timeline</em></h2>
   <div class="s-rule reveal"><span></span><i></i><span></span></div>
   <div class="tl-wrap">
-    <div class="tl-row reveal"><div class="tl-time">10:30 AM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4 data-en="Guests Arrive" data-ig="Ndị ọbịa bịa" data-yo="Àwọn àlejò dé">Guests Arrive</h4><p data-en="Welcome drinks &amp; seating" data-ig="Ọ̃numọnụ nnabata na àgbà" data-yo="Ọtí ào àti ìjókòó">Welcome drinks &amp; seating</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">11:00 AM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4 data-en="Traditional Ceremony" data-ig="Ememe Ọdịnala" data-yo="Àyẹyẹ Ìbílẹ̀">Traditional Ceremony</h4><p data-en="Exchange of vows &amp; blessings" data-ig="Ikele na ngọzi" data-yo="Pínpín ìdúróṣinṣin àti àbùkù">Exchange of vows &amp; blessings</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">12:30 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4 data-en="Reception Opens" data-ig="Nnabata Amalite" data-yo="Àpéjọ Bẹ̀rẹ̀">Reception Opens</h4><p data-en="Food, drinks &amp; live music" data-ig="Nri, ihe ọṅụṅụ na egwu ndụ" data-yo="Oúnjẹ, ọtí àti orin alààyè">Food, drinks &amp; live music</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">4:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4 data-en="Dinner &amp; Dancing" data-ig="Nri na Egwu" data-yo="Oúnjẹ àti Ijó">Dinner &amp; Dancing</h4><p data-en="Grand feast &amp; first dances" data-ig="Oriri ukwu na mbụ egwu" data-yo="Àsè ńlá àti ìjó àkọ́kọ́">Grand feast &amp; first dances</p></div></div>
-    <div class="tl-row reveal"><div class="tl-time">Evening</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4 data-en="Night Celebration" data-ig="Ememe Abalị" data-yo="Àyẹyẹ Alẹ́">Night Celebration</h4><p data-en="Cultural performances &amp; farewell" data-ig="Mgbasa ọdịnala na nkwesọ" data-yo="Àwọn ìṣe àṣà àti ìdásígbó">Cultural performances &amp; farewell</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">12:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Guest Arrival</h4><p>Welcome &amp; seating</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">12:45 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Arrival of the Groom</h4><p>The groom makes his entrance</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">1:10 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Opening Prayer &amp; Welcome</h4><p>Blessings to begin the day</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">1:30 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Kola Nut Ceremony</h4><p>Traditional Igbo welcome ritual</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">2:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Bride Price Confirmation</h4><p>The sacred agreement</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">2:20 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Speeches by Elders</h4><p>Words of wisdom &amp; blessing</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">2:50 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>First Entrance of the Bride</h4><p>Chelsea walks in</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">3:10 PM</div><div class="tl-node"><div class="tl-gem tl-gem--highlight"></div></div><div class="tl-ev"><h4>Palm Wine Ceremony <span style="font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-family:'Jost',sans-serif;font-weight:400;margin-left:6px">Highlight</span></h4><p>The heart of the traditional celebration</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">3:40 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Couple Blessing</h4><p>United in love &amp; tradition</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">4:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Second Outfit &amp; Grand Entrance</h4><p>A new look, a grand reveal</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">4:30 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Lunch &amp; Reception</h4><p>Feast together</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">5:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Entertainment</h4><p>Music, dance &amp; celebration</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">6:00 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Family Photos</h4><p>Capturing the memories</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">6:45 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Open Celebration</h4><p>The dance floor is yours</p></div></div>
+    <div class="tl-row reveal"><div class="tl-time">7:45 PM</div><div class="tl-node"><div class="tl-gem"></div></div><div class="tl-ev"><h4>Official Closing</h4><p>Until we meet again</p></div></div>
   </div>
 </section>
 
@@ -1172,7 +1183,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
         <span class="faq-q-text">What time should I arrive?</span>
         <span class="faq-icon"></span>
       </button>
-      <div class="faq-a"><p class="faq-a-text">Guests are invited to arrive from <strong style="color:var(--olive-pale)">10:30 AM</strong> for welcome drinks and seating. The ceremony begins promptly at <strong style="color:var(--olive-pale)">11:00 AM</strong>. Nigerian time is beautiful — but for this occasion, please do be punctual.</p></div>
+      <div class="faq-a"><p class="faq-a-text">Guests are invited to arrive from <strong style="color:var(--olive-pale)">12:00 PM</strong>. The first ceremony events begin at <strong style="color:var(--olive-pale)">1:10 PM</strong>. Nigerian time is beautiful — but for this occasion, please do be punctual.</p></div>
     </div>
 
     <div class="faq-item">
