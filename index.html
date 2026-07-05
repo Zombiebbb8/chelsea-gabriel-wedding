@@ -126,6 +126,10 @@ svg.env-svg{width:100%;display:block;overflow:visible}
 nav{position:fixed;top:36px;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:14px 48px;background:rgba(250,248,240,.96);backdrop-filter:blur(18px);border-bottom:1px solid rgba(107,112,69,.14);transition:padding .4s,top .4s}
 nav.compact{top:0;padding:10px 48px}
 .nav-mono{font-family:'Great Vibes',cursive;font-size:1.7rem;color:var(--olive)}
+/* Nav right cluster + RSVP button */
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-rsvp{background:var(--olive);color:#faf8f0;padding:9px 20px;font-family:'Jost',sans-serif;font-size:.68rem;font-weight:400;letter-spacing:.22em;text-transform:uppercase;text-decoration:none;border-radius:2px;transition:background .3s;white-space:nowrap}
+.nav-rsvp:hover{background:var(--olive-dk)}
 /* Dropdown */
 .nav-dd-wrap{position:relative}
 .nav-dd-btn{background:transparent;border:1px solid rgba(107,112,69,.28);padding:8px 18px 8px 16px;display:flex;align-items:center;gap:9px;cursor:pointer;font-family:'Jost',sans-serif;font-size:.68rem;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--olive-dk);transition:all .3s;border-radius:2px;white-space:nowrap}
@@ -146,6 +150,8 @@ nav{padding:10px 20px}
 nav.compact{padding:8px 20px}
 .nav-dd-btn{font-size:.52rem;padding:7px 14px 7px 12px;letter-spacing:.22em}
 .nav-dd-menu{right:0;min-width:190px}
+.nav-right{gap:8px}
+.nav-rsvp{font-size:.52rem;padding:8px 14px;letter-spacing:.2em}
 }
 
 /* HERO */
@@ -569,9 +575,20 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 
 /* ══ MOBILE RESPONSIVE ENHANCEMENTS ══ */
 @media(max-width:600px){
-  section{padding:80px 20px}
-  #hero{padding:110px 20px 90px}
+  section{padding:64px 20px}
+  #hero{padding:100px 20px 80px}
+  .h-names{font-size:clamp(3rem,14vw,4.4rem)}
+  .h-amp{font-size:clamp(1.4rem,6vw,2rem)}
+  .h-eyebrow{font-size:.6rem;letter-spacing:.28em;margin-bottom:16px}
   .h-date{font-size:.95rem;letter-spacing:.08em}
+  .h-loc{font-size:.6rem;letter-spacing:.26em}
+  #countdown{padding:52px 20px}
+  .cd-num{font-size:clamp(2rem,9vw,2.6rem)}
+  .cd-unit{font-size:.55rem;letter-spacing:.2em}
+  .cd-sep{font-size:1.8rem;padding-bottom:8px}
+  .s-title{font-size:clamp(1.8rem,7.5vw,2.4rem)}
+  .s-eye{font-size:.6rem;letter-spacing:.26em}
+  .s-rule{margin-bottom:40px}
   .couple-scene{bottom:96px;left:auto;right:10px;translate:0 0;width:150px;--couple-travel:22px}
   .igbo-fig{width:54px;height:104px}
   .couple-lbl{display:none}
@@ -586,7 +603,8 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 @media(max-width:480px){
   .cal-opt{padding:10px 11px;font-size:.46rem;letter-spacing:.14em}
   .cal-opt svg{display:none}
-  #weather-widget{transform:scale(.62);transform-origin:bottom left;min-width:140px}
+  #weather-widget{transform:translateY(14px) scale(.62);transform-origin:bottom left;min-width:140px}
+  #weather-widget.wx-loaded{transform:translateY(0) scale(.62)}
   .h-roman{font-size:.6rem;letter-spacing:.26em}
   nav{padding:10px 16px}
   nav.compact{padding:8px 16px}
@@ -777,6 +795,8 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 <div id="petalLayer"></div>
 <nav id="mainNav">
   <span class="nav-mono">C &amp; G</span>
+  <div class="nav-right">
+  <a class="nav-rsvp" href="#rsvp" onclick="navGoTo('rsvp',event)" data-en="RSVP" data-ig="RSVP" data-yo="RSVP">RSVP</a>
   <div class="nav-dd-wrap" id="navDDWrap">
     <button class="nav-dd-btn" id="navDDBtn" onclick="toggleNavDD()" aria-expanded="false" aria-haspopup="true">
       <span id="navDDLabel" data-en="Explore" data-ig="Chọpụta" data-yo="Ṣàwárí">Explore</span>
@@ -796,6 +816,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
       <a class="nav-dd-item" href="#travel" onclick="navGoTo('travel',event)" data-en="Travel" data-ig="Njem" data-yo="Ìrìnàjò" role="menuitem"><span class="nav-dd-dot"></span>Travel</a>
       <a class="nav-dd-item" href="#gifts" onclick="navGoTo('gifts',event)" data-en="Gifts" data-ig="Onyinye" data-yo="Ẹbùn" role="menuitem"><span class="nav-dd-dot"></span>Gifts</a>
     </div>
+  </div>
   </div>
 </nav>
 
