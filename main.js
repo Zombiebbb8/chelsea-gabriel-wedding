@@ -164,15 +164,77 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),3500);
 }
 
-/* ═══ LIGHTBOX ═══ */
-function openLightbox(cell){
-  const lb=document.getElementById('lightbox');
-  const content=cell.querySelector('.g-placeholder-bg');
-  if(content)lb.querySelector('.lb-content').innerHTML=content.innerHTML;
-  lb.classList.add('open');
+/* ═══ LIGHTBOX — swipeable gallery viewer ═══ */
+let _lbPhotos=[],_lbIndex=0,_lbTimer=null;
+
+function _lbCollect(){
+  _lbPhotos=[...document.querySelectorAll('#galleryMosaic .g-cell[data-full]')].map(c=>c.dataset.full);
 }
-function closeLightbox(){document.getElementById('lightbox').classList.remove('open')}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
+function _lbShow(i,instant){
+  if(!_lbPhotos.length)return;
+  _lbIndex=(i+_lbPhotos.length)%_lbPhotos.length;
+  const img=document.getElementById('lbImg');
+  const counter=document.getElementById('lbCounter');
+  if(counter)counter.textContent=(_lbIndex+1)+' of '+_lbPhotos.length;
+  if(instant){img.src=_lbPhotos[_lbIndex];return;}
+  img.classList.add('switching');
+  const next=new Image();
+  next.onload=()=>{img.src=next.src;img.classList.remove('switching');};
+  next.src=_lbPhotos[_lbIndex];
+  // Preload neighbours for instant swiping
+  [_lbIndex+1,_lbIndex-1].forEach(n=>{
+    const p=new Image();p.src=_lbPhotos[(n+_lbPhotos.length)%_lbPhotos.length];
+  });
+}
+function openLightbox(cell){
+  _lbCollect();
+  if(!_lbPhotos.length)return;
+  const idx=cell&&cell.dataset&&cell.dataset.full?_lbPhotos.indexOf(cell.dataset.full):0;
+  document.getElementById('lightbox').classList.add('open');
+  _lbShow(idx<0?0:idx,true);
+  [_lbIndex+1,_lbIndex-1].forEach(n=>{
+    const p=new Image();p.src=_lbPhotos[(n+_lbPhotos.length)%_lbPhotos.length];
+  });
+}
+function lbStep(dir){_lbShow(_lbIndex+dir)}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('open');
+  _lbStopSlideshow();
+}
+function lbToggleSlideshow(){
+  if(_lbTimer){_lbStopSlideshow();return;}
+  const btn=document.getElementById('lbPlay');
+  if(btn){btn.classList.add('on');btn.textContent='Pause';}
+  _lbTimer=setInterval(()=>lbStep(1),3200);
+}
+function _lbStopSlideshow(){
+  if(_lbTimer){clearInterval(_lbTimer);_lbTimer=null;}
+  const btn=document.getElementById('lbPlay');
+  if(btn){btn.classList.remove('on');btn.textContent='Slideshow';}
+}
+document.addEventListener('keydown',e=>{
+  const lb=document.getElementById('lightbox');
+  if(!lb||!lb.classList.contains('open'))return;
+  if(e.key==='Escape')closeLightbox();
+  else if(e.key==='ArrowRight')lbStep(1);
+  else if(e.key==='ArrowLeft')lbStep(-1);
+});
+// Touch swipe left/right
+(function(){
+  const lb=document.getElementById('lightbox');
+  if(!lb)return;
+  let sx=0,sy=0,swiping=false;
+  lb.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1)return;
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;swiping=true;
+  },{passive:true});
+  lb.addEventListener('touchend',e=>{
+    if(!swiping)return;swiping=false;
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.4)lbStep(dx<0?1:-1);
+  },{passive:true});
+})();
 
 /* ═══ CONFETTI ═══ */
 function launchConfetti(){
@@ -301,9 +363,8 @@ function initSite(){
     });
 })();
 
-/* ═══ 3D PARTICLE NAMES (Three.js) ═══ */
+/* ═══ 3D PARTICLE NAMES (lightweight 2D canvas — no libraries) ═══ */
 async function initNames3D(){
-  if(typeof THREE==='undefined')return;
   const oldCanvas=document.getElementById('names-3d-canvas');
   if(oldCanvas)oldCanvas.remove();
   // On portrait mobile the horizontal FOV is too narrow for the wide particle canvas —
@@ -327,7 +388,7 @@ async function initNames3D(){
   const OW=Math.max(680, Math.min(Math.round(W*1.18), 1350));
   const OH=Math.round(OW/3.4);
   const fontPx=Math.round(OW/6.2);    // bigger, bolder strokes
-  const GAP=W<600 ? 3 : 2;
+  const GAP=3;                        // CPU renderer: 3px sampling keeps particle count comfortable
   const scaleFactor=0.90;
 
   const off=document.createElement('canvas');
@@ -362,57 +423,35 @@ async function initNames3D(){
   hero.appendChild(canvas);
   hero.classList.add('has-3d-names');
 
-  const FOV=60;
-  const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(FOV, W/H, 1, 5000);
-  const halfFOVrad=(FOV/2)*Math.PI/180;
-  camera.position.z=Math.ceil((OW/2*scaleFactor)/Math.tan(halfFOVrad)*1.22);
+  const dpr=Math.min(devicePixelRatio||1,1.5);
+  canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
 
-  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(W,H);
+  // ── Pre-tinted sprite atlas: 8 gradient discs along the olive→gold ramp ──
+  const SPR=24, LEVELS=8;
+  const atlas=document.createElement('canvas');
+  atlas.width=SPR*LEVELS; atlas.height=SPR;
+  const ax=atlas.getContext('2d');
+  for(let l=0;l<LEVELS;l++){
+    const tt=l/(LEVELS-1);
+    // Bright gold-to-champagne ramp — dark olive stops disappear against the hero photo
+    const r=Math.round((0.76+tt*0.22)*255), g=Math.round((0.63+tt*0.26)*255), b=Math.round((0.26+tt*0.38)*255);
+    const grd=ax.createRadialGradient(l*SPR+SPR/2,SPR/2,0,l*SPR+SPR/2,SPR/2,SPR/2);
+    grd.addColorStop(0,'rgba('+r+','+g+','+b+',1)');
+    grd.addColorStop(0.82,'rgba('+r+','+g+','+b+',1)');
+    grd.addColorStop(1,'rgba('+r+','+g+','+b+',0)');
+    ax.fillStyle=grd; ax.fillRect(l*SPR,0,SPR,SPR);
+  }
+  particles.forEach(p=>{p.lvl=Math.min(LEVELS-1,Math.floor(p.str*LEVELS)+2)});
 
-  // ── Particle sprite (ink→gold gradient disc) ──
-  const tc=document.createElement('canvas');
-  tc.width=tc.height=32;
-  const tx=tc.getContext('2d');
-  const grd=tx.createRadialGradient(16,16,0,16,16,16);
-  grd.addColorStop(0,'rgba(226,200,122,1)');
-  grd.addColorStop(0.45,'rgba(201,168,76,1)');
-  grd.addColorStop(0.8,'rgba(138,144,88,0.7)');
-  grd.addColorStop(1,'rgba(107,112,69,0)');
-  tx.fillStyle=grd; tx.fillRect(0,0,32,32);
-  const tex=new THREE.CanvasTexture(tc);
-
-  const N=particles.length;
-  const pos=new Float32Array(N*3);
-  const col=new Float32Array(N*3);
-  const opx=new Float32Array(N*3);
-
-  particles.forEach((p,i)=>{
-    pos[i*3]=opx[i*3]=p.ox;
-    pos[i*3+1]=opx[i*3+1]=p.oy;
-    pos[i*3+2]=opx[i*3+2]=p.oz;
-    const t=p.str;
-    // Gold→olive palette — reads well on cream background
-    col[i*3]  =0.44+t*0.45;   // R: 0.44 (olive) → 0.89 (gold-lt)
-    col[i*3+1]=0.38+t*0.40;   // G: 0.38 (olive) → 0.78 (gold-lt)
-    col[i*3+2]=0.08+t*0.20;   // B: 0.08 → 0.28
-  });
-
-  const geo=new THREE.BufferGeometry();
-  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-  geo.setAttribute('color',new THREE.BufferAttribute(col,3));
-
-  // Bigger particles — proportional to sampling canvas (not raw W)
-  const pSize=Math.max(5.5, OW/100);
-  const mat=new THREE.PointsMaterial({
-    size:pSize, vertexColors:true, transparent:true, opacity:0,
-    map:tex, blending:THREE.NormalBlending, depthWrite:false,
-    sizeAttenuation:true, alphaTest:0.01
-  });
-  const pts=new THREE.Points(geo,mat);
-  scene.add(pts);
+  const F=1400;                       // focal length for perspective projection
+  const cx=W/2, cy=H/2;
+  // Fit the sampled text into the hero width (the old THREE camera did this via FOV)
+  const fit=Math.min(1,(W*0.84)/(OW*scaleFactor));
+  // Mid-size "gold dust" particles — big enough to shimmer, small enough that the script stays legible
+  const pSize=Math.max(5, OW/120)*fit;
 
   // Mouse / touch parallax
   let mx=0, my=0;
@@ -427,36 +466,41 @@ async function initNames3D(){
     }
   },{passive:true});
 
-  let t=0, fade=0, animRunning=true;
+  const reduceMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let t=0, fade=0, animRunning=true, camX=0, camY=0;
+  const fadeStart=performance.now();
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Gentle forward-facing sway (no full spin — letters stay readable)
+    const ry=Math.sin(t*0.22)*0.13, rx=Math.sin(t*0.28)*0.07;
+    const cosY=Math.cos(ry), sinY=Math.sin(ry), cosX=Math.cos(rx), sinX=Math.sin(rx);
+    camX+=(mx*18-camX)*.04;
+    camY+=(-my*12-camY)*.04;
+    ctx.globalAlpha=fade;
+    for(let i=0;i<particles.length;i++){
+      const p=particles[i];
+      // Per-particle ripple (living shimmer)
+      const px=p.ox+Math.sin(t+p.ph)*1.8;
+      const py=p.oy+Math.cos(t*.72+p.ph)*1.2;
+      const pz=p.oz+Math.sin(t*.55+p.ph*.7)*14;
+      // Rotate around Y then X, project with perspective
+      const x1=px*cosY - pz*sinY, z1=px*sinY + pz*cosY;
+      const y1=py*cosX - z1*sinX, z2=py*sinX + z1*cosX;
+      const s=F/(F+z2), sz=pSize*s;
+      ctx.drawImage(atlas, p.lvl*SPR,0,SPR,SPR, cx+(x1*fit-camX)*s-sz/2, cy-(y1*fit+camY)*s-sz/2, sz,sz);
+    }
+    ctx.globalAlpha=1;
+  }
   function animate(){
     if(!animRunning)return;
     requestAnimationFrame(animate);
     t+=0.006;
-
-    // ── Fade in ──
-    if(fade<0.96){fade=Math.min(fade+0.008,0.96);mat.opacity=fade;}
-
-    // ── Gentle forward-facing sway (no full spin — letters stay readable) ──
-    pts.rotation.y = Math.sin(t * 0.22) * 0.13;    // ±7° gentle rock, always faces forward
-    pts.rotation.x = Math.sin(t * 0.28) * 0.07;    // subtle tilt for depth
-
-    // ── Per-particle ripple (gives the letters a living shimmer) ──
-    const pa=geo.attributes.position;
-    particles.forEach((p,i)=>{
-      pa.array[i*3]  =opx[i*3]  +Math.sin(t+p.ph)*1.8;
-      pa.array[i*3+1]=opx[i*3+1]+Math.cos(t*.72+p.ph)*1.2;
-      pa.array[i*3+2]=opx[i*3+2]+Math.sin(t*.55+p.ph*.7)*14;
-    });
-    pa.needsUpdate=true;
-
-    // ── Mouse / touch parallax on camera (adds extra perspective) ──
-    camera.position.x+=(mx*18-camera.position.x)*.04;
-    camera.position.y+=(-my*12-camera.position.y)*.04;
-    camera.lookAt(0,0,0);
-
-    renderer.render(scene,camera);
+    fade=Math.min((performance.now()-fadeStart)/1800,1)*0.96;
+    draw();
   }
-  animate();
+  if(reduceMotion){fade=.96;draw();}
+  else animate();
 
   // Full reinit on resize (debounced) → keeps names sized consistently
   let rszTimer;
@@ -464,7 +508,6 @@ async function initNames3D(){
     clearTimeout(rszTimer);
     rszTimer=setTimeout(()=>{
       animRunning=false;
-      try{renderer.dispose();}catch(e){}
       initNames3D();
     },450);
   });
