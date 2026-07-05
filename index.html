@@ -170,6 +170,9 @@ nav.compact{padding:8px 20px}
 .h-rule i{width:7px;height:7px;background:var(--olive);transform:rotate(45deg);flex-shrink:0}
 .h-date{font-family:'Cormorant Garamond',serif;font-size:1.22rem;font-style:italic;font-weight:400;color:rgba(230,218,185,.8);letter-spacing:.12em;line-height:2;opacity:0;animation:riseIn .8s var(--ease) 1.2s forwards}
 .h-loc{font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--olive-dk);margin-top:14px;opacity:0;animation:riseIn .7s var(--ease) 1.5s forwards}
+.h-rsvp{display:none;margin-top:30px;padding:14px 44px;background:var(--olive);color:#faf8f0;font-family:'Jost',sans-serif;font-size:.72rem;font-weight:400;letter-spacing:.28em;text-transform:uppercase;text-decoration:none;border-radius:2px;border:1px solid var(--gold);box-shadow:0 8px 30px rgba(0,0,0,.4);opacity:0;animation:riseIn .8s var(--ease) 1.8s forwards;transition:background .3s,transform .3s}
+.h-rsvp:hover{background:var(--olive-dk);transform:translateY(-2px)}
+@media(max-width:820px){.h-rsvp{display:inline-block}}
 .h-scroll{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;animation:fadeIn 1s ease 2.4s forwards}
 .h-scroll p{font-size:.55rem;letter-spacing:.38em;text-transform:uppercase;color:rgba(220,210,180,.4)}
 .h-scroll-bar{width:1px;height:44px;background:linear-gradient(to bottom,var(--olive),transparent);animation:barDrop 2.6s ease-in-out infinite}
@@ -576,12 +579,15 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 /* ══ MOBILE RESPONSIVE ENHANCEMENTS ══ */
 @media(max-width:600px){
   section{padding:64px 20px}
-  #hero{padding:100px 20px 80px}
-  .h-names{font-size:clamp(3rem,14vw,4.4rem)}
-  .h-amp{font-size:clamp(1.4rem,6vw,2rem)}
-  .h-eyebrow{font-size:.6rem;letter-spacing:.28em;margin-bottom:16px}
-  .h-date{font-size:.95rem;letter-spacing:.08em}
-  .h-loc{font-size:.6rem;letter-spacing:.26em}
+  #hero{padding:92px 20px 80px;background-position:center 22%}
+  #hero::before{background:linear-gradient(to bottom,rgba(10,9,5,.6) 0%,rgba(10,9,5,.5) 45%,rgba(10,9,5,.72) 100%)}
+  .h-names{font-size:clamp(2.7rem,12vw,3.8rem);line-height:1}
+  .h-amp{font-size:clamp(1.3rem,5vw,1.8rem)}
+  .h-eyebrow{font-size:.58rem;letter-spacing:.26em;margin-bottom:28px}
+  .h-rule{margin:20px auto}
+  .h-date{font-size:.9rem;letter-spacing:.08em;line-height:1.7}
+  .h-loc{font-size:.6rem;letter-spacing:.26em;margin-top:10px}
+  .h-rsvp{margin-top:22px;padding:13px 40px;font-size:.68rem}
   #countdown{padding:52px 20px}
   .cd-num{font-size:clamp(2rem,9vw,2.6rem)}
   .cd-unit{font-size:.55rem;letter-spacing:.2em}
@@ -839,6 +845,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   <div class="h-rule"><span></span><i></i><span></span></div>
   <p class="h-date">Saturday &middot; the Twentieth of March<br>Two Thousand &amp; Twenty-Seven</p>
   <p class="h-loc" data-en="Enugu · Nigeria" data-ig="Enugwu · Naịjịrịa" data-yo="Enugu · Nàìjíríà">Enugu &middot; Nigeria</p>
+  <a class="h-rsvp" href="#rsvp" onclick="navGoTo('rsvp',event)" data-en="RSVP Now" data-ig="Zaa Ugbu a" data-yo="Fèsì Báyìí">RSVP Now</a>
   <!-- ══ IGBO COUPLE ══ -->
   <div class="couple-scene" id="couple-scene" aria-label="Chelsea and Gabriel in Igbo traditional attire">
     <!-- Female: approaches from left -->
