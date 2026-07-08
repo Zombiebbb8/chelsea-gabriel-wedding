@@ -194,8 +194,10 @@ const dance=(()=>{
   }
 
   function pose(){
-    // phase counts beats; one full sway = 2 beats — a slow romantic rock, not a robot tick
-    const p=phase*Math.PI;
+    // phase counts beats; one full sway = 2 beats — a slow romantic rock, not a robot tick.
+    // Fast songs (>~140 BPM) fold to half-time so the sway stays graceful.
+    const fold=beatPeriod<430?2:1;
+    const p=phase*Math.PI/fold;
     const sway=Math.sin(p);
     const lift=Math.abs(Math.sin(p));
     const amp=.6+level*1.4;                       // louder music → bigger movement
@@ -231,7 +233,7 @@ const dance=(()=>{
       if(strong||beatCount%2===0)spawnHearts(strong);
       // Bride twirls every 16 beats; the twirl lasts exactly 2 beats of the current tempo
       if(beatCount%16===0&&femSvg){
-        femSvg.style.setProperty('--twirl-dur',Math.round(beatPeriod*2)+'ms');
+        femSvg.style.setProperty('--twirl-dur',Math.round(beatPeriod*2*(beatPeriod<430?2:1))+'ms');
         femSvg.classList.remove('twirl');void femSvg.offsetWidth;femSvg.classList.add('twirl');
       }
       // Re-anchor the phase to the detected beat — keeps the dance locked to the song
