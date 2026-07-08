@@ -75,14 +75,201 @@ function setLang(lang){
   const h=document.querySelector('.gate-hint');if(h)h.textContent=hints[lang]||hints.en;
 }
 
-/* ═══ MUSIC ═══ */
+/* ═══ MUSIC + BEAT-SYNCED DANCE ENGINE ═══
+   All timing is derived live from the loaded track via the Web Audio API —
+   replace africa.mp3 with any song and the choreography adapts automatically. */
 const audio=document.getElementById('bgMusic');audio.volume=0.22;
 let musicStarted=false;
+
 function toggleMusic(){
   const btn=document.getElementById('music-btn');
-  if(!musicStarted){audio.play().then(()=>{btn.classList.add('playing');musicStarted=true}).catch(()=>{});return}
-  if(audio.paused){audio.play();btn.classList.add('playing')}else{audio.pause();btn.classList.remove('playing')}
+  if(audio.paused){
+    audio.play().then(()=>{btn.classList.add('playing');musicStarted=true}).catch(()=>{});
+  }else{audio.pause();btn.classList.remove('playing')}
 }
+function startMusicFromPill(){
+  hideMusicPill();
+  audio.play().then(()=>{musicStarted=true}).catch(()=>{});
+}
+function showMusicPill(){const p=document.getElementById('music-pill');if(p)p.classList.add('show')}
+function hideMusicPill(){const p=document.getElementById('music-pill');if(p)p.classList.remove('show')}
+
+/* Autoplay attempt for returning guests who skip the envelope.
+   The envelope-tap path is a user gesture so it always plays;
+   this path may be blocked by the browser → show the play pill instead. */
+function attemptAutoplay(){
+  if(!audio.paused)return;
+  audio.play().then(()=>{musicStarted=true}).catch(()=>{showMusicPill()});
+}
+
+const dance=(()=>{
+  const REDUCE=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let ctx=null,analyser=null,freq=null,raf=0,running=false;
+  let energyHist=[],lastBeatAt=0,beatIvals=[],beatPeriod=500,beatCount=0,phase=0,lastFrame=0,level=0,beatFlash=0;
+  let scene,fem,mal,femBody,malBody,femSvg,fx,limbs=null;
+
+  function nodes(){
+    scene=document.getElementById('couple-scene');
+    fem=document.getElementById('fig-female-mover');
+    mal=document.getElementById('fig-male-mover');
+    if(!scene||!fem||!mal)return false;
+    femSvg=fem.querySelector('svg');
+    femBody=fem.querySelector('.fig-body');malBody=mal.querySelector('.fig-body');
+    limbs={
+      fLegL:fem.querySelector('.leg-l'),fLegR:fem.querySelector('.leg-r'),
+      fArmI:fem.querySelector('.arm-inner'),fArmO:fem.querySelector('.arm-outer'),
+      mLegL:mal.querySelector('.leg-l'),mLegR:mal.querySelector('.leg-r'),
+      mArmI:mal.querySelector('.arm-inner'),mArmO:mal.querySelector('.arm-outer')
+    };
+    fx=document.getElementById('dance-fx');
+    return !!(femBody&&malBody);
+  }
+
+  function ensureAudioGraph(){
+    if(ctx){ctx.resume().catch(()=>{});return}
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC)return;
+      ctx=new AC();
+      const src=ctx.createMediaElementSource(audio);
+      analyser=ctx.createAnalyser();
+      analyser.fftSize=1024;
+      analyser.smoothingTimeConstant=.55;
+      src.connect(analyser);analyser.connect(ctx.destination);
+      freq=new Uint8Array(analyser.frequencyBinCount);
+      ctx.resume().catch(()=>{});
+    }catch(e){ctx=null}
+  }
+  // If the context was created suspended (strict autoplay policy), any first tap unlocks it
+  document.addEventListener('pointerdown',()=>{if(ctx&&ctx.state==='suspended')ctx.resume().catch(()=>{})},{passive:true});
+
+  function bassEnergy(){
+    analyser.getByteFrequencyData(freq);
+    const binHz=ctx.sampleRate/analyser.fftSize;
+    const n=Math.max(3,Math.round(140/binHz));   // ≈0–140 Hz kick band
+    let s=0;for(let i=0;i<n;i++)s+=freq[i];
+    return s/(n*255);
+  }
+
+  function detectBeat(e,now){
+    energyHist.push(e);if(energyHist.length>50)energyHist.shift();
+    const avg=energyHist.reduce((a,b)=>a+b,0)/energyHist.length;
+    if(!(e>0.08&&e>avg*1.28&&(now-lastBeatAt)>240))return false;
+    if(lastBeatAt){
+      const iv=now-lastBeatAt;
+      if(iv>270&&iv<1100){                        // 55–220 BPM window
+        beatIvals.push(iv);if(beatIvals.length>16)beatIvals.shift();
+        const sorted=[...beatIvals].sort((a,b)=>a-b);
+        beatPeriod=sorted[Math.floor(sorted.length/2)];   // median interval = stable tempo
+      }
+    }
+    lastBeatAt=now;beatCount++;
+    return true;
+  }
+
+  function spawnHearts(strong){
+    if(!fx||fx.childElementCount>14)return;       // pool cap keeps 60fps
+    const n=strong?3:1;
+    for(let i=0;i<n;i++){
+      const h=document.createElement('div');h.className='dance-heart';
+      const sz=8+Math.random()*8;
+      h.style.left=(30+Math.random()*40)+'%';
+      h.style.setProperty('--h-dur',(2.1+Math.random()*1.4)+'s');
+      h.style.setProperty('--h-drift',((Math.random()-.5)*46)+'px');
+      h.style.setProperty('--h-rot',((Math.random()-.5)*30)+'deg');
+      h.innerHTML='<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24"><path d="M12 21C5 15 2 11 2 7.5 2 4.5 4.5 2 7.5 2 9.24 2 11 3 12 4.5 13 3 14.76 2 16.5 2 19.5 2 22 4.5 22 7.5 22 11 19 15 12 21Z" fill="'+(Math.random()>.5?'rgba(216,90,72,.85)':'rgba(226,200,122,.9)')+'"/></svg>';
+      fx.appendChild(h);
+      setTimeout(()=>h.remove(),3600);
+    }
+    if(strong){
+      for(let i=0;i<5;i++){
+        const s=document.createElement('div');s.className='dance-spark';
+        s.style.left=(38+Math.random()*24)+'%';s.style.bottom='34%';
+        s.style.setProperty('--s-dx',((Math.random()-.5)*70)+'px');
+        s.style.setProperty('--s-dy',(-(20+Math.random()*50))+'px');
+        s.style.setProperty('--s-dur',(.7+Math.random()*.5)+'s');
+        fx.appendChild(s);setTimeout(()=>s.remove(),1300);
+      }
+    }
+  }
+
+  function pose(){
+    // phase counts beats; one full sway = 2 beats — a slow romantic rock, not a robot tick
+    const p=phase*Math.PI;
+    const sway=Math.sin(p);
+    const lift=Math.abs(Math.sin(p));
+    const amp=.6+level*1.4;                       // louder music → bigger movement
+    const bounce=(1.5+beatFlash*2.5)*amp;
+    const rock=3.2*amp*sway;
+    femBody.style.transform='translateY('+(-lift*bounce)+'px) rotate('+rock+'deg)';
+    malBody.style.transform='translateY('+(-lift*bounce)+'px) rotate('+(-rock)+'deg)';   // mirrored = facing each other
+    const arm=10*amp;
+    limbs.fArmI.style.transform='rotate('+(sway*arm)+'deg)';
+    limbs.fArmO.style.transform='rotate('+(-sway*arm*1.4)+'deg)';
+    limbs.mArmI.style.transform='rotate('+(-sway*arm)+'deg)';
+    limbs.mArmO.style.transform='rotate('+(sway*arm*1.4)+'deg)';
+    const step=2.4*amp;
+    const stepA=Math.max(0,sway)*step,stepB=Math.max(0,-sway)*step;
+    limbs.fLegL.style.transform='translateY('+(-stepA)+'px)';
+    limbs.fLegR.style.transform='translateY('+(-stepB)+'px)';
+    limbs.mLegL.style.transform='translateY('+(-stepB)+'px)';
+    limbs.mLegR.style.transform='translateY('+(-stepA)+'px)';
+  }
+
+  function loop(t){
+    if(!running)return;
+    raf=requestAnimationFrame(loop);
+    if(!lastFrame)lastFrame=t;
+    const dt=Math.min(64,t-lastFrame);lastFrame=t;
+    if(ctx.state!=='running'){pose();return}
+    const e=bassEnergy();
+    level+=(e-level)*.12;
+    beatFlash*=Math.pow(.94,dt/16);
+    if(detectBeat(e,t)){
+      beatFlash=Math.min(1,e/(level||.1)-.6);
+      const strong=e>level*1.6;
+      if(strong||beatCount%2===0)spawnHearts(strong);
+      // Bride twirls every 16 beats; the twirl lasts exactly 2 beats of the current tempo
+      if(beatCount%16===0&&femSvg){
+        femSvg.style.setProperty('--twirl-dur',Math.round(beatPeriod*2)+'ms');
+        femSvg.classList.remove('twirl');void femSvg.offsetWidth;femSvg.classList.add('twirl');
+      }
+      // Re-anchor the phase to the detected beat — keeps the dance locked to the song
+      phase+=(Math.round(phase)-phase)*.35;
+    }
+    phase+=dt/beatPeriod;
+    pose();
+  }
+
+  function start(){
+    if(REDUCE||running)return;
+    if(!nodes())return;
+    ensureAudioGraph();
+    if(!ctx)return;
+    scene.classList.add('dancing');
+    running=true;lastFrame=0;
+    raf=requestAnimationFrame(loop);
+  }
+  function stop(){
+    if(!running&&!scene)return;
+    running=false;cancelAnimationFrame(raf);
+    if(scene){
+      scene.classList.remove('dancing');
+      [femBody,malBody].concat(limbs?Object.values(limbs):[]).forEach(el=>{if(el)el.style.transform=''});
+    }
+  }
+  return {start,stop};
+})();
+
+audio.addEventListener('play',()=>{
+  hideMusicPill();
+  const btn=document.getElementById('music-btn');if(btn)btn.classList.add('playing');
+  dance.start();
+});
+audio.addEventListener('pause',()=>{
+  const btn=document.getElementById('music-btn');if(btn)btn.classList.remove('playing');
+  dance.stop();
+});
 
 /* ═══ GRAIN TEXTURE ═══ */
 (function initGrain(){
@@ -320,6 +507,9 @@ function initSite(){
 
   // Guest portal
   initGuestPortal();
+
+  // Music: try to start automatically; if the browser blocks it, offer the play pill
+  setTimeout(attemptAutoplay,900);
 }
 
 /* ═══ WEATHER WIDGET ═══ */

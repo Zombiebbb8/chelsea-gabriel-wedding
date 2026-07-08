@@ -579,6 +579,28 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 .arm-outer{transform-box:fill-box;transform-origin:center top;animation:lgFwd .58s ease-in-out infinite}
 .couple-lbl{position:absolute;bottom:-20px;left:50%;translate:-50% 0;white-space:nowrap;font-size:.44rem;letter-spacing:.26em;text-transform:uppercase;color:var(--olive-dk);opacity:.55;font-family:'Jost',sans-serif}
 
+/* ══ BEAT-SYNCED DANCE MODE (JS drives poses from live audio analysis) ══ */
+.couple-scene.dancing #fig-female-mover{animation:none;transform:translateX(-4px)}
+.couple-scene.dancing #fig-male-mover{animation:none;transform:translateX(4px)}
+.couple-scene.dancing .fig-body,.couple-scene.dancing .leg-l,.couple-scene.dancing .leg-r,.couple-scene.dancing .arm-inner,.couple-scene.dancing .arm-outer{animation:none}
+.couple-scene.dancing .fig-body,.couple-scene.dancing .leg-l,.couple-scene.dancing .leg-r,.couple-scene.dancing .arm-inner,.couple-scene.dancing .arm-outer{will-change:transform}
+.twirl{animation:coupleTwirl var(--twirl-dur,1s) cubic-bezier(.45,.05,.35,1) 1}
+@keyframes coupleTwirl{to{transform:rotate(360deg)}}
+#dance-fx{position:absolute;left:-30px;right:-30px;top:-70px;bottom:0;pointer-events:none;overflow:visible}
+.dance-heart{position:absolute;bottom:32%;opacity:0;animation:heartRise var(--h-dur,2.6s) ease-out forwards;will-change:transform,opacity}
+.dance-heart svg{display:block}
+@keyframes heartRise{0%{opacity:0;transform:translateY(0) scale(.5) rotate(var(--h-rot,0deg))}12%{opacity:.9}100%{opacity:0;transform:translateY(-110px) translateX(var(--h-drift,0px)) scale(1.15) rotate(var(--h-rot,0deg))}}
+.dance-spark{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--gold-lt);opacity:0;animation:sparkPop var(--s-dur,.9s) ease-out forwards;will-change:transform,opacity;box-shadow:0 0 6px rgba(226,200,122,.8)}
+@keyframes sparkPop{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--s-dx,0px),var(--s-dy,-40px)) scale(.3)}}
+/* Autoplay-blocked prompt */
+#music-pill{position:fixed;bottom:92px;right:28px;z-index:8000;display:flex;align-items:center;gap:10px;background:rgba(20,18,10,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(201,168,76,.45);color:var(--gold-lt);padding:12px 22px;border-radius:999px;font-family:'Jost',sans-serif;font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;cursor:pointer;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .6s ease,transform .6s ease;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+#music-pill.show{opacity:1;transform:none;pointer-events:auto}
+#music-pill:hover{border-color:var(--gold);background:rgba(40,36,18,.92)}
+#music-pill .pill-note{font-size:.85rem;animation:notebob 1.6s ease-in-out infinite}
+@keyframes notebob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-3px) rotate(6deg)}}
+@media(max-width:600px){#music-pill{bottom:88px;right:20px;padding:10px 18px}}
+@media(prefers-reduced-motion:reduce){.dance-heart,.dance-spark,.twirl,#music-pill .pill-note{animation:none!important}}
+
 /* ══ MOBILE RESPONSIVE ENHANCEMENTS ══ */
 @media(max-width:600px){
   section{padding:64px 20px}
@@ -697,6 +719,10 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 </button>
 <div class="music-ring"></div>
 <div class="music-track">&hearts; African Warmth</div>
+<button id="music-pill" onclick="startMusicFromPill()" aria-label="Play music">
+  <span class="pill-note">&#9834;</span>
+  <span data-en="Play the music" data-ig="Kpọọ egwu" data-yo="Tẹ orin">Play the music</span>
+</button>
 <audio id="bgMusic" loop><source src="africa.mp3" type="audio/mpeg"/></audio>
 
 <!-- ═══ ENVELOPE INTRO ═══ -->
@@ -851,6 +877,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   <a class="h-rsvp" href="#rsvp" onclick="navGoTo('rsvp',event)" data-en="RSVP Now" data-ig="Zaa Ugbu a" data-yo="Fèsì Báyìí">RSVP Now</a>
   <!-- ══ IGBO COUPLE ══ -->
   <div class="couple-scene" id="couple-scene" aria-label="Chelsea and Gabriel in Igbo traditional attire">
+    <div id="dance-fx" aria-hidden="true"></div>
     <!-- Female: approaches from left -->
     <div id="fig-female-mover">
       <svg class="igbo-fig" viewBox="-40 -142 80 152" width="70" height="135" aria-hidden="true">
