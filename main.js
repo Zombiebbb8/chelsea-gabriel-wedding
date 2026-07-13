@@ -14,6 +14,33 @@ function getTurnstileToken(){
   return (i&&i.value)?i.value:null;
 }
 
+/* ═══ RSVP THANK-YOU STATE ═══
+   After a guest responds, the whole section becomes a thank-you page —
+   heading included — and persists across visits via localStorage, so they
+   are never asked to RSVP again. */
+function applyRsvpThanksState(){
+  const sec=document.getElementById('rsvp');if(!sec)return;
+  const eye=sec.querySelector('.s-eye');
+  const title=sec.querySelector('.s-title');
+  const intro=sec.querySelector('.rsvp-intro');
+  if(eye){
+    eye.setAttribute('data-en','Response received');
+    eye.setAttribute('data-ig','Anatala azịza gị');
+    eye.setAttribute('data-yo','A ti gba ìdáhùn rẹ');
+  }
+  if(title){
+    title.setAttribute('data-en','Thank <em>you!</em>');
+    title.setAttribute('data-ig','Daalụ <em>nke ukwuu!</em>');
+    title.setAttribute('data-yo','Ẹ <em>ṣeun!</em>');
+  }
+  if(intro)intro.style.display='none';
+  const form=document.getElementById('rsvpForm');if(form)form.style.display='none';
+  const thanks=document.getElementById('rsvpThanks');
+  if(thanks){thanks.style.display='block';thanks.classList.add('in')}
+  sec.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+  setLang(currentLang);
+}
+
 /* ═══ GUEST PORTAL ═══ */
 const _guestToken=(new URLSearchParams(location.search)).get('guest');
 
@@ -515,6 +542,9 @@ function initSite(){
   // Guest portal
   initGuestPortal();
 
+  // Returning guest who already responded → thank-you state, not the form again
+  try{if(localStorage.getItem('wdg_rsvp_done')==='1')applyRsvpThanksState()}catch(e){}
+
   // Music: try to start automatically; if the browser blocks it, offer the play pill
   setTimeout(attemptAutoplay,900);
 }
@@ -873,9 +903,9 @@ async function submitRSVP(e){
     }
     return;
   }
-  document.getElementById('rsvpForm').style.display='none';
-  document.getElementById('rsvpThanks').style.display='block';
-  setLang(currentLang);
+  applyRsvpThanksState();
+  try{localStorage.setItem('wdg_rsvp_done','1')}catch(e){}
+  document.getElementById('rsvp').scrollIntoView({behavior:'smooth',block:'start'});
   launchConfetti();
   showToast(attending==='yes'?'We can\'t wait to see you! 💛':'We\'ll miss you!');
 }
