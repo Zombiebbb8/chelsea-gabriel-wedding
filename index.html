@@ -1448,6 +1448,13 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   var LS_OPENED='wdg_v1_opened';   // bumped key avoids conflicts with any old values
   var LS_UNLOCKED='wdg_v1_unlocked';
 
+  /* Turnstile callbacks must exist BEFORE the CDN widget completes —
+     main.js loads late (fetch+eval), so a fast verification used to win the
+     race and drop its token, leaving guests stuck on "complete the check". */
+  window.__tsToken=null;
+  window.onTurnstileSuccess=function(t){window.__tsToken=t};
+  window.onTurnstileExpired=function(){window.__tsToken=null};
+
   /* ── Jump straight to the main site (returning guests / page reload) ── */
   function skipIntro(){
     var g=document.getElementById('gate');if(g)g.style.display='none';

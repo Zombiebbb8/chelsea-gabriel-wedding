@@ -4,10 +4,15 @@ const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 let supabase;
 try{supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON)}catch(e){console.warn('Supabase init failed',e)}
 
-/* ═══ TURNSTILE ═══ */
-let turnstileToken=null;
-function onTurnstileSuccess(token){turnstileToken=token;}
-function onTurnstileExpired(){turnstileToken=null;}
+/* ═══ TURNSTILE ═══
+   Callbacks live inline in index.html so they exist before the CDN widget
+   completes (main.js loads late via fetch+eval). Reading falls back to the
+   widget's hidden input so a lost callback can never strand a guest. */
+function getTurnstileToken(){
+  if(window.__tsToken)return window.__tsToken;
+  const i=document.querySelector('input[name="cf-turnstile-response"]');
+  return (i&&i.value)?i.value:null;
+}
 
 /* ═══ GUEST PORTAL ═══ */
 const _guestToken=(new URLSearchParams(location.search)).get('guest');
@@ -838,7 +843,8 @@ async function submitRSVP(e){
   if(!emailRe.test(email)){showToast('Please enter a valid email address.');return}
 
   // Turnstile check
-  if(!turnstileToken){
+  const tsToken=getTurnstileToken();
+  if(!tsToken){
     showToast('Please complete the verification check above.');
     return;
   }
@@ -850,7 +856,7 @@ async function submitRSVP(e){
   // ── All-in-one: verify Turnstile + save to DB + notify Gabriel (edge function) ──
   const {data:fnData,error:fnErr}=await supabase.functions.invoke('rsvp-notify',{
     body:{
-      turnstile_token:turnstileToken,
+      turnstile_token:tsToken,
       record:{first_name:first,last_name:last,email:email,attending:attending,guests:guests,meal_preference:meal,message:msg,phone:phone,song_request:song}
     }
   });
@@ -861,7 +867,7 @@ async function submitRSVP(e){
     if(apiError.includes('Verification')){
       showToast('Verification expired. Please try again.');
       if(window.turnstile)window.turnstile.reset();
-      turnstileToken=null;
+      window.__tsToken=null;
     }else{
       showToast(apiError||'Something went wrong. Please try again.');
     }
