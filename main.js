@@ -21,16 +21,54 @@ function typeHeroDate(){
   const el=document.getElementById('heroDate');
   if(!el)return;
   const text=el.dataset.text||'03-20-2027';
-  const caret=document.querySelector('.date-caret');
   const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(reduce){el.textContent=text;return}
   el.textContent='';
   let i=0;
-  setTimeout(function step(){
+  function typing(){
     el.textContent=text.slice(0,i);
-    if(i++<text.length){setTimeout(step,115);return}
-    setTimeout(()=>{if(caret)caret.classList.add('done')},1600);
-  },1700);   // starts just after the .h-date rise-in finishes
+    if(i++<text.length){setTimeout(typing,120);return}
+    setTimeout(erasing,2600);        // hold the finished date
+  }
+  function erasing(){
+    el.textContent=text.slice(0,i);
+    if(i-->0){setTimeout(erasing,55);return}
+    i=0;
+    setTimeout(typing,500);          // pause, then type it again — loops forever
+  }
+  setTimeout(typing,1700);           // starts just after the .h-date rise-in
+}
+
+/* ═══ COUNTDOWN LABEL SCRAMBLE ═══
+   Letters churn, then resolve into the label. Re-reads the label for the
+   active language each cycle so it keeps working after a language switch. */
+function scrambleCountdownLabel(){
+  const el=document.querySelector('.cd-label');
+  if(!el)return;
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  function target(){
+    const v=el.getAttribute('data-'+(typeof currentLang!=='undefined'?currentLang:'en'));
+    const tmp=document.createElement('div');tmp.innerHTML=v||el.textContent;
+    return tmp.textContent.trim();
+  }
+  function run(){
+    const text=target();
+    const queue=[...text].map((ch,i)=>({ch,start:Math.floor(i*1.4),end:Math.floor(i*1.4)+14}));
+    let frame=0;
+    (function tick(){
+      let out='',done=0;
+      for(const q of queue){
+        if(frame>=q.end){done++;out+=q.ch}
+        else if(frame>=q.start){out+=(q.ch===' ')?' ':CHARS[Math.floor(Math.random()*CHARS.length)]}
+        else out+=(q.ch===' ')?' ':'';
+      }
+      el.textContent=out;
+      if(done===queue.length){setTimeout(run,4200);return}   // settle, then loop
+      frame++;setTimeout(tick,34);   // timer, not rAF — rAF is throttled in background tabs
+    })();
+  }
+  setTimeout(run,900);
 }
 
 /* ═══ RSVP THANK-YOU STATE ═══
@@ -559,8 +597,9 @@ function initSite(){
     cell.addEventListener('mouseleave',()=>{cell.style.transform=''});
   });
 
-  // Hero date typewriter
+  // Hero date typewriter + countdown label scramble (both loop)
   typeHeroDate();
+  scrambleCountdownLabel();
 
   // Guest portal
   initGuestPortal();
