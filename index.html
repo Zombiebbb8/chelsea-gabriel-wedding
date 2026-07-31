@@ -168,7 +168,12 @@ nav.compact{padding:8px 20px}
 .h-rule{display:flex;align-items:center;gap:16px;width:min(300px,70%);margin:28px auto;opacity:0;animation:riseIn .8s var(--ease) 1s forwards}
 .h-rule span{flex:1;height:1px;background:linear-gradient(to right,transparent,var(--olive-lt),transparent)}
 .h-rule i{width:7px;height:7px;background:var(--olive);transform:rotate(45deg);flex-shrink:0}
-.h-date{font-family:'Cormorant Garamond',serif;font-size:1.22rem;font-style:italic;font-weight:400;color:rgba(230,218,185,.8);letter-spacing:.12em;line-height:2;opacity:0;animation:riseIn .8s var(--ease) 1.2s forwards}
+.h-date{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-style:italic;font-weight:400;color:rgba(230,218,185,.9);letter-spacing:.24em;line-height:1.8;opacity:0;animation:riseIn .8s var(--ease) 1.2s forwards;min-height:1.8em}
+#heroDate{white-space:nowrap}
+.date-caret{display:inline-block;width:2px;height:1.05em;background:var(--gold-lt);margin-left:5px;vertical-align:-3px;animation:caretBlink 1s step-end infinite}
+@keyframes caretBlink{0%,100%{opacity:1}50%{opacity:0}}
+.date-caret.done{animation:none;opacity:0}
+@media(prefers-reduced-motion:reduce){.date-caret{display:none}}
 .h-loc{font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--olive-dk);margin-top:14px;opacity:0;animation:riseIn .7s var(--ease) 1.5s forwards}
 .h-rsvp{display:none;margin-top:30px;padding:14px 44px;background:var(--olive);color:#faf8f0;font-family:'Jost',sans-serif;font-size:.72rem;font-weight:400;letter-spacing:.28em;text-transform:uppercase;text-decoration:none;border-radius:2px;border:1px solid var(--gold);box-shadow:0 8px 30px rgba(0,0,0,.4);opacity:0;animation:riseIn .8s var(--ease) 1.8s forwards;transition:background .3s,transform .3s}
 .h-rsvp:hover{background:var(--olive-dk);transform:translateY(-2px)}
@@ -872,7 +877,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   <p class="h-eyebrow" data-en="Together with their families" data-ig="Ọnụ na ezinụlọ ha" data-yo="Papọ̀ pẹ̀lú ìdílé wọn">Together with their families</p>
   <div class="h-names"><span>Chelsea</span><span class="h-amp">&amp;</span><span>Gabriel</span></div>
   <div class="h-rule"><span></span><i></i><span></span></div>
-  <p class="h-date">Saturday &middot; the Twentieth of March<br>Two Thousand &amp; Twenty-Seven</p>
+  <p class="h-date" aria-label="March 20, 2027"><span id="heroDate" data-text="03-20-2027"></span><span class="date-caret" aria-hidden="true"></span></p>
   <p class="h-loc" data-en="Enugu · Nigeria" data-ig="Enugwu · Naịjịrịa" data-yo="Enugu · Nàìjíríà">Enugu &middot; Nigeria</p>
   <a class="h-rsvp" href="#rsvp" onclick="navGoTo('rsvp',event)" data-en="RSVP Now" data-ig="Zaa Ugbu a" data-yo="Fèsì Báyìí">RSVP Now</a>
   <!-- ══ IGBO COUPLE ══ -->
@@ -1012,7 +1017,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 
 <!-- COUNTDOWN -->
 <div id="countdown">
-  <p class="cd-label" data-en="Days until we say &ldquo;I do&rdquo;" data-ig="Ụbọchị ruo mgbe anyị ga-ekwu ya" data-yo="Àwọn ọjọ́ tó kù">Days until we say &ldquo;I do&rdquo;</p>
+  <p class="cd-label" data-en="Days until our Traditional Marriage" data-ig="Ụbọchị ruo Igba Nkwụ anyị" data-yo="Àwọn ọjọ́ tó kù sí Ìgbéyàwó Ìbílẹ̀ wa">Days until our Traditional Marriage</p>
   <div class="cd-wrap">
     <div class="cd-item"><span class="cd-num" id="cd-d">000</span><span class="cd-unit" data-en="Days" data-ig="Ụbọchị" data-yo="Ọjọ́">Days</span></div>
     <div class="cd-sep">&middot;</div>
@@ -1077,13 +1082,14 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   <span class="s-eye reveal" data-en="Attire" data-ig="Akwa Ịyi" data-yo="Aṣọ">Attire</span>
   <h2 class="s-title reveal" data-en="Traditional <em>Attire</em>" data-ig="Akwa Ọdịnala <em>Nigerian</em>" data-yo="Aṣọ <em>Ìbílẹ̀</em>">Traditional <em>Attire</em></h2>
   <div class="s-rule reveal"><span></span><i></i><span></span></div>
-  <p class="dc-note reveal" data-en="Nigerian traditional dress is encouraged. Ladies may wear Aso-Ebi or elegant Ankara. Gentlemen are welcome in agbada, kaftan or suits." data-ig="A na-akwado akwa ọdịnala Naịjịrịa. Ụmụ nwanyị nwere ike yi Aso-Ebi ma ọ bụ Ankara. Ndi okoobia nabatara agbada, kaftan ma ọ bụ suit." data-yo="A gbà àwọn ọmọ Nàìjíríà nímọ̀ láti wọ̀ aṣọ ìbílẹ̀. Àwọn obìnrin lè wọ̀ Aso-Ebi tàbí Ankara. Àwọn ọkùnrin wà láti wọ̀ agbada, kaftan tàbí suit.">Nigerian traditional dress is encouraged. Ladies may wear Aso-Ebi or elegant Ankara. Gentlemen are welcome in agbada, kaftan or suits.</p>
-  <div class="swatches reveal">
-    <div class="sw"><div class="sw-dot" style="background:#6b7045;"></div><span class="sw-lbl" data-en="Olive" data-ig="Olive" data-yo="Olive">Olive</span></div>
-    <div class="sw"><div class="sw-dot" style="background:#c9a84c;"></div><span class="sw-lbl" data-en="Gold" data-ig="Ọla Ọcha" data-yo="Wúrà">Gold</span></div>
-    <div class="sw"><div class="sw-dot" style="background:#6b2030;"></div><span class="sw-lbl" data-en="Burgundy" data-ig="Burgundy" data-yo="Búrgúndì">Burgundy</span></div>
-    <div class="sw"><div class="sw-dot" style="background:#2a2818;"></div><span class="sw-lbl" data-en="Ebony" data-ig="Ojii" data-yo="Dúdú">Ebony</span></div>
-    <div class="sw"><div class="sw-dot" style="background:#d8c8a0;"></div><span class="sw-lbl" data-en="Cream" data-ig="Oji Ọcha" data-yo="Ìkéré">Cream</span></div>
+  <div id="attire-content">
+    <div class="locked-card reveal" onclick="document.getElementById('rsvp').scrollIntoView({behavior:'smooth'})">
+      <span class="locked-icon">🔒</span>
+      <div class="locked-title" data-en="Attire &amp; Aso-Ebi" data-ig="Akwa na Aso-Ebi" data-yo="Aṣọ àti Aso-Ebi">Attire &amp; Aso-Ebi</div>
+      <span class="locked-unlock" data-en="Shared with confirmed guests" data-ig="Ekekọrịtara ya na ndị ọbịa kwadoro" data-yo="A ó pín pẹ̀lú àwọn àlejò tí wọ́n jẹ́rìí">Shared with confirmed guests</span>
+      <p class="locked-msg" data-en="Our family colours and aso-ebi details are still being finalised. RSVP to receive your private access link — confirmed guests will be the first to know." data-ig="Agba ezinụlọ anyị na nkọwa aso-ebi ka na-edozi. Zaa ka ị nweta njikọ nzuzo gị — ndị ọbịa kwadoro ga-ebu ụzọ mara." data-yo="Àwọn àwọ̀ ìdílé wa àti àlàyé aso-ebi ṣì ń parí. Fèsì láti gba ọ̀nà àbáwọlé aládàáni rẹ — àwọn àlejò tí wọ́n jẹ́rìí ni yóò kọ́kọ́ mọ̀.">Our family colours and aso-ebi details are still being finalised. RSVP to receive your private access link &mdash; confirmed guests will be the first to know.</p>
+      <div class="locked-cta" data-en="Complete My RSVP" data-ig="Mezuo RSVP m" data-yo="Parí RSVP mi">Complete My RSVP</div>
+    </div>
   </div>
 </section>
 

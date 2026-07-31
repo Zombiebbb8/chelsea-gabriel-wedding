@@ -14,6 +14,25 @@ function getTurnstileToken(){
   return (i&&i.value)?i.value:null;
 }
 
+/* ═══ HERO DATE TYPEWRITER ═══
+   Types the wedding date after the hero copy has faded in. The <p> carries an
+   aria-label so screen readers get the full date regardless of animation. */
+function typeHeroDate(){
+  const el=document.getElementById('heroDate');
+  if(!el)return;
+  const text=el.dataset.text||'03-20-2027';
+  const caret=document.querySelector('.date-caret');
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){el.textContent=text;return}
+  el.textContent='';
+  let i=0;
+  setTimeout(function step(){
+    el.textContent=text.slice(0,i);
+    if(i++<text.length){setTimeout(step,115);return}
+    setTimeout(()=>{if(caret)caret.classList.add('done')},1600);
+  },1700);   // starts just after the .h-date rise-in finishes
+}
+
 /* ═══ RSVP THANK-YOU STATE ═══
    After a guest responds, the whole section becomes a thank-you page —
    heading included — and persists across visits via localStorage, so they
@@ -87,6 +106,7 @@ async function initGuestPortal(){
       }
     }
 
+    injectSection('attire-content','attire','soon');
     injectSection('timeline-content','timeline','March 6, 2027');
     injectSection('travel-content','travel','December 20, 2026');
     injectSection('photos-content','photos','March 20, 2027');
@@ -538,6 +558,9 @@ function initSite(){
     cell.addEventListener('mousemove',e=>{const r=cell.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-.5;const y=(e.clientY-r.top)/r.height-.5;cell.style.transform='scale(1.02) perspective(600px) rotateY('+(x*8)+'deg) rotateX('+(-y*8)+'deg)'});
     cell.addEventListener('mouseleave',()=>{cell.style.transform=''});
   });
+
+  // Hero date typewriter
+  typeHeroDate();
 
   // Guest portal
   initGuestPortal();
