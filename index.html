@@ -1558,7 +1558,11 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 
     /* CDN scripts finish before DOMContentLoaded so supabase + THREE are ready.
        (0,eval) runs in global scope so function declarations land on window. */
-    fetch('main.js').then(function(r){return r.text();}).then(function(src){
+    /* Cache-bust: Netlify's edge was observed serving main.js with a 4-hour
+       cache regardless of the max-age=0 header in netlify.toml. Bump this
+       version number whenever main.js changes so every guest gets the fix
+       immediately instead of waiting out a stale edge/browser cache. */
+    fetch('main.js?v=2').then(function(r){return r.text();}).then(function(src){
       (0,eval)(src);
       /* If we already skipped the intro, kick off site init now that main.js is ready */
       if(alreadyOpened){
