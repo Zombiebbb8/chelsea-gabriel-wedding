@@ -972,7 +972,13 @@ async function submitRSVP(e){
   showToast(attending==='yes'?'We can\'t wait to see you! 💛':'We\'ll miss you!');
 }
 
-document.body.style.overflow='hidden';
+/* Only lock scroll if the envelope intro is still showing — for a returning
+   guest (or anyone reopening their portal link), the inline gate script has
+   already skipped straight to the site before this line runs, and locking
+   here with nothing left to unlock it would freeze scrolling forever. */
+if(!document.getElementById('site').classList.contains('visible')){
+  document.body.style.overflow='hidden';
+}
 
 /* toggleNavDD / navGoTo live in the inline <script> block in index.html
    so they are available immediately (before this async eval runs). */
