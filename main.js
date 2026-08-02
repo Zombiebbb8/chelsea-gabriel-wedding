@@ -96,6 +96,14 @@ function applyRsvpThanksState(){
   if(thanks){thanks.style.display='block';thanks.classList.add('in')}
   sec.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
   setLang(currentLang);
+  hideHeroRsvp();
+}
+
+/* The big mobile "RSVP Now" hero button only makes sense before a guest has
+   responded — hide it once they have, whether that's on this same device
+   (wdg_rsvp_done) or via their portal link on a different device. */
+function hideHeroRsvp(){
+  document.querySelectorAll('.h-rsvp').forEach(el=>{el.style.display='none'});
 }
 
 /* ═══ GUEST PORTAL ═══ */
@@ -114,6 +122,11 @@ async function initGuestPortal(){
 
     const {guest,unlocked,days_until_wedding:days,content}=data;
 
+    // A guest reaching their portal has already responded — the hero's
+    // mobile "RSVP Now" CTA no longer applies, regardless of this device's
+    // own localStorage state.
+    hideHeroRsvp();
+
     // Show banner
     const banner=document.getElementById('guest-portal-banner');
     if(banner){
@@ -121,7 +134,7 @@ async function initGuestPortal(){
       const s=document.getElementById('gp-status');
       const c=document.getElementById('gp-countdown');
       if(n)n.textContent='Welcome, '+guest.first_name;
-      if(s)s.textContent=guest.attending==='yes'?'Confirmed ✓':'Response received';
+      if(s)s.textContent=guest.attending==='yes'?'Confirmed ✓':'We\'ll miss you';
       if(c)c.textContent=days>0?days+' days to go':'See you today!';
       banner.classList.add('visible');
     }

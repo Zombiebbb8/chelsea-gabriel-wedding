@@ -123,7 +123,7 @@ svg.env-svg{width:100%;display:block;overflow:visible}
 #site.visible{opacity:1}
 
 /* NAV */
-nav{position:fixed;top:36px;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:14px 48px;background:rgba(250,248,240,.96);backdrop-filter:blur(18px);border-bottom:1px solid rgba(107,112,69,.14);transition:padding .4s,top .4s}
+nav{position:fixed;top:36px;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:14px 48px;background:rgba(250,248,240,.96);backdrop-filter:blur(18px);border-bottom:1px solid rgba(107,112,69,.14);transition:padding .4s,top .4s;-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform}
 nav.compact{top:0;padding:10px 48px}
 .nav-mono{font-family:'Great Vibes',cursive;font-size:1.7rem;color:var(--olive)}
 /* Nav right cluster + RSVP button */
@@ -847,13 +847,13 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
       <a class="nav-dd-item" href="#details" onclick="navGoTo('details',event)" data-en="Details" data-ig="Nkọwa" data-yo="Àlàyé" role="menuitem"><span class="nav-dd-dot"></span>Details</a>
       <a class="nav-dd-item" href="#dresscode" onclick="navGoTo('dresscode',event)" data-en="Dress Code" data-ig="Uwe" data-yo="Aṣọ" role="menuitem"><span class="nav-dd-dot"></span>Dress Code</a>
       <a class="nav-dd-item" href="#venue" onclick="navGoTo('venue',event)" data-en="Venue" data-ig="Ebe ọzọ" data-yo="Ibi" role="menuitem"><span class="nav-dd-dot"></span>Venue</a>
+      <a class="nav-dd-item" href="#travel" onclick="navGoTo('travel',event)" data-en="Travel" data-ig="Njem" data-yo="Ìrìnàjò" role="menuitem"><span class="nav-dd-dot"></span>Travel</a>
       <a class="nav-dd-item" href="#timeline" onclick="navGoTo('timeline',event)" data-en="Timeline" data-ig="Usoro Oge" data-yo="Àkókò" role="menuitem"><span class="nav-dd-dot"></span>Timeline</a>
       <div class="nav-dd-sep"></div>
       <a class="nav-dd-item" href="#rsvp" onclick="navGoTo('rsvp',event)" data-en="RSVP" data-ig="RSVP" data-yo="RSVP" role="menuitem"><span class="nav-dd-dot"></span>RSVP</a>
       <a class="nav-dd-item" href="#photos" onclick="navGoTo('photos',event)" data-en="Photos" data-ig="Foto" data-yo="Àwòrán" role="menuitem"><span class="nav-dd-dot"></span>Photos</a>
       <div class="nav-dd-sep"></div>
       <a class="nav-dd-item" href="#faq" onclick="navGoTo('faq',event)" data-en="FAQ" data-ig="Ajụjụ" data-yo="FAQ" role="menuitem"><span class="nav-dd-dot"></span>FAQ</a>
-      <a class="nav-dd-item" href="#travel" onclick="navGoTo('travel',event)" data-en="Travel" data-ig="Njem" data-yo="Ìrìnàjò" role="menuitem"><span class="nav-dd-dot"></span>Travel</a>
       <a class="nav-dd-item" href="#gifts" onclick="navGoTo('gifts',event)" data-en="Gifts" data-ig="Onyinye" data-yo="Ẹbùn" role="menuitem"><span class="nav-dd-dot"></span>Gifts</a>
     </div>
   </div>
@@ -1113,6 +1113,22 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   </div>
 </section>
 
+<!-- TRAVEL & ACCOMMODATION -->
+<section id="travel">
+  <span class="s-eye reveal" data-en="Getting Here" data-ig="Ịbịa Ebe A" data-yo="Bí o ṣe wà níbí">Getting Here</span>
+  <h2 class="s-title reveal" data-en="Travel &amp; <em>Stay</em>" data-ig="Njem na <em>Obibi</em>" data-yo="Ìrìnàjò àti <em>Ibùgbé</em>">Travel &amp; <em>Stay</em></h2>
+  <div class="s-rule reveal"><span></span><i></i><span></span></div>
+  <div id="travel-content">
+    <div class="locked-card reveal" onclick="document.getElementById('rsvp').scrollIntoView({behavior:'smooth'})">
+      <span class="locked-icon">🔒</span>
+      <div class="locked-title">Hotels &amp; Travel</div>
+      <span class="locked-unlock">Shared with confirmed guests</span>
+      <p class="locked-msg">RSVP to receive your private access link — accommodation options, flight routes, and local tips will be shared with confirmed guests.</p>
+      <div class="locked-cta">Complete My RSVP</div>
+    </div>
+  </div>
+</section>
+
 <!-- TIMELINE -->
 <section id="timeline">
   <span class="s-eye reveal" data-en="The Day" data-ig="Ụbọchị Ememe" data-yo="Ọjọ́ Àyẹyẹ">The Day</span>
@@ -1358,25 +1374,6 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
   </div>
 </section>
 
-<!-- TRAVEL & ACCOMMODATION -->
-<section id="travel">
-  <span class="s-eye reveal" data-en="Getting Here" data-ig="Ịbịa Ebe A" data-yo="Bí o ṣe wà níbí">Getting Here</span>
-  <h2 class="s-title reveal" data-en="Travel &amp; <em>Stay</em>" data-ig="Njem na <em>Obibi</em>" data-yo="Ìrìnàjò àti <em>Ibùgbé</em>">Travel &amp; <em>Stay</em></h2>
-  <div class="s-rule reveal"><span></span><i></i><span></span></div>
-  <div id="travel-content">
-    <div class="locked-card reveal" onclick="document.getElementById('rsvp').scrollIntoView({behavior:'smooth'})">
-      <span class="locked-icon">🔒</span>
-      <div class="locked-title">Hotels &amp; Travel</div>
-      <span class="locked-unlock">Unlocks December 20, 2026 · 90 days before the wedding</span>
-      <p class="locked-msg">RSVP to receive your private access link — accommodation options, flight routes, and local tips will be shared with confirmed guests.</p>
-      <div class="locked-cta">Complete My RSVP</div>
-    </div>
-  </div>
-
-
-
-</section>
-
 <!-- GIFTS -->
 <section id="gifts">
   <span class="s-eye reveal" data-en="Wedding Gifts" data-ig="Onyinye Alụmdi" data-yo="Ẹbùn Ìgbéyàwó">Wedding Gifts</span>
@@ -1562,7 +1559,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
        cache regardless of the max-age=0 header in netlify.toml. Bump this
        version number whenever main.js changes so every guest gets the fix
        immediately instead of waiting out a stale edge/browser cache. */
-    fetch('main.js?v=2').then(function(r){return r.text();}).then(function(src){
+    fetch('main.js?v=3').then(function(r){return r.text();}).then(function(src){
       (0,eval)(src);
       /* If we already skipped the intro, kick off site init now that main.js is ready */
       if(alreadyOpened){
