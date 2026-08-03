@@ -170,31 +170,56 @@ async function initGuestPortal(){
 }
 
 /* ═══ HOTELS MAP + TIER FILTERS ═══
-   Leaflet + OpenStreetMap — free, no API key. Only hotels with a verified
-   street address (data-lat/data-lon) get a pin; every hotel still has a
-   working "View on Maps" button regardless, so navigation never depends on
-   our own geocoding being complete. */
+   Leaflet + OpenStreetMap — free, no API key. Loaded on demand (only when a
+   guest actually reaches the unlocked Travel section) so the ~99% of public
+   visitors who never see this never download it. Only hotels with a
+   verified street address (data-lat/data-lon) get a pin; every hotel still
+   has a working "View on Maps" button regardless, so navigation never
+   depends on our own geocoding being complete. */
+let _leafletPromise=null;
+function loadLeaflet(){
+  if(_leafletPromise)return _leafletPromise;
+  _leafletPromise=new Promise((resolve,reject)=>{
+    if(typeof L!=='undefined'){resolve();return}
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+    const script=document.createElement('script');
+    script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload=()=>resolve();
+    script.onerror=()=>reject(new Error('Leaflet failed to load'));
+    document.head.appendChild(script);
+  });
+  return _leafletPromise;
+}
+
 function initHotelsMap(){
   const mapEl=document.getElementById('hotels-map');
   const grid=document.getElementById('hotelGrid');
   if(!grid)return;
 
-  if(mapEl&&typeof L!=='undefined'){
+  if(mapEl){
     const cards=[...grid.querySelectorAll('.hotel-card[data-lat]')];
     if(cards.length){
-      const map=L.map(mapEl,{scrollWheelZoom:false}).setView([6.451,7.503],12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-        attribution:'&copy; OpenStreetMap contributors',maxZoom:18
-      }).addTo(map);
-      const bounds=[];
-      cards.forEach(c=>{
-        const lat=parseFloat(c.dataset.lat),lon=parseFloat(c.dataset.lon);
-        if(Number.isNaN(lat)||Number.isNaN(lon))return;
-        L.marker([lat,lon]).addTo(map).bindPopup('<strong>'+(c.dataset.name||'')+'</strong>');
-        bounds.push([lat,lon]);
+      loadLeaflet().then(()=>{
+        const map=L.map(mapEl,{scrollWheelZoom:false}).setView([6.451,7.503],12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+          attribution:'&copy; OpenStreetMap contributors',maxZoom:18
+        }).addTo(map);
+        const bounds=[];
+        cards.forEach(c=>{
+          const lat=parseFloat(c.dataset.lat),lon=parseFloat(c.dataset.lon);
+          if(Number.isNaN(lat)||Number.isNaN(lon))return;
+          L.marker([lat,lon]).addTo(map).bindPopup('<strong>'+(c.dataset.name||'')+'</strong>');
+          bounds.push([lat,lon]);
+        });
+        if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]});
+        setTimeout(()=>map.invalidateSize(),300);
+      }).catch(err=>{
+        console.warn('Hotels map failed to load',err);
+        mapEl.style.display='none';
       });
-      if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]});
-      setTimeout(()=>map.invalidateSize(),300);
     }else{
       mapEl.style.display='none';
     }
