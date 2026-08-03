@@ -162,9 +162,55 @@ async function initGuestPortal(){
     injectSection('travel-content','travel','December 20, 2026');
     injectSection('photos-content','photos','March 20, 2027');
 
+    if(unlocked.includes('travel')&&content.travel)requestAnimationFrame(initHotelsMap);
+
   }catch(err){
     console.warn('Guest portal init failed',err);
   }
+}
+
+/* ═══ HOTELS MAP + TIER FILTERS ═══
+   Leaflet + OpenStreetMap — free, no API key. Only hotels with a verified
+   street address (data-lat/data-lon) get a pin; every hotel still has a
+   working "View on Maps" button regardless, so navigation never depends on
+   our own geocoding being complete. */
+function initHotelsMap(){
+  const mapEl=document.getElementById('hotels-map');
+  const grid=document.getElementById('hotelGrid');
+  if(!grid)return;
+
+  if(mapEl&&typeof L!=='undefined'){
+    const cards=[...grid.querySelectorAll('.hotel-card[data-lat]')];
+    if(cards.length){
+      const map=L.map(mapEl,{scrollWheelZoom:false}).setView([6.451,7.503],12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        attribution:'&copy; OpenStreetMap contributors',maxZoom:18
+      }).addTo(map);
+      const bounds=[];
+      cards.forEach(c=>{
+        const lat=parseFloat(c.dataset.lat),lon=parseFloat(c.dataset.lon);
+        if(Number.isNaN(lat)||Number.isNaN(lon))return;
+        L.marker([lat,lon]).addTo(map).bindPopup('<strong>'+(c.dataset.name||'')+'</strong>');
+        bounds.push([lat,lon]);
+      });
+      if(bounds.length>1)map.fitBounds(bounds,{padding:[30,30]});
+      setTimeout(()=>map.invalidateSize(),300);
+    }else{
+      mapEl.style.display='none';
+    }
+  }
+
+  const filterBtns=[...document.querySelectorAll('.hf-btn')];
+  filterBtns.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      filterBtns.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const tier=btn.dataset.tier;
+      grid.querySelectorAll('.hotel-card').forEach(card=>{
+        card.classList.toggle('hf-hidden',tier!=='all'&&card.dataset.tier!==tier);
+      });
+    });
+  });
 }
 
 /* ═══ LANGUAGE ═══ */

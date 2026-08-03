@@ -457,6 +457,26 @@ section{padding:120px 32px}
 .hotel-details{display:flex;flex-direction:column;gap:6px}
 .hotel-row{display:flex;align-items:flex-start;gap:8px;font-size:.78rem;color:var(--ink);opacity:.68;line-height:1.5}
 .hotel-row svg{width:12px;height:12px;stroke:var(--olive-lt);fill:none;stroke-width:1.5;flex-shrink:0;margin-top:2px}
+/* Hotel tier filter pills */
+.hotel-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.hf-btn{background:white;border:1px solid rgba(107,112,69,.25);padding:8px 18px;font-family:'Jost',sans-serif;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);cursor:pointer;transition:all .25s;border-radius:2px}
+.hf-btn:hover{border-color:var(--olive)}
+.hf-btn.active{background:var(--olive);border-color:var(--olive);color:#fff}
+/* Leaflet map */
+#hotels-map{width:100%;height:320px;margin-bottom:20px;border:1px solid rgba(107,112,69,.18);filter:sepia(6%) saturate(92%)}
+#hotels-map .leaflet-popup-content-wrapper{border-radius:2px;font-family:'Jost',sans-serif}
+#hotels-map .leaflet-popup-content{font-size:.78rem;margin:10px 12px}
+.map-note{font-size:.66rem;color:var(--muted);font-style:italic;font-family:'Cormorant Garamond',serif;margin:-10px 0 20px;text-align:center}
+.hotel-card.hf-hidden{display:none}
+/* Tier badge colours */
+.hotel-tier--luxury{color:#a3792f}
+.hotel-tier--mid{color:var(--olive)}
+.hotel-tier--budget{color:#7a8a6a}
+.hotel-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.hotel-btn{flex:1;min-width:100px;text-align:center;padding:9px 12px;border:1px solid rgba(107,112,69,.3);font-family:'Jost',sans-serif;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);text-decoration:none;transition:all .25s;border-radius:2px}
+.hotel-btn:hover{border-color:var(--olive);background:rgba(107,112,69,.05)}
+.hotel-btn-primary{background:var(--olive);border-color:var(--olive);color:#fff}
+.hotel-btn-primary:hover{background:var(--olive-dk)}
 .tips-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
 .tip-card{background:white;border:1px solid rgba(107,112,69,.13);padding:22px 20px}
 .tip-icon{font-size:1.4rem;margin-bottom:10px}
@@ -1559,7 +1579,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
        cache regardless of the max-age=0 header in netlify.toml. Bump this
        version number whenever main.js changes so every guest gets the fix
        immediately instead of waiting out a stale edge/browser cache. */
-    fetch('main.js?v=3').then(function(r){return r.text();}).then(function(src){
+    fetch('main.js?v=4').then(function(r){return r.text();}).then(function(src){
       (0,eval)(src);
       /* If we already skipped the intro, kick off site init now that main.js is ready */
       if(alreadyOpened){
@@ -1572,5 +1592,7 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </body>
 </html>
