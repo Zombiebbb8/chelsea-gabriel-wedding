@@ -1489,6 +1489,17 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
       try{localStorage.setItem(LS_UNLOCKED,'1')}catch(e){}
       var g=document.getElementById('gate');
       if(g){g.classList.add('gone');setTimeout(function(){g.style.display='none'},800)}
+      /* Notify Gabriel once per new device the first time it clears the gate —
+         this branch only runs while the gate is still showing, which only
+         happens before LS_UNLOCKED/LS_OPENED are set, so it's naturally a
+         one-shot per device (no separate dedupe flag needed). */
+      try{
+        fetch('https://nakadctpdszskvooftln.supabase.co/functions/v1/notify-visit',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({referrer:document.referrer||'',userAgent:navigator.userAgent||''})
+        }).catch(function(){});
+      }catch(e){}
     }else{
       var err=document.getElementById('gate-error');
       if(err)err.style.display='block';
