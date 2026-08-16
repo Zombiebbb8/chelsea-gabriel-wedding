@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="robots" content="noindex, nofollow"/>
-<title>C &amp; G · Admin</title>
+<title>C &amp; G · Guest Logins</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500;600&display=swap" rel="stylesheet"/>
@@ -53,37 +53,11 @@
 import React from 'https://esm.sh/react@18';
 import ReactDOM from 'https://esm.sh/react-dom@18/client';
 import {
-  html, sb, Icon, paths, useToast, Toast, Modal, useSession,
+  html, sb, Icon, paths, useToast, Toast, useSession,
   PasswordModal, AdminHeader, Login,
 } from './admin-shared.js';
 
 const { useState, useEffect, useMemo, useCallback } = React;
-
-/* ── Delete Confirm Modal ── */
-function ConfirmDeleteModal({ guest, onClose, onConfirm, busy }) {
-  return html`
-    <${Modal} open=${!!guest} onClose=${onClose} labelledBy="del-modal-title">
-      <div class="anim-pop bg-charcoal border border-danger/25 p-9 max-w-sm w-full text-left">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-9 h-9 rounded-full bg-danger/10 flex items-center justify-center shrink-0">
-            <${Icon} path=${paths.alert} className="w-[18px] h-[18px] text-danger"/>
-          </div>
-          <div id="del-modal-title" class="font-serif italic text-xl text-olive-pale">Remove RSVP?</div>
-        </div>
-        <p class="text-sm text-olive-pale/60 leading-relaxed mb-6">
-          This will permanently remove <strong class="text-cream font-normal">${guest?.first_name} ${guest?.last_name || ''}</strong> from your guest list. This cannot be undone.
-        </p>
-        <div class="flex gap-2.5">
-          <button onClick=${onClose}
-                  class="flex-1 py-3 border border-olive-pale/20 text-olive-pale/60 text-[.56rem] tracking-[.2em] uppercase cursor-pointer hover:border-olive-pale/40 transition-colors">Cancel</button>
-          <button onClick=${onConfirm} disabled=${busy}
-                  class="flex-1 py-3 bg-danger/90 text-ivory text-[.56rem] tracking-[.2em] uppercase cursor-pointer hover:bg-danger transition-colors disabled:opacity-50">
-            ${busy ? 'Removing…' : 'Remove'}
-          </button>
-        </div>
-      </div>
-    <//>`;
-}
 
 /* ── Stat Card ── */
 function StatCard({ label, value, accent, delay }) {
@@ -96,37 +70,16 @@ function StatCard({ label, value, accent, delay }) {
 }
 
 function StatsGrid({ rsvps }) {
-  const yes = rsvps.filter((r) => r.attending === 'yes');
-  const no = rsvps.filter((r) => r.attending === 'no');
-  const totalGuests = yes.reduce((sum, r) => sum + (r.guests || 1), 0);
+  const eligible = rsvps.filter((r) => r.attending === 'yes');
+  const opened = eligible.filter((r) => r.portal_visit_count > 0);
+  const neverOpened = eligible.length - opened.length;
+  const pct = eligible.length ? Math.round((opened.length / eligible.length) * 100) : 0;
   return html`
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-9">
-      <${StatCard} label="Total RSVPs" value=${rsvps.length} accent="bg-gold" delay=${0}/>
-      <${StatCard} label="Attending" value=${yes.length} accent="bg-success" delay=${40}/>
-      <${StatCard} label="Declining" value=${no.length} accent="bg-danger" delay=${80}/>
-      <${StatCard} label="Total Guests" value=${totalGuests} accent="bg-olive" delay=${120}/>
-    </div>`;
-}
-
-function MealBreakdown({ rsvps }) {
-  const attending = rsvps.filter((r) => r.attending === 'yes');
-  const count = (k) => attending.filter((r) => (r.meal_preference || 'No preference').toLowerCase() === k.toLowerCase()).length;
-  const meals = [
-    ['No Preference', count('No preference')],
-    ['Vegetarian', count('Vegetarian')],
-    ['Vegan', count('Vegan')],
-    ['Gluten-Free', count('Gluten-free')],
-  ];
-  return html`
-    <div class="mb-9">
-      <div class="font-serif text-xl font-light text-ink mb-4 pb-2.5 border-b border-olive/15">Meal Preferences</div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        ${meals.map(([label, num], i) => html`
-          <div key=${label} class="anim-in bg-white border border-olive/10 p-4 text-center" style=${{ animationDelay: `${i * 30}ms` }}>
-            <div class="font-serif text-3xl text-olive-dk tabular-nums">${num}</div>
-            <div class="text-[.52rem] tracking-[.2em] uppercase text-muted mt-1">${label}</div>
-          </div>`)}
-      </div>
+      <${StatCard} label="Confirmed Guests" value=${eligible.length} accent="bg-gold" delay=${0}/>
+      <${StatCard} label="Opened Portal" value=${opened.length} accent="bg-success" delay=${40}/>
+      <${StatCard} label="Never Opened" value=${neverOpened} accent="bg-danger" delay=${80}/>
+      <${StatCard} label="Open Rate" value=${`${pct}%`} accent="bg-olive" delay=${120}/>
     </div>`;
 }
 
@@ -134,7 +87,7 @@ function MealBreakdown({ rsvps }) {
 function SkeletonRows({ count = 6 }) {
   return html`${Array.from({ length: count }).map((_, i) => html`
     <tr key=${i} class="border-b border-olive/8">
-      ${Array.from({ length: 8 }).map((__, j) => html`<td key=${j} class="px-3 py-3"><div class="skeleton h-3.5 rounded" style=${{ width: `${50 + ((i + j) % 4) * 12}%` }}></div></td>`)}
+      ${Array.from({ length: 6 }).map((__, j) => html`<td key=${j} class="px-3 py-3"><div class="skeleton h-3.5 rounded" style=${{ width: `${50 + ((i + j) % 4) * 12}%` }}></div></td>`)}
     </tr>`)}`;
 }
 
@@ -153,64 +106,59 @@ function Th({ label, sortKey, active, dir, onSort, className = '' }) {
     </th>`;
 }
 
-/* ── Guest Table ── */
-function GuestTable({ rsvps, loading, onDelete, notify }) {
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all');
-  const [sortKey, setSortKey] = useState('created_at');
-  const [sortDir, setSortDir] = useState('desc');
-  const [confirmTarget, setConfirmTarget] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-  const [expanded, setExpanded] = useState(() => new Set());
+function timeAgo(iso) {
+  if (!iso) return null;
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.round(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString('en-GB');
+}
 
-  const toggleExpanded = (id) => setExpanded((prev) => {
-    const next = new Set(prev);
-    next.has(id) ? next.delete(id) : next.add(id);
-    return next;
-  });
+/* ── Guest Logins Table ── */
+function LoginsTable({ rsvps, loading }) {
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all'); // all | opened | never
+  const [sortKey, setSortKey] = useState('portal_last_visited_at');
+  const [sortDir, setSortDir] = useState('desc');
 
   const onSort = (key) => {
     if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-    else { setSortKey(key); setSortDir('asc'); }
+    else { setSortKey(key); setSortDir(key === 'name' ? 'asc' : 'desc'); }
   };
 
+  const eligible = useMemo(() => rsvps.filter((r) => r.attending === 'yes'), [rsvps]);
+
   const filtered = useMemo(() => {
-    let data = filter === 'all' ? rsvps : rsvps.filter((r) => r.attending === filter);
+    let data = eligible;
+    if (filter === 'opened') data = data.filter((r) => r.portal_visit_count > 0);
+    if (filter === 'never') data = data.filter((r) => !r.portal_visit_count);
     const q = search.trim().toLowerCase();
     if (q) data = data.filter((r) => `${r.first_name} ${r.last_name} ${r.email}`.toLowerCase().includes(q));
     const dir = sortDir === 'asc' ? 1 : -1;
     return [...data].sort((a, b) => {
       if (sortKey === 'name') return dir * `${a.first_name} ${a.last_name || ''}`.localeCompare(`${b.first_name} ${b.last_name || ''}`);
-      if (sortKey === 'guests') return dir * ((a.guests || 1) - (b.guests || 1));
-      return dir * (new Date(a.created_at) - new Date(b.created_at));
+      if (sortKey === 'visits') return dir * ((a.portal_visit_count || 0) - (b.portal_visit_count || 0));
+      if (sortKey === 'created_at') return dir * (new Date(a.created_at) - new Date(b.created_at));
+      // portal_last_visited_at — guests who never opened sort to the end regardless of direction
+      const av = a.portal_last_visited_at, bv = b.portal_last_visited_at;
+      if (!av && !bv) return 0;
+      if (!av) return 1;
+      if (!bv) return -1;
+      return dir * (new Date(av) - new Date(bv));
     });
-  }, [rsvps, filter, search, sortKey, sortDir]);
-
-  const exportCSV = () => {
-    if (!rsvps.length) { notify('No data to export.', 'error'); return; }
-    const cols = ['first_name', 'last_name', 'email', 'attending', 'guests', 'meal_preference', 'message', 'created_at'];
-    const header = cols.join(',');
-    const rows = rsvps.map((r) => cols.map((c) => `"${String(r[c] ?? '').replace(/"/g, '""')}"`).join(','));
-    const csv = [header, ...rows].join('\n');
-    const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = `chelsea-gabriel-rsvps-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    notify('CSV exported!');
-  };
-
-  const confirmDelete = async () => {
-    setDeleting(true);
-    await onDelete(confirmTarget.id);
-    setDeleting(false);
-    setConfirmTarget(null);
-  };
+  }, [eligible, filter, search, sortKey, sortDir]);
 
   const esc = (s) => String(s ?? '');
 
   return html`
     <div>
-      <div class="font-serif text-xl font-light text-ink mb-4 pb-2.5 border-b border-olive/15">Guest List</div>
+      <div class="font-serif text-xl font-light text-ink mb-4 pb-2.5 border-b border-olive/15">Guest Portal Activity</div>
+      <p class="text-sm text-muted mb-4 -mt-2 max-w-2xl">Tracks who has actually opened their private guest-portal link (sent in their RSVP confirmation email), not just who RSVP'd. Only confirmed ("Attending") guests are shown here.</p>
       <div class="bg-white border border-olive/15">
         <div class="p-4 flex flex-wrap items-center gap-2.5 border-b border-olive/10">
           <div class="relative">
@@ -219,41 +167,33 @@ function GuestTable({ rsvps, loading, onDelete, notify }) {
                    placeholder="Search by name or email…"
                    class="border border-olive/20 bg-cream pl-8 pr-3 py-2 font-serif text-sm text-ink outline-none min-w-[220px] focus:border-olive transition-colors placeholder:text-muted/70"/>
           </div>
-          ${['all', 'yes', 'no'].map((f) => html`
+          ${[['all', 'All'], ['opened', 'Opened'], ['never', 'Never Opened']].map(([f, label]) => html`
             <button key=${f} onClick=${() => setFilter(f)}
                     class=${`px-4 py-2 border text-[.52rem] tracking-[.2em] uppercase cursor-pointer transition-colors ${filter === f ? 'bg-olive text-white border-olive' : 'border-olive/20 text-muted hover:border-olive/40'}`}>
-              ${f === 'all' ? 'All' : f === 'yes' ? 'Attending' : 'Declining'}
+              ${label}
             </button>`)}
-          <div class="ml-auto flex gap-2">
-            <button onClick=${exportCSV} title="Export CSV"
-                    class="flex items-center gap-1.5 px-4 py-2 bg-olive-dk text-ivory text-[.52rem] tracking-[.2em] uppercase cursor-pointer hover:bg-olive transition-colors">
-              <${Icon} path=${paths.download} className="w-3 h-3" strokeWidth=${2}/> Export
-            </button>
-          </div>
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse min-w-[820px]">
+          <table class="w-full border-collapse min-w-[760px]">
             <thead class="bg-charcoal">
               <tr>
                 <${Th} label="#"/>
                 <${Th} label="Name" sortKey="name" active=${sortKey === 'name'} dir=${sortDir} onSort=${onSort}/>
                 <${Th} label="Email"/>
-                <${Th} label="Attending"/>
-                <${Th} label="Guests" sortKey="guests" active=${sortKey === 'guests'} dir=${sortDir} onSort=${onSort} className="text-center"/>
-                <${Th} label="Meal"/>
-                <${Th} label="Message"/>
-                <${Th} label="Date" sortKey="created_at" active=${sortKey === 'created_at'} dir=${sortDir} onSort=${onSort}/>
-                <${Th} label=""/>
+                <${Th} label="Status"/>
+                <${Th} label="Visits" sortKey="visits" active=${sortKey === 'visits'} dir=${sortDir} onSort=${onSort} className="text-center"/>
+                <${Th} label="Last Opened" sortKey="portal_last_visited_at" active=${sortKey === 'portal_last_visited_at'} dir=${sortDir} onSort=${onSort}/>
+                <${Th} label="RSVP'd" sortKey="created_at" active=${sortKey === 'created_at'} dir=${sortDir} onSort=${onSort}/>
               </tr>
             </thead>
             <tbody>
               ${loading ? html`<${SkeletonRows}/>` : filtered.length === 0 ? html`
                 <tr>
-                  <td colSpan="9" class="py-16 text-center">
+                  <td colSpan="7" class="py-16 text-center">
                     <div class="flex flex-col items-center gap-2 text-muted">
                       <${Icon} path=${paths.inbox} className="w-8 h-8 text-olive/30" strokeWidth=${1.3}/>
-                      <span class="font-serif italic text-lg">${rsvps.length === 0 ? 'No RSVPs yet — share the invitation!' : 'No guests match your search.'}</span>
+                      <span class="font-serif italic text-lg">${eligible.length === 0 ? 'No confirmed guests yet.' : 'No guests match your search.'}</span>
                     </div>
                   </td>
                 </tr>` : filtered.map((r, i) => html`
@@ -262,32 +202,18 @@ function GuestTable({ rsvps, loading, onDelete, notify }) {
                   <td class="px-3 py-3 text-sm"><strong class="font-medium">${esc(r.first_name)}</strong> ${esc(r.last_name)}</td>
                   <td class="px-3 py-3 text-sm text-muted">${esc(r.email)}</td>
                   <td class="px-3 py-3">
-                    <span class=${`inline-flex items-center gap-1 px-2.5 py-1 text-[.5rem] tracking-[.15em] uppercase rounded-sm ${r.attending === 'yes' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
-                      ${r.attending === 'yes' ? 'Attending' : 'Declining'}
+                    <span class=${`inline-flex items-center gap-1 px-2.5 py-1 text-[.5rem] tracking-[.15em] uppercase rounded-sm ${r.portal_visit_count > 0 ? 'bg-success/10 text-success' : 'bg-muted/10 text-muted'}`}>
+                      ${r.portal_visit_count > 0 ? 'Opened' : 'Never opened'}
                     </span>
                   </td>
-                  <td class="px-3 py-3 text-center text-sm tabular-nums">${r.attending === 'yes' ? r.guests : '—'}</td>
-                  <td class="px-3 py-3 text-[.76rem] text-muted">${esc(r.meal_preference || '—')}</td>
-                  <td class=${`px-3 py-3 font-serif italic text-[.78rem] text-muted ${expanded.has(r.id) ? 'max-w-[280px] whitespace-normal' : 'max-w-[160px] truncate whitespace-nowrap'} ${r.message ? 'cursor-pointer hover:text-ink transition-colors' : ''}`}
-                      onClick=${() => r.message && toggleExpanded(r.id)}
-                      title=${r.message && !expanded.has(r.id) ? 'Click to read full message' : ''}>
-                    ${esc(r.message || '—')}
-                  </td>
+                  <td class="px-3 py-3 text-center text-sm tabular-nums">${r.portal_visit_count || 0}</td>
+                  <td class="px-3 py-3 text-[.76rem] text-muted whitespace-nowrap">${timeAgo(r.portal_last_visited_at) || '—'}</td>
                   <td class="px-3 py-3 text-[.72rem] text-muted whitespace-nowrap">${new Date(r.created_at).toLocaleDateString('en-GB')}</td>
-                  <td class="px-3 py-3">
-                    <button onClick=${() => setConfirmTarget(r)} aria-label=${`Remove ${r.first_name}`}
-                            class="p-1.5 text-danger/40 hover:text-danger transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-danger rounded">
-                      <${Icon} path=${paths.trash} className="w-3.5 h-3.5" strokeWidth=${1.75}/>
-                    </button>
-                  </td>
                 </tr>`)}
             </tbody>
           </table>
         </div>
       </div>
-
-      <${ConfirmDeleteModal} guest=${confirmTarget} busy=${deleting}
-        onClose=${() => setConfirmTarget(null)} onConfirm=${confirmDelete}/>
     </div>`;
 }
 
@@ -308,24 +234,16 @@ function Dashboard({ onSignOut, notify }) {
 
   useEffect(() => { load(false); }, [load]);
 
-  const handleDelete = async (id) => {
-    const { error } = await sb.from('rsvps').delete().eq('id', id);
-    if (error) { notify('Delete failed: ' + error.message, 'error'); return; }
-    setRsvps((prev) => prev.filter((r) => r.id !== id));
-    notify('RSVP removed.');
-  };
-
   const dateStr = new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   return html`
     <div class="min-h-screen">
-      <${AdminHeader} active="rsvps" onSignOut=${onSignOut} onOpenPassword=${() => setPwOpen(true)}
+      <${AdminHeader} active="logins" onSignOut=${onSignOut} onOpenPassword=${() => setPwOpen(true)}
         refreshing=${refreshing} onRefresh=${() => load(true)} extraDate=${dateStr}/>
 
       <main class="p-5 sm:p-9 max-w-[1440px] mx-auto">
         <${StatsGrid} rsvps=${rsvps}/>
-        <${MealBreakdown} rsvps=${rsvps}/>
-        <${GuestTable} rsvps=${rsvps} loading=${loading} onDelete=${handleDelete} notify=${notify}/>
+        <${LoginsTable} rsvps=${rsvps} loading=${loading}/>
       </main>
 
       <${PasswordModal} open=${pwOpen} onClose=${() => setPwOpen(false)} notify=${notify}/>
