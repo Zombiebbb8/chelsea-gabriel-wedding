@@ -342,6 +342,13 @@ function GuestTable({ rsvps, loading, onDelete, notify }) {
   const [sortDir, setSortDir] = useState('desc');
   const [confirmTarget, setConfirmTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [expanded, setExpanded] = useState(() => new Set());
+
+  const toggleExpanded = (id) => setExpanded((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
 
   const onSort = (key) => {
     if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -442,7 +449,11 @@ function GuestTable({ rsvps, loading, onDelete, notify }) {
                   </td>
                   <td class="px-3 py-3 text-center text-sm tabular-nums">${r.attending === 'yes' ? r.guests : '—'}</td>
                   <td class="px-3 py-3 text-[.76rem] text-muted">${esc(r.meal_preference || '—')}</td>
-                  <td class="px-3 py-3 max-w-[160px] truncate font-serif italic text-[.78rem] text-muted" title=${esc(r.message)}>${esc(r.message || '—')}</td>
+                  <td class=${`px-3 py-3 font-serif italic text-[.78rem] text-muted ${expanded.has(r.id) ? 'max-w-[280px] whitespace-normal' : 'max-w-[160px] truncate whitespace-nowrap'} ${r.message ? 'cursor-pointer hover:text-ink transition-colors' : ''}`}
+                      onClick=${() => r.message && toggleExpanded(r.id)}
+                      title=${r.message && !expanded.has(r.id) ? 'Click to read full message' : ''}>
+                    ${esc(r.message || '—')}
+                  </td>
                   <td class="px-3 py-3 text-[.72rem] text-muted whitespace-nowrap">${new Date(r.created_at).toLocaleDateString('en-GB')}</td>
                   <td class="px-3 py-3">
                     <button onClick=${() => setConfirmTarget(r)} aria-label=${`Remove ${r.first_name}`}
