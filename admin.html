@@ -5,365 +5,549 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="robots" content="noindex, nofollow"/>
 <title>C &amp; G · Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          olive: { DEFAULT:'#6b7045', dk:'#4a4e2e', lt:'#8a9058', pale:'#c8cc9a' },
+          gold: { DEFAULT:'#c9a84c', lt:'#e2c87a' },
+          cream: '#faf8f0', ivory: '#f4eed8', linen: '#ede5cc',
+          ink: '#2a2818', muted: '#7a7050',
+          charcoal: '#1c1a10', deep: '#0e0c08',
+          danger: '#c84a2a', success: '#4a8b2a',
+        },
+        fontFamily: {
+          serif: ['"Cormorant Garamond"','serif'],
+          sans: ['"Jost"','sans-serif'],
+        },
+      }
+    }
+  }
+</script>
 <style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --olive:#6b7045;--olive-dk:#4a4e2e;--olive-lt:#8a9058;--olive-pale:#c8cc9a;
-  --cream:#faf8f0;--ivory:#f4eed8;--linen:#ede5cc;
-  --gold:#c9a84c;--gold-lt:#e2c87a;
-  --black:#0e0c08;--charcoal:#1c1a10;--ink:#2a2818;
-  --text:#2a2010;--muted:#7a7050;
-  --red:#c84a2a;--green:#4a8b2a;
-  --ease:cubic-bezier(.22,1,.36,1);
-}
-body{background:var(--cream);color:var(--text);font-family:'Jost',sans-serif;font-weight:300;min-height:100vh}
-
-/* ── LOGIN ── */
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 40% 35%,#3a3e18,#0e0c04 70%)}
-.login-box{text-align:center;padding:60px 48px;border:1px solid rgba(201,168,76,.2);max-width:360px;width:100%;background:rgba(14,12,8,.6);backdrop-filter:blur(20px)}
-.login-mono{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:3rem;color:var(--olive-pale);display:block;margin-bottom:6px}
-.login-sub{font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(200,204,154,.35);margin-bottom:40px;display:block}
-.login-grp{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;text-align:left}
-.login-lbl{font-size:.54rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(200,204,154,.45)}
-.login-in{background:transparent;border:none;border-bottom:1px solid rgba(201,168,76,.3);padding:9px 0;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--cream);outline:none;transition:border-color .3s;width:100%}
-.login-in:focus{border-color:var(--gold)}
-.login-in::placeholder{color:rgba(200,204,154,.2);font-style:italic}
-.login-btn{width:100%;margin-top:8px;padding:13px;background:var(--olive-dk);color:var(--ivory);border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:.58rem;letter-spacing:.32em;text-transform:uppercase;transition:background .3s}
-.login-btn:hover{background:var(--olive)}
-.login-err{font-size:.7rem;color:rgba(220,80,60,.8);margin-top:10px;min-height:18px;font-family:'Cormorant Garamond',serif;font-style:italic}
-
-/* ── DASHBOARD ── */
-#dashboard{display:none;min-height:100vh}
-header{background:var(--charcoal);padding:20px 36px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,.12)}
-.hd-logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;color:var(--olive-pale)}
-.hd-sub{font-size:.52rem;letter-spacing:.26em;text-transform:uppercase;color:rgba(200,204,154,.35);margin-top:2px}
-.hd-right{display:flex;align-items:center;gap:16px}
-.hd-date{font-size:.54rem;letter-spacing:.18em;color:rgba(200,204,154,.3)}
-.logout-btn{padding:7px 18px;background:transparent;border:1px solid rgba(200,204,154,.2);color:rgba(200,204,154,.45);font-family:'Jost',sans-serif;font-size:.52rem;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.logout-btn:hover{border-color:var(--red);color:rgba(200,100,80,.8)}
-.pw-btn{padding:7px 18px;background:transparent;border:1px solid rgba(200,204,154,.2);color:rgba(200,204,154,.45);font-family:'Jost',sans-serif;font-size:.52rem;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.pw-btn:hover{border-color:var(--gold);color:var(--gold-lt)}
-
-/* ── CHANGE PASSWORD MODAL ── */
-#pw-modal{display:none;position:fixed;inset:0;background:rgba(14,12,8,.7);z-index:1000;align-items:center;justify-content:center}
-#pw-modal.show{display:flex}
-.pw-box{background:var(--charcoal);border:1px solid rgba(201,168,76,.2);padding:40px;max-width:340px;width:100%}
-.pw-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.4rem;color:var(--olive-pale);margin-bottom:24px}
-.pw-actions{display:flex;gap:10px;margin-top:20px}
-.pw-cancel{flex:1;padding:11px;background:transparent;border:1px solid rgba(200,204,154,.2);color:rgba(200,204,154,.5);font-family:'Jost',sans-serif;font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
-.pw-submit{flex:1;padding:11px;background:var(--olive-dk);color:var(--ivory);border:none;font-family:'Jost',sans-serif;font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
-.pw-submit:hover{background:var(--olive)}
-
-main{padding:36px;max-width:1440px;margin:0 auto}
-
-/* ── STATS CARDS ── */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:36px}
-.stat-card{background:white;border:1px solid rgba(107,112,69,.15);padding:28px 24px;text-align:center;position:relative;overflow:hidden}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.stat-card.total::before{background:var(--gold)}
-.stat-card.yes::before{background:var(--green)}
-.stat-card.no::before{background:var(--red)}
-.stat-card.guests::before{background:var(--olive)}
-.stat-card.pending::before{background:var(--olive-pale)}
-.stat-num{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--ink);line-height:1}
-.stat-lbl{font-size:.54rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:6px}
-
-/* ── MEAL BREAKDOWN ── */
-.section-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--ink);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid rgba(107,112,69,.15)}
-.meal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:36px}
-.meal-card{background:white;border:1px solid rgba(107,112,69,.12);padding:18px;text-align:center}
-.meal-num{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--olive-dk)}
-.meal-lbl{font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:4px}
-
-/* ── GUEST TABLE ── */
-.table-wrap{background:white;border:1px solid rgba(107,112,69,.15);overflow-x:auto;margin-bottom:36px}
-.table-toolbar{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(107,112,69,.1);flex-wrap:wrap}
-.search-in{border:1px solid rgba(107,112,69,.2);background:var(--cream);padding:8px 14px;font-family:'Cormorant Garamond',serif;font-size:.9rem;color:var(--text);outline:none;min-width:220px;transition:border-color .3s}
-.search-in:focus{border-color:var(--olive)}
-.filter-btn{padding:7px 16px;background:transparent;border:1px solid rgba(107,112,69,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
-.filter-btn:hover,.filter-btn.active{background:var(--olive);color:white;border-color:var(--olive)}
-.tbl-actions{margin-left:auto;display:flex;gap:8px}
-.export-btn{padding:7px 18px;background:var(--olive-dk);color:var(--ivory);border:none;font-family:'Jost',sans-serif;font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .3s}
-.export-btn:hover{background:var(--olive)}
-table{width:100%;border-collapse:collapse}
-thead{background:var(--charcoal)}
-th{padding:9px 12px;text-align:left;font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(200,204,154,.5);font-weight:300;white-space:nowrap}
-td{padding:9px 12px;font-size:.76rem;color:var(--text);border-bottom:1px solid rgba(107,112,69,.08)}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(107,112,69,.03)}
-.badge{display:inline-block;padding:3px 10px;font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;border-radius:2px}
-.badge-yes{background:rgba(74,139,42,.12);color:#3a6e1a}
-.badge-no{background:rgba(200,74,42,.1);color:#a03018}
-.msg-cell{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--muted);font-size:.78rem}
-.del-btn{background:transparent;border:none;color:rgba(200,74,42,.4);cursor:pointer;font-size:.9rem;padding:4px 8px;transition:color .3s}
-.del-btn:hover{color:var(--red)}
-.no-data{padding:60px;text-align:center;color:var(--muted);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem}
-
-/* ── TOAST ── */
-#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--charcoal);border:1px solid rgba(201,168,76,.3);padding:10px 24px;font-size:.78rem;color:var(--olive-pale);letter-spacing:.08em;opacity:0;transition:all .4s;pointer-events:none;z-index:9999;font-family:'Cormorant Garamond',serif;font-style:italic}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-@media(max-width:640px){main{padding:20px}th:nth-child(3),td:nth-child(3),th:nth-child(6),td:nth-child(6){display:none}.stats-grid{grid-template-columns:1fr 1fr}}
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+  ::-webkit-scrollbar { height: 8px; width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(107,112,69,.25); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(107,112,69,.4); }
+  @keyframes fade-slide-up { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes fade-scale-in { from { opacity:0; transform:scale(.96) } to { opacity:1; transform:scale(1) } }
+  @keyframes shimmer { 0% { background-position:-200% 0 } 100% { background-position:200% 0 } }
+  .anim-in { animation: fade-slide-up .35s cubic-bezier(.22,1,.36,1) both; }
+  .anim-pop { animation: fade-scale-in .25s cubic-bezier(.22,1,.36,1) both; }
+  .skeleton { background: linear-gradient(90deg, rgba(107,112,69,.08) 25%, rgba(107,112,69,.16) 37%, rgba(107,112,69,.08) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
+  body { -webkit-font-smoothing: antialiased; }
 </style>
 </head>
-<body>
+<body class="bg-cream text-ink font-sans font-light min-h-screen">
+<div id="root"></div>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-box">
-    <span class="login-mono">C &amp; G</span>
-    <span class="login-sub">Admin Dashboard</span>
-    <div class="login-grp">
-      <label class="login-lbl">Email</label>
-      <input class="login-in" id="admin-email" type="email" placeholder="admin@email.com"/>
-    </div>
-    <div class="login-grp">
-      <label class="login-lbl">Password</label>
-      <input class="login-in" id="admin-pass" type="password" placeholder="••••••••"/>
-    </div>
-    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
-    <div class="login-err" id="login-err"></div>
-  </div>
-</div>
+<script type="module">
+import React from 'https://esm.sh/react@18';
+import ReactDOM from 'https://esm.sh/react-dom@18/client';
+import htm from 'https://esm.sh/htm@3';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <header>
-    <div>
-      <div class="hd-logo">Chelsea &amp; Gabriel · Enugu 2027</div>
-      <div class="hd-sub">RSVP Management</div>
-    </div>
-    <div class="hd-right">
-      <span class="hd-date" id="hd-date"></span>
-      <button class="pw-btn" onclick="openPwModal()">Change Password</button>
-      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
-    </div>
-  </header>
+const html = htm.bind(React.createElement);
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
 
-  <!-- CHANGE PASSWORD MODAL -->
-  <div id="pw-modal">
-    <div class="pw-box">
-      <div class="pw-title">Change Password</div>
-      <div class="login-grp">
-        <label class="login-lbl">New Password</label>
-        <input class="login-in" id="pw-new" type="password" placeholder="At least 8 characters"/>
+const SUPABASE_URL = 'https://nakadctpdszskvooftln.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ha2FkY3RwZHN6c2t2b29mdGxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMDExMzcsImV4cCI6MjA5Mzg3NzEzN30.iNYd01ff_TKKmGRb0pTB3fch_EIavoGaOnXAJt36jms';
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+/* ── Icons (inline SVG — no icon-font/emoji dependency) ── */
+const Icon = ({ path, className = 'w-4 h-4', strokeWidth = 1.75 }) =>
+  html`<svg class=${className} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=${strokeWidth} stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
+
+const paths = {
+  search: html`<circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>`,
+  trash: html`<path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m3 0-.87 12.14A2 2 0 0 1 15.14 21H8.86a2 2 0 0 1-1.99-1.86L6 7"/>`,
+  download: html`<path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>`,
+  lock: html`<rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>`,
+  eye: html`<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>`,
+  eyeOff: html`<path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.4 5.5A9.6 9.6 0 0 1 12 5c6.5 0 10 7 10 7a13.6 13.6 0 0 1-3.1 3.9M6.1 6.1C4 7.6 2 12 2 12s3.5 7 10 7a9.6 9.6 0 0 0 3.4-.6"/>`,
+  x: html`<path d="M18 6 6 18M6 6l12 12"/>`,
+  users: html`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>`,
+  check: html`<path d="M4 12.5 9.5 18 20 6"/>`,
+  chevronUp: html`<path d="m18 15-6-6-6 6"/>`,
+  chevronDown: html`<path d="m6 9 6 6 6-6"/>`,
+  chevronsUpDown: html`<path d="m7 15 5 5 5-5M7 9l5-5 5 5"/>`,
+  refresh: html`<path d="M3 12a9 9 0 0 1 15.3-6.3L21 8M3 12a9 9 0 0 0 15.3 6.3L21 16M21 3v5h-5M3 21v-5h5"/>`,
+  logout: html`<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>`,
+  key: html`<circle cx="8" cy="15" r="4"/><path d="m10.85 12.15 8.7-8.7M15 7l2 2M18 4l2 2"/>`,
+  inbox: html`<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/>`,
+  alert: html`<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/>`,
+};
+
+/* ── Toast ── */
+function useToast() {
+  const [toast, setToast] = useState(null);
+  const timer = useRef(null);
+  const show = useCallback((message, tone = 'success') => {
+    clearTimeout(timer.current);
+    setToast({ message, tone });
+    timer.current = setTimeout(() => setToast(null), 3500);
+  }, []);
+  return [toast, show];
+}
+
+function Toast({ toast }) {
+  if (!toast) return null;
+  const tone = toast.tone === 'error' ? 'border-danger/40 text-danger' : 'border-gold/40 text-olive-pale';
+  return html`
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] anim-pop" role="status" aria-live="polite">
+      <div class=${`bg-charcoal border ${tone} px-6 py-3 text-sm font-serif italic shadow-xl shadow-black/20`}>
+        ${toast.message}
       </div>
-      <div class="login-grp">
-        <label class="login-lbl">Confirm Password</label>
-        <input class="login-in" id="pw-confirm" type="password" placeholder="••••••••"/>
-      </div>
-      <div class="login-err" id="pw-err"></div>
-      <div class="pw-actions">
-        <button class="pw-cancel" onclick="closePwModal()">Cancel</button>
-        <button class="pw-submit" id="pw-submit-btn" onclick="doChangePassword()">Update</button>
-      </div>
-    </div>
-  </div>
+    </div>`;
+}
 
-  <main>
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card total"><div class="stat-num" id="s-total">—</div><div class="stat-lbl">Total RSVPs</div></div>
-      <div class="stat-card yes"><div class="stat-num" id="s-yes">—</div><div class="stat-lbl">Attending</div></div>
-      <div class="stat-card no"><div class="stat-num" id="s-no">—</div><div class="stat-lbl">Declining</div></div>
-      <div class="stat-card guests"><div class="stat-num" id="s-guests">—</div><div class="stat-lbl">Total Guests</div></div>
-    </div>
+/* ── Modal shell ── */
+function Modal({ open, onClose, children, labelledBy }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+  if (!open) return null;
+  return html`
+    <div class="fixed inset-0 z-[1000] flex items-center justify-center bg-deep/70 backdrop-blur-sm p-4 anim-pop"
+         role="dialog" aria-modal="true" aria-labelledby=${labelledBy}
+         onMouseDown=${(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      ${children}
+    </div>`;
+}
 
-    <!-- Meal breakdown -->
-    <div class="section-title">Meal Preferences</div>
-    <div class="meal-grid" id="meal-grid">
-      <div class="meal-card"><div class="meal-num" id="m-nopref">—</div><div class="meal-lbl">No Preference</div></div>
-      <div class="meal-card"><div class="meal-num" id="m-veg">—</div><div class="meal-lbl">Vegetarian</div></div>
-      <div class="meal-card"><div class="meal-num" id="m-vegan">—</div><div class="meal-lbl">Vegan</div></div>
-      <div class="meal-card"><div class="meal-num" id="m-gf">—</div><div class="meal-lbl">Gluten-Free</div></div>
-    </div>
+/* ── Login ── */
+function Login({ onSignedIn }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
 
-    <!-- Guest table -->
-    <div class="section-title">Guest List</div>
-    <div class="table-wrap">
-      <div class="table-toolbar">
-        <input class="search-in" id="search-in" type="text" placeholder="Search by name or email…" oninput="filterTable()"/>
-        <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
-        <button class="filter-btn" data-filter="yes" onclick="setFilter('yes',this)">Attending</button>
-        <button class="filter-btn" data-filter="no" onclick="setFilter('no',this)">Declining</button>
-        <div class="tbl-actions">
-          <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+  const submit = async (e) => {
+    e.preventDefault();
+    setErr(''); setBusy(true);
+    const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password });
+    setBusy(false);
+    if (error) { setErr(error.message); return; }
+    onSignedIn();
+  };
+
+  return html`
+    <div class="min-h-screen flex items-center justify-center px-4"
+         style=${{ background: 'radial-gradient(ellipse at 40% 35%, #3a3e18, #0e0c04 70%)' }}>
+      <form onSubmit=${submit}
+            class="anim-in text-center px-10 py-14 sm:px-12 border border-gold/20 max-w-sm w-full bg-deep/60 backdrop-blur-xl">
+        <span class="font-serif italic text-5xl text-olive-pale block mb-1">C & G</span>
+        <span class="text-[.56rem] tracking-[.3em] uppercase text-olive-pale/40 block mb-10">Admin Dashboard</span>
+
+        <div class="flex flex-col gap-1.5 mb-4 text-left">
+          <label for="admin-email" class="text-[.54rem] tracking-[.24em] uppercase text-olive-pale/50">Email</label>
+          <input id="admin-email" type="email" autoComplete="email" required
+                 value=${email} onInput=${(e) => setEmail(e.target.value)}
+                 placeholder="admin@email.com"
+                 class="bg-transparent border-0 border-b border-gold/30 py-2 font-serif text-base text-cream placeholder:text-olive-pale/20 placeholder:italic outline-none focus:border-gold transition-colors"/>
+        </div>
+
+        <div class="flex flex-col gap-1.5 mb-2 text-left">
+          <label for="admin-pass" class="text-[.54rem] tracking-[.24em] uppercase text-olive-pale/50">Password</label>
+          <div class="relative">
+            <input id="admin-pass" type=${showPw ? 'text' : 'password'} autoComplete="current-password" required
+                   value=${password} onInput=${(e) => setPassword(e.target.value)}
+                   placeholder="••••••••"
+                   class="w-full bg-transparent border-0 border-b border-gold/30 py-2 pr-8 font-serif text-base text-cream placeholder:text-olive-pale/20 placeholder:italic outline-none focus:border-gold transition-colors"/>
+            <button type="button" onClick=${() => setShowPw((s) => !s)}
+                    aria-label=${showPw ? 'Hide password' : 'Show password'}
+                    class="absolute right-0 top-1/2 -translate-y-1/2 text-olive-pale/40 hover:text-gold transition-colors cursor-pointer p-1">
+              <${Icon} path=${showPw ? paths.eyeOff : paths.eye} className="w-4 h-4"/>
+            </button>
+          </div>
+        </div>
+
+        <div class="min-h-[18px] text-[.7rem] text-danger/80 font-serif italic mt-2" role="alert">${err}</div>
+
+        <button type="submit" disabled=${busy}
+                class="w-full mt-3 py-3.5 bg-olive-dk text-ivory text-[.58rem] tracking-[.32em] uppercase transition-colors hover:bg-olive disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 focus-visible:ring-offset-deep">
+          ${busy ? 'Signing in…' : 'Sign In'}
+        </button>
+      </form>
+    </div>`;
+}
+
+/* ── Change Password Modal ── */
+function PasswordModal({ open, onClose, notify }) {
+  const [pw, setPw] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const firstRef = useRef(null);
+
+  useEffect(() => {
+    if (open) { setPw(''); setConfirm(''); setErr(''); setTimeout(() => firstRef.current?.focus(), 50); }
+  }, [open]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setErr('');
+    if (pw.length < 8) { setErr('Password must be at least 8 characters.'); return; }
+    if (pw !== confirm) { setErr('Passwords do not match.'); return; }
+    setBusy(true);
+    const { error } = await sb.auth.updateUser({ password: pw });
+    setBusy(false);
+    if (error) { setErr(error.message); return; }
+    onClose();
+    notify('Password updated.');
+  };
+
+  return html`
+    <${Modal} open=${open} onClose=${onClose} labelledBy="pw-modal-title">
+      <form onSubmit=${submit} class="anim-pop bg-charcoal border border-gold/20 p-9 max-w-sm w-full">
+        <div id="pw-modal-title" class="font-serif italic text-2xl text-olive-pale mb-6">Change Password</div>
+        <div class="flex flex-col gap-1.5 mb-4 text-left">
+          <label for="pw-new" class="text-[.54rem] tracking-[.24em] uppercase text-olive-pale/50">New Password</label>
+          <input ref=${firstRef} id="pw-new" type="password" autoComplete="new-password"
+                 value=${pw} onInput=${(e) => setPw(e.target.value)}
+                 placeholder="At least 8 characters"
+                 class="bg-transparent border-0 border-b border-gold/30 py-2 font-serif text-base text-cream placeholder:text-olive-pale/20 placeholder:italic outline-none focus:border-gold transition-colors"/>
+        </div>
+        <div class="flex flex-col gap-1.5 mb-2 text-left">
+          <label for="pw-confirm" class="text-[.54rem] tracking-[.24em] uppercase text-olive-pale/50">Confirm Password</label>
+          <input id="pw-confirm" type="password" autoComplete="new-password"
+                 value=${confirm} onInput=${(e) => setConfirm(e.target.value)}
+                 placeholder="••••••••"
+                 class="bg-transparent border-0 border-b border-gold/30 py-2 font-serif text-base text-cream placeholder:text-olive-pale/20 placeholder:italic outline-none focus:border-gold transition-colors"/>
+        </div>
+        <div class="min-h-[18px] text-[.7rem] text-danger/80 font-serif italic mt-2" role="alert">${err}</div>
+        <div class="flex gap-2.5 mt-6">
+          <button type="button" onClick=${onClose}
+                  class="flex-1 py-3 border border-olive-pale/20 text-olive-pale/60 text-[.56rem] tracking-[.2em] uppercase cursor-pointer hover:border-olive-pale/40 transition-colors">Cancel</button>
+          <button type="submit" disabled=${busy}
+                  class="flex-1 py-3 bg-olive-dk text-ivory text-[.56rem] tracking-[.2em] uppercase cursor-pointer hover:bg-olive transition-colors disabled:opacity-50">
+            ${busy ? 'Updating…' : 'Update'}
+          </button>
+        </div>
+      </form>
+    <//>`;
+}
+
+/* ── Delete Confirm Modal ── */
+function ConfirmDeleteModal({ guest, onClose, onConfirm, busy }) {
+  return html`
+    <${Modal} open=${!!guest} onClose=${onClose} labelledBy="del-modal-title">
+      <div class="anim-pop bg-charcoal border border-danger/25 p-9 max-w-sm w-full text-left">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 rounded-full bg-danger/10 flex items-center justify-center shrink-0">
+            <${Icon} path=${paths.alert} className="w-[18px] h-[18px] text-danger"/>
+          </div>
+          <div id="del-modal-title" class="font-serif italic text-xl text-olive-pale">Remove RSVP?</div>
+        </div>
+        <p class="text-sm text-olive-pale/60 leading-relaxed mb-6">
+          This will permanently remove <strong class="text-cream font-normal">${guest?.first_name} ${guest?.last_name || ''}</strong> from your guest list. This cannot be undone.
+        </p>
+        <div class="flex gap-2.5">
+          <button onClick=${onClose}
+                  class="flex-1 py-3 border border-olive-pale/20 text-olive-pale/60 text-[.56rem] tracking-[.2em] uppercase cursor-pointer hover:border-olive-pale/40 transition-colors">Cancel</button>
+          <button onClick=${onConfirm} disabled=${busy}
+                  class="flex-1 py-3 bg-danger/90 text-ivory text-[.56rem] tracking-[.2em] uppercase cursor-pointer hover:bg-danger transition-colors disabled:opacity-50">
+            ${busy ? 'Removing…' : 'Remove'}
+          </button>
         </div>
       </div>
-      <table id="guest-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Attending</th>
-            <th>Guests</th>
-            <th>Meal</th>
-            <th>Message</th>
-            <th>Date</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="guest-tbody"></tbody>
-      </table>
-    </div>
-  </main>
-</div>
-
-<div id="toast"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-const SUPABASE_URL='https://nakadctpdszskvooftln.supabase.co';
-const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ha2FkY3RwZHN6c2t2b29mdGxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMDExMzcsImV4cCI6MjA5Mzg3NzEzN30.iNYd01ff_TKKmGRb0pTB3fch_EIavoGaOnXAJt36jms';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
-
-let allRsvps=[];
-let activeFilter='all';
-
-document.getElementById('hd-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-
-/* ── LOGIN ── */
-document.getElementById('admin-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-async function doLogin(){
-  const email=document.getElementById('admin-email').value.trim();
-  const pass=document.getElementById('admin-pass').value;
-  const btn=document.getElementById('login-btn');
-  const err=document.getElementById('login-err');
-  err.textContent='';btn.textContent='Signing in…';btn.disabled=true;
-  const {error}=await sb.auth.signInWithPassword({email,password:pass});
-  btn.textContent='Sign In';btn.disabled=false;
-  if(error){err.textContent=error.message;return}
-  showDashboard();
+    <//>`;
 }
 
-/* ── CHANGE PASSWORD ── */
-function openPwModal(){
-  document.getElementById('pw-new').value='';
-  document.getElementById('pw-confirm').value='';
-  document.getElementById('pw-err').textContent='';
-  document.getElementById('pw-modal').classList.add('show');
-}
-function closePwModal(){
-  document.getElementById('pw-modal').classList.remove('show');
-}
-async function doChangePassword(){
-  const pw=document.getElementById('pw-new').value;
-  const confirm=document.getElementById('pw-confirm').value;
-  const err=document.getElementById('pw-err');
-  const btn=document.getElementById('pw-submit-btn');
-  err.textContent='';
-  if(pw.length<8){err.textContent='Password must be at least 8 characters.';return}
-  if(pw!==confirm){err.textContent='Passwords do not match.';return}
-  btn.textContent='Updating…';btn.disabled=true;
-  const {error}=await sb.auth.updateUser({password:pw});
-  btn.textContent='Update';btn.disabled=false;
-  if(error){err.textContent=error.message;return}
-  closePwModal();
-  showToast('Password updated.');
+/* ── Stat Card ── */
+function StatCard({ label, value, accent, delay }) {
+  return html`
+    <div class="anim-in bg-white border border-olive/15 px-6 py-7 text-center relative overflow-hidden" style=${{ animationDelay: `${delay}ms` }}>
+      <div class=${`absolute top-0 left-0 right-0 h-[2px] ${accent}`}></div>
+      <div class="font-serif text-5xl font-light text-ink leading-none tabular-nums">${value}</div>
+      <div class="text-[.54rem] tracking-[.24em] uppercase text-muted mt-2">${label}</div>
+    </div>`;
 }
 
-async function doLogout(){
-  await sb.auth.signOut();
-  document.getElementById('dashboard').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
+function StatsGrid({ rsvps }) {
+  const yes = rsvps.filter((r) => r.attending === 'yes');
+  const no = rsvps.filter((r) => r.attending === 'no');
+  const totalGuests = yes.reduce((sum, r) => sum + (r.guests || 1), 0);
+  return html`
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-9">
+      <${StatCard} label="Total RSVPs" value=${rsvps.length} accent="bg-gold" delay=${0}/>
+      <${StatCard} label="Attending" value=${yes.length} accent="bg-success" delay=${40}/>
+      <${StatCard} label="Declining" value=${no.length} accent="bg-danger" delay=${80}/>
+      <${StatCard} label="Total Guests" value=${totalGuests} accent="bg-olive" delay=${120}/>
+    </div>`;
 }
 
-/* ── CHECK EXISTING SESSION ── */
-sb.auth.getSession().then(({data:{session}})=>{if(session)showDashboard()});
-
-/* ── DASHBOARD ── */
-async function showDashboard(){
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('dashboard').style.display='block';
-  await loadData();
+function MealBreakdown({ rsvps }) {
+  const attending = rsvps.filter((r) => r.attending === 'yes');
+  const count = (k) => attending.filter((r) => (r.meal_preference || 'No preference').toLowerCase() === k.toLowerCase()).length;
+  const meals = [
+    ['No Preference', count('No preference')],
+    ['Vegetarian', count('Vegetarian')],
+    ['Vegan', count('Vegan')],
+    ['Gluten-Free', count('Gluten-free')],
+  ];
+  return html`
+    <div class="mb-9">
+      <div class="font-serif text-xl font-light text-ink mb-4 pb-2.5 border-b border-olive/15">Meal Preferences</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        ${meals.map(([label, num], i) => html`
+          <div key=${label} class="anim-in bg-white border border-olive/10 p-4 text-center" style=${{ animationDelay: `${i * 30}ms` }}>
+            <div class="font-serif text-3xl text-olive-dk tabular-nums">${num}</div>
+            <div class="text-[.52rem] tracking-[.2em] uppercase text-muted mt-1">${label}</div>
+          </div>`)}
+      </div>
+    </div>`;
 }
 
-async function loadData(){
-  const {data,error}=await sb.from('rsvps').select('*').order('created_at',{ascending:false});
-  if(error){showToast('Failed to load data: '+error.message);return}
-  allRsvps=data||[];
-  renderStats();
-  renderTable(allRsvps);
+/* ── Skeleton rows while loading ── */
+function SkeletonRows({ count = 6 }) {
+  return html`${Array.from({ length: count }).map((_, i) => html`
+    <tr key=${i} class="border-b border-olive/8">
+      ${Array.from({ length: 8 }).map((__, j) => html`<td key=${j} class="px-3 py-3"><div class="skeleton h-3.5 rounded" style=${{ width: `${50 + ((i + j) % 4) * 12}%` }}></div></td>`)}
+    </tr>`)}`;
 }
 
-function renderStats(){
-  const yes=allRsvps.filter(r=>r.attending==='yes');
-  const no=allRsvps.filter(r=>r.attending==='no');
-  const totalGuests=yes.reduce((sum,r)=>sum+(r.guests||1),0);
-  document.getElementById('s-total').textContent=allRsvps.length;
-  document.getElementById('s-yes').textContent=yes.length;
-  document.getElementById('s-no').textContent=no.length;
-  document.getElementById('s-guests').textContent=totalGuests;
-
-  const attending=allRsvps.filter(r=>r.attending==='yes');
-  const count=k=>attending.filter(r=>(r.meal_preference||'').toLowerCase()===k.toLowerCase()).length;
-  document.getElementById('m-nopref').textContent=count('No preference');
-  document.getElementById('m-veg').textContent=count('Vegetarian');
-  document.getElementById('m-vegan').textContent=count('Vegan');
-  document.getElementById('m-gf').textContent=count('Gluten-free');
+/* ── Sortable header cell ── */
+function Th({ label, sortKey, active, dir, onSort, className = '' }) {
+  const clickable = !!sortKey;
+  return html`
+    <th class=${`px-3 py-2.5 text-left text-[.5rem] tracking-[.22em] uppercase text-olive-pale/50 font-normal whitespace-nowrap ${className}`}>
+      ${clickable ? html`
+        <button onClick=${() => onSort(sortKey)}
+                class="flex items-center gap-1 cursor-pointer hover:text-olive-pale transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold rounded">
+          ${label}
+          <${Icon} path=${active ? (dir === 'asc' ? paths.chevronUp : paths.chevronDown) : paths.chevronsUpDown}
+                   className=${`w-3 h-3 ${active ? 'text-gold' : 'text-olive-pale/25'}`} strokeWidth=${2}/>
+        </button>` : label}
+    </th>`;
 }
 
-function renderTable(data){
-  const tbody=document.getElementById('guest-tbody');
-  if(!data.length){tbody.innerHTML='<tr><td colspan="9" class="no-data">No RSVPs yet — share the invitation!</td></tr>';return}
-  tbody.innerHTML=data.map((r,i)=>`
-    <tr>
-      <td style="color:var(--muted);font-size:.72rem">${i+1}</td>
-      <td><strong>${esc(r.first_name)}</strong> ${esc(r.last_name||'')}</td>
-      <td style="color:var(--muted)">${esc(r.email)}</td>
-      <td><span class="badge badge-${r.attending}">${r.attending==='yes'?'Attending':'Declining'}</span></td>
-      <td style="text-align:center">${r.attending==='yes'?r.guests:'-'}</td>
-      <td style="color:var(--muted);font-size:.76rem">${esc(r.meal_preference||'—')}</td>
-      <td class="msg-cell" title="${esc(r.message||'')}">${esc(r.message||'—')}</td>
-      <td style="color:var(--muted);font-size:.72rem">${new Date(r.created_at).toLocaleDateString('en-GB')}</td>
-      <td><button class="del-btn" onclick="deleteRsvp('${r.id}')" title="Delete">✕</button></td>
-    </tr>`).join('');
+/* ── Guest Table ── */
+function GuestTable({ rsvps, loading, onDelete, notify }) {
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [sortKey, setSortKey] = useState('created_at');
+  const [sortDir, setSortDir] = useState('desc');
+  const [confirmTarget, setConfirmTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const onSort = (key) => {
+    if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortKey(key); setSortDir('asc'); }
+  };
+
+  const filtered = useMemo(() => {
+    let data = filter === 'all' ? rsvps : rsvps.filter((r) => r.attending === filter);
+    const q = search.trim().toLowerCase();
+    if (q) data = data.filter((r) => `${r.first_name} ${r.last_name} ${r.email}`.toLowerCase().includes(q));
+    const dir = sortDir === 'asc' ? 1 : -1;
+    return [...data].sort((a, b) => {
+      if (sortKey === 'name') return dir * `${a.first_name} ${a.last_name || ''}`.localeCompare(`${b.first_name} ${b.last_name || ''}`);
+      if (sortKey === 'guests') return dir * ((a.guests || 1) - (b.guests || 1));
+      return dir * (new Date(a.created_at) - new Date(b.created_at));
+    });
+  }, [rsvps, filter, search, sortKey, sortDir]);
+
+  const exportCSV = () => {
+    if (!rsvps.length) { notify('No data to export.', 'error'); return; }
+    const cols = ['first_name', 'last_name', 'email', 'attending', 'guests', 'meal_preference', 'message', 'created_at'];
+    const header = cols.join(',');
+    const rows = rsvps.map((r) => cols.map((c) => `"${String(r[c] ?? '').replace(/"/g, '""')}"`).join(','));
+    const csv = [header, ...rows].join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = `chelsea-gabriel-rsvps-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    notify('CSV exported!');
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    await onDelete(confirmTarget.id);
+    setDeleting(false);
+    setConfirmTarget(null);
+  };
+
+  const esc = (s) => String(s ?? '');
+
+  return html`
+    <div>
+      <div class="font-serif text-xl font-light text-ink mb-4 pb-2.5 border-b border-olive/15">Guest List</div>
+      <div class="bg-white border border-olive/15">
+        <div class="p-4 flex flex-wrap items-center gap-2.5 border-b border-olive/10">
+          <div class="relative">
+            <${Icon} path=${paths.search} className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" strokeWidth=${2}/>
+            <input type="text" value=${search} onInput=${(e) => setSearch(e.target.value)}
+                   placeholder="Search by name or email…"
+                   class="border border-olive/20 bg-cream pl-8 pr-3 py-2 font-serif text-sm text-ink outline-none min-w-[220px] focus:border-olive transition-colors placeholder:text-muted/70"/>
+          </div>
+          ${['all', 'yes', 'no'].map((f) => html`
+            <button key=${f} onClick=${() => setFilter(f)}
+                    class=${`px-4 py-2 border text-[.52rem] tracking-[.2em] uppercase cursor-pointer transition-colors ${filter === f ? 'bg-olive text-white border-olive' : 'border-olive/20 text-muted hover:border-olive/40'}`}>
+              ${f === 'all' ? 'All' : f === 'yes' ? 'Attending' : 'Declining'}
+            </button>`)}
+          <div class="ml-auto flex gap-2">
+            <button onClick=${exportCSV} title="Export CSV"
+                    class="flex items-center gap-1.5 px-4 py-2 bg-olive-dk text-ivory text-[.52rem] tracking-[.2em] uppercase cursor-pointer hover:bg-olive transition-colors">
+              <${Icon} path=${paths.download} className="w-3 h-3" strokeWidth=${2}/> Export
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse min-w-[820px]">
+            <thead class="bg-charcoal">
+              <tr>
+                <${Th} label="#"/>
+                <${Th} label="Name" sortKey="name" active=${sortKey === 'name'} dir=${sortDir} onSort=${onSort}/>
+                <${Th} label="Email"/>
+                <${Th} label="Attending"/>
+                <${Th} label="Guests" sortKey="guests" active=${sortKey === 'guests'} dir=${sortDir} onSort=${onSort} className="text-center"/>
+                <${Th} label="Meal"/>
+                <${Th} label="Message"/>
+                <${Th} label="Date" sortKey="created_at" active=${sortKey === 'created_at'} dir=${sortDir} onSort=${onSort}/>
+                <${Th} label=""/>
+              </tr>
+            </thead>
+            <tbody>
+              ${loading ? html`<${SkeletonRows}/>` : filtered.length === 0 ? html`
+                <tr>
+                  <td colSpan="9" class="py-16 text-center">
+                    <div class="flex flex-col items-center gap-2 text-muted">
+                      <${Icon} path=${paths.inbox} className="w-8 h-8 text-olive/30" strokeWidth=${1.3}/>
+                      <span class="font-serif italic text-lg">${rsvps.length === 0 ? 'No RSVPs yet — share the invitation!' : 'No guests match your search.'}</span>
+                    </div>
+                  </td>
+                </tr>` : filtered.map((r, i) => html`
+                <tr key=${r.id} class="border-b border-olive/8 last:border-0 hover:bg-olive/[.03] transition-colors">
+                  <td class="px-3 py-3 text-[.72rem] text-muted tabular-nums">${i + 1}</td>
+                  <td class="px-3 py-3 text-sm"><strong class="font-medium">${esc(r.first_name)}</strong> ${esc(r.last_name)}</td>
+                  <td class="px-3 py-3 text-sm text-muted">${esc(r.email)}</td>
+                  <td class="px-3 py-3">
+                    <span class=${`inline-flex items-center gap-1 px-2.5 py-1 text-[.5rem] tracking-[.15em] uppercase rounded-sm ${r.attending === 'yes' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
+                      ${r.attending === 'yes' ? 'Attending' : 'Declining'}
+                    </span>
+                  </td>
+                  <td class="px-3 py-3 text-center text-sm tabular-nums">${r.attending === 'yes' ? r.guests : '—'}</td>
+                  <td class="px-3 py-3 text-[.76rem] text-muted">${esc(r.meal_preference || '—')}</td>
+                  <td class="px-3 py-3 max-w-[160px] truncate font-serif italic text-[.78rem] text-muted" title=${esc(r.message)}>${esc(r.message || '—')}</td>
+                  <td class="px-3 py-3 text-[.72rem] text-muted whitespace-nowrap">${new Date(r.created_at).toLocaleDateString('en-GB')}</td>
+                  <td class="px-3 py-3">
+                    <button onClick=${() => setConfirmTarget(r)} aria-label=${`Remove ${r.first_name}`}
+                            class="p-1.5 text-danger/40 hover:text-danger transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-danger rounded">
+                      <${Icon} path=${paths.trash} className="w-3.5 h-3.5" strokeWidth=${1.75}/>
+                    </button>
+                  </td>
+                </tr>`)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <${ConfirmDeleteModal} guest=${confirmTarget} busy=${deleting}
+        onClose=${() => setConfirmTarget(null)} onConfirm=${confirmDelete}/>
+    </div>`;
 }
 
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+/* ── Dashboard ── */
+function Dashboard({ onSignOut, notify }) {
+  const [rsvps, setRsvps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-function setFilter(f,btn){
-  activeFilter=f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  filterTable();
+  const load = useCallback(async (isRefresh) => {
+    if (isRefresh) setRefreshing(true); else setLoading(true);
+    const { data, error } = await sb.from('rsvps').select('*').order('created_at', { ascending: false });
+    if (error) notify('Failed to load data: ' + error.message, 'error');
+    else setRsvps(data || []);
+    setLoading(false); setRefreshing(false);
+  }, [notify]);
+
+  useEffect(() => { load(false); }, [load]);
+
+  const handleDelete = async (id) => {
+    const { error } = await sb.from('rsvps').delete().eq('id', id);
+    if (error) { notify('Delete failed: ' + error.message, 'error'); return; }
+    setRsvps((prev) => prev.filter((r) => r.id !== id));
+    notify('RSVP removed.');
+  };
+
+  const dateStr = new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  return html`
+    <div class="min-h-screen">
+      <header class="bg-charcoal px-5 sm:px-9 py-5 flex flex-wrap items-center justify-between gap-3 border-b border-gold/10">
+        <div>
+          <div class="font-serif italic text-2xl text-olive-pale">Chelsea & Gabriel · Enugu 2027</div>
+          <div class="text-[.5rem] tracking-[.24em] uppercase text-olive-pale/35 mt-0.5">RSVP Management</div>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-4">
+          <span class="hidden md:inline text-[.52rem] tracking-[.16em] text-olive-pale/30">${dateStr}</span>
+          <button onClick=${() => load(true)} aria-label="Refresh data" title="Refresh"
+                  class="p-2 border border-olive-pale/20 text-olive-pale/50 hover:text-gold hover:border-gold/40 transition-colors cursor-pointer">
+            <${Icon} path=${paths.refresh} className=${`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} strokeWidth=${2}/>
+          </button>
+          <button onClick=${() => setPwOpen(true)}
+                  class="flex items-center gap-1.5 px-4 py-2 border border-olive-pale/20 text-olive-pale/50 text-[.52rem] tracking-[.22em] uppercase cursor-pointer hover:border-gold/40 hover:text-gold transition-colors">
+            <${Icon} path=${paths.key} className="w-3 h-3" strokeWidth=${2}/>
+            <span class="hidden sm:inline">Change Password</span>
+          </button>
+          <button onClick=${onSignOut}
+                  class="flex items-center gap-1.5 px-4 py-2 border border-olive-pale/20 text-olive-pale/50 text-[.52rem] tracking-[.22em] uppercase cursor-pointer hover:border-danger/50 hover:text-danger/80 transition-colors">
+            <${Icon} path=${paths.logout} className="w-3 h-3" strokeWidth=${2}/>
+            <span class="hidden sm:inline">Sign Out</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="p-5 sm:p-9 max-w-[1440px] mx-auto">
+        <${StatsGrid} rsvps=${rsvps}/>
+        <${MealBreakdown} rsvps=${rsvps}/>
+        <${GuestTable} rsvps=${rsvps} loading=${loading} onDelete=${handleDelete} notify=${notify}/>
+      </main>
+
+      <${PasswordModal} open=${pwOpen} onClose=${() => setPwOpen(false)} notify=${notify}/>
+    </div>`;
 }
 
-function filterTable(){
-  const q=document.getElementById('search-in').value.toLowerCase();
-  let data=activeFilter==='all'?allRsvps:allRsvps.filter(r=>r.attending===activeFilter);
-  if(q)data=data.filter(r=>(r.first_name+' '+r.last_name+' '+r.email).toLowerCase().includes(q));
-  renderTable(data);
+/* ── Root App ── */
+function App() {
+  const [session, setSession] = useState(undefined); // undefined = checking, null = signed out
+  const [toast, notify] = useToast();
+
+  useEffect(() => {
+    sb.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const { data: sub } = sb.auth.onAuthStateChange((_event, session) => setSession(session));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const signOut = async () => { await sb.auth.signOut(); setSession(null); };
+
+  if (session === undefined) {
+    return html`<div class="min-h-screen flex items-center justify-center"><div class="skeleton w-40 h-6 rounded"></div></div>`;
+  }
+
+  return html`
+    <div>
+      ${session ? html`<${Dashboard} onSignOut=${signOut} notify=${notify}/>` : html`<${Login} onSignedIn=${() => {}}/>`}
+      <${Toast} toast=${toast}/>
+    </div>`;
 }
 
-async function deleteRsvp(id){
-  if(!confirm('Remove this RSVP? This cannot be undone.'))return;
-  const {error}=await sb.from('rsvps').delete().eq('id',id);
-  if(error){showToast('Delete failed: '+error.message);return}
-  allRsvps=allRsvps.filter(r=>r.id!==id);
-  renderStats();filterTable();
-  showToast('RSVP removed.');
-}
-
-function exportCSV(){
-  if(!allRsvps.length){showToast('No data to export.');return}
-  const cols=['first_name','last_name','email','attending','guests','meal_preference','message','created_at'];
-  const header=cols.join(',');
-  const rows=allRsvps.map(r=>cols.map(c=>'"'+(r[c]||'').toString().replace(/"/g,'""')+'"').join(','));
-  const csv=[header,...rows].join('\n');
-  const a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download='chelsea-gabriel-rsvps-'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click();
-  showToast('CSV exported!');
-}
-
-function showToast(msg){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
 </script>
 </body>
 </html>
