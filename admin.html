@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>C &amp; G · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --olive:#6b7045;--olive-dk:#4a4e2e;--olive-lt:#8a9058;--olive-pale:#c8cc9a;
+  --cream:#faf8f0;--ivory:#f4eed8;--linen:#ede5cc;
+  --gold:#c9a84c;--gold-lt:#e2c87a;
+  --black:#0e0c08;--charcoal:#1c1a10;--ink:#2a2818;
+  --text:#2a2010;--muted:#7a7050;
+  --red:#c84a2a;--green:#4a8b2a;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+body{background:var(--cream);color:var(--text);font-family:'Jost',sans-serif;font-weight:300;min-height:100vh}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 40% 35%,#3a3e18,#0e0c04 70%)}
+.login-box{text-align:center;padding:60px 48px;border:1px solid rgba(201,168,76,.2);max-width:360px;width:100%;background:rgba(14,12,8,.6);backdrop-filter:blur(20px)}
+.login-mono{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:3rem;color:var(--olive-pale);display:block;margin-bottom:6px}
+.login-sub{font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(200,204,154,.35);margin-bottom:40px;display:block}
+.login-grp{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;text-align:left}
+.login-lbl{font-size:.54rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(200,204,154,.45)}
+.login-in{background:transparent;border:none;border-bottom:1px solid rgba(201,168,76,.3);padding:9px 0;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--cream);outline:none;transition:border-color .3s;width:100%}
+.login-in:focus{border-color:var(--gold)}
+.login-in::placeholder{color:rgba(200,204,154,.2);font-style:italic}
+.login-btn{width:100%;margin-top:8px;padding:13px;background:var(--olive-dk);color:var(--ivory);border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:.58rem;letter-spacing:.32em;text-transform:uppercase;transition:background .3s}
+.login-btn:hover{background:var(--olive)}
+.login-err{font-size:.7rem;color:rgba(220,80,60,.8);margin-top:10px;min-height:18px;font-family:'Cormorant Garamond',serif;font-style:italic}
+
+/* ── DASHBOARD ── */
+#dashboard{display:none;min-height:100vh}
+header{background:var(--charcoal);padding:20px 36px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,.12)}
+.hd-logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;color:var(--olive-pale)}
+.hd-sub{font-size:.52rem;letter-spacing:.26em;text-transform:uppercase;color:rgba(200,204,154,.35);margin-top:2px}
+.hd-right{display:flex;align-items:center;gap:16px}
+.hd-date{font-size:.54rem;letter-spacing:.18em;color:rgba(200,204,154,.3)}
+.logout-btn{padding:7px 18px;background:transparent;border:1px solid rgba(200,204,154,.2);color:rgba(200,204,154,.45);font-family:'Jost',sans-serif;font-size:.52rem;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.logout-btn:hover{border-color:var(--red);color:rgba(200,100,80,.8)}
+
+main{padding:36px;max-width:1200px;margin:0 auto}
+
+/* ── STATS CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:36px}
+.stat-card{background:white;border:1px solid rgba(107,112,69,.15);padding:28px 24px;text-align:center;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.total::before{background:var(--gold)}
+.stat-card.yes::before{background:var(--green)}
+.stat-card.no::before{background:var(--red)}
+.stat-card.guests::before{background:var(--olive)}
+.stat-card.pending::before{background:var(--olive-pale)}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--ink);line-height:1}
+.stat-lbl{font-size:.54rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+
+/* ── MEAL BREAKDOWN ── */
+.section-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:300;color:var(--ink);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid rgba(107,112,69,.15)}
+.meal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:36px}
+.meal-card{background:white;border:1px solid rgba(107,112,69,.12);padding:18px;text-align:center}
+.meal-num{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--olive-dk)}
+.meal-lbl{font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* ── GUEST TABLE ── */
+.table-wrap{background:white;border:1px solid rgba(107,112,69,.15);overflow:hidden;margin-bottom:36px}
+.table-toolbar{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(107,112,69,.1);flex-wrap:wrap}
+.search-in{border:1px solid rgba(107,112,69,.2);background:var(--cream);padding:8px 14px;font-family:'Cormorant Garamond',serif;font-size:.9rem;color:var(--text);outline:none;min-width:220px;transition:border-color .3s}
+.search-in:focus{border-color:var(--olive)}
+.filter-btn{padding:7px 16px;background:transparent;border:1px solid rgba(107,112,69,.2);color:var(--muted);font-family:'Jost',sans-serif;font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.filter-btn:hover,.filter-btn.active{background:var(--olive);color:white;border-color:var(--olive)}
+.tbl-actions{margin-left:auto;display:flex;gap:8px}
+.export-btn{padding:7px 18px;background:var(--olive-dk);color:var(--ivory);border:none;font-family:'Jost',sans-serif;font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:background .3s}
+.export-btn:hover{background:var(--olive)}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--charcoal)}
+th{padding:12px 16px;text-align:left;font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(200,204,154,.5);font-weight:300}
+td{padding:13px 16px;font-size:.82rem;color:var(--text);border-bottom:1px solid rgba(107,112,69,.08)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(107,112,69,.03)}
+.badge{display:inline-block;padding:3px 10px;font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;border-radius:2px}
+.badge-yes{background:rgba(74,139,42,.12);color:#3a6e1a}
+.badge-no{background:rgba(200,74,42,.1);color:#a03018}
+.msg-cell{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--muted);font-size:.82rem}
+.del-btn{background:transparent;border:none;color:rgba(200,74,42,.4);cursor:pointer;font-size:.9rem;padding:4px 8px;transition:color .3s}
+.del-btn:hover{color:var(--red)}
+.no-data{padding:60px;text-align:center;color:var(--muted);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--charcoal);border:1px solid rgba(201,168,76,.3);padding:10px 24px;font-size:.78rem;color:var(--olive-pale);letter-spacing:.08em;opacity:0;transition:all .4s;pointer-events:none;z-index:9999;font-family:'Cormorant Garamond',serif;font-style:italic}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:640px){main{padding:20px}th:nth-child(3),td:nth-child(3),th:nth-child(6),td:nth-child(6){display:none}.stats-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <span class="login-mono">C &amp; G</span>
+    <span class="login-sub">Admin Dashboard</span>
+    <div class="login-grp">
+      <label class="login-lbl">Email</label>
+      <input class="login-in" id="admin-email" type="email" placeholder="admin@email.com"/>
+    </div>
+    <div class="login-grp">
+      <label class="login-lbl">Password</label>
+      <input class="login-in" id="admin-pass" type="password" placeholder="••••••••"/>
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <header>
+    <div>
+      <div class="hd-logo">Chelsea &amp; Gabriel · Enugu 2027</div>
+      <div class="hd-sub">RSVP Management</div>
+    </div>
+    <div class="hd-right">
+      <span class="hd-date" id="hd-date"></span>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card total"><div class="stat-num" id="s-total">—</div><div class="stat-lbl">Total RSVPs</div></div>
+      <div class="stat-card yes"><div class="stat-num" id="s-yes">—</div><div class="stat-lbl">Attending</div></div>
+      <div class="stat-card no"><div class="stat-num" id="s-no">—</div><div class="stat-lbl">Declining</div></div>
+      <div class="stat-card guests"><div class="stat-num" id="s-guests">—</div><div class="stat-lbl">Total Guests</div></div>
+    </div>
+
+    <!-- Meal breakdown -->
+    <div class="section-title">Meal Preferences</div>
+    <div class="meal-grid" id="meal-grid">
+      <div class="meal-card"><div class="meal-num" id="m-nopref">—</div><div class="meal-lbl">No Preference</div></div>
+      <div class="meal-card"><div class="meal-num" id="m-veg">—</div><div class="meal-lbl">Vegetarian</div></div>
+      <div class="meal-card"><div class="meal-num" id="m-vegan">—</div><div class="meal-lbl">Vegan</div></div>
+      <div class="meal-card"><div class="meal-num" id="m-gf">—</div><div class="meal-lbl">Gluten-Free</div></div>
+    </div>
+
+    <!-- Guest table -->
+    <div class="section-title">Guest List</div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input class="search-in" id="search-in" type="text" placeholder="Search by name or email…" oninput="filterTable()"/>
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+        <button class="filter-btn" data-filter="yes" onclick="setFilter('yes',this)">Attending</button>
+        <button class="filter-btn" data-filter="no" onclick="setFilter('no',this)">Declining</button>
+        <div class="tbl-actions">
+          <button class="export-btn" onclick="exportCSV()">Export CSV</button>
+        </div>
+      </div>
+      <table id="guest-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Attending</th>
+            <th>Guests</th>
+            <th>Meal</th>
+            <th>Message</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="guest-tbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL='https://nakadctpdszskvooftln.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ha2FkY3RwZHN6c2t2b29mdGxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMDExMzcsImV4cCI6MjA5Mzg3NzEzN30.iNYd01ff_TKKmGRb0pTB3fch_EIavoGaOnXAJt36jms';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+
+let allRsvps=[];
+let activeFilter='all';
+
+document.getElementById('hd-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+/* ── LOGIN ── */
+document.getElementById('admin-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+async function doLogin(){
+  const email=document.getElementById('admin-email').value.trim();
+  const pass=document.getElementById('admin-pass').value;
+  const btn=document.getElementById('login-btn');
+  const err=document.getElementById('login-err');
+  err.textContent='';btn.textContent='Signing in…';btn.disabled=true;
+  const {error}=await sb.auth.signInWithPassword({email,password:pass});
+  btn.textContent='Sign In';btn.disabled=false;
+  if(error){err.textContent=error.message;return}
+  showDashboard();
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+/* ── CHECK EXISTING SESSION ── */
+sb.auth.getSession().then(({data:{session}})=>{if(session)showDashboard()});
+
+/* ── DASHBOARD ── */
+async function showDashboard(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  await loadData();
+}
+
+async function loadData(){
+  const {data,error}=await sb.from('rsvps').select('*').order('created_at',{ascending:false});
+  if(error){showToast('Failed to load data: '+error.message);return}
+  allRsvps=data||[];
+  renderStats();
+  renderTable(allRsvps);
+}
+
+function renderStats(){
+  const yes=allRsvps.filter(r=>r.attending==='yes');
+  const no=allRsvps.filter(r=>r.attending==='no');
+  const totalGuests=yes.reduce((sum,r)=>sum+(r.guests||1),0);
+  document.getElementById('s-total').textContent=allRsvps.length;
+  document.getElementById('s-yes').textContent=yes.length;
+  document.getElementById('s-no').textContent=no.length;
+  document.getElementById('s-guests').textContent=totalGuests;
+
+  const attending=allRsvps.filter(r=>r.attending==='yes');
+  const count=k=>attending.filter(r=>(r.meal_preference||'').toLowerCase()===k.toLowerCase()).length;
+  document.getElementById('m-nopref').textContent=count('No preference');
+  document.getElementById('m-veg').textContent=count('Vegetarian');
+  document.getElementById('m-vegan').textContent=count('Vegan');
+  document.getElementById('m-gf').textContent=count('Gluten-free');
+}
+
+function renderTable(data){
+  const tbody=document.getElementById('guest-tbody');
+  if(!data.length){tbody.innerHTML='<tr><td colspan="9" class="no-data">No RSVPs yet — share the invitation!</td></tr>';return}
+  tbody.innerHTML=data.map((r,i)=>`
+    <tr>
+      <td style="color:var(--muted);font-size:.72rem">${i+1}</td>
+      <td><strong>${esc(r.first_name)}</strong> ${esc(r.last_name||'')}</td>
+      <td style="color:var(--muted)">${esc(r.email)}</td>
+      <td><span class="badge badge-${r.attending}">${r.attending==='yes'?'Attending':'Declining'}</span></td>
+      <td style="text-align:center">${r.attending==='yes'?r.guests:'-'}</td>
+      <td style="color:var(--muted);font-size:.76rem">${esc(r.meal_preference||'—')}</td>
+      <td class="msg-cell" title="${esc(r.message||'')}">${esc(r.message||'—')}</td>
+      <td style="color:var(--muted);font-size:.72rem">${new Date(r.created_at).toLocaleDateString('en-GB')}</td>
+      <td><button class="del-btn" onclick="deleteRsvp('${r.id}')" title="Delete">✕</button></td>
+    </tr>`).join('');
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function setFilter(f,btn){
+  activeFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterTable();
+}
+
+function filterTable(){
+  const q=document.getElementById('search-in').value.toLowerCase();
+  let data=activeFilter==='all'?allRsvps:allRsvps.filter(r=>r.attending===activeFilter);
+  if(q)data=data.filter(r=>(r.first_name+' '+r.last_name+' '+r.email).toLowerCase().includes(q));
+  renderTable(data);
+}
+
+async function deleteRsvp(id){
+  if(!confirm('Remove this RSVP? This cannot be undone.'))return;
+  const {error}=await sb.from('rsvps').delete().eq('id',id);
+  if(error){showToast('Delete failed: '+error.message);return}
+  allRsvps=allRsvps.filter(r=>r.id!==id);
+  renderStats();filterTable();
+  showToast('RSVP removed.');
+}
+
+function exportCSV(){
+  if(!allRsvps.length){showToast('No data to export.');return}
+  const cols=['first_name','last_name','email','attending','guests','meal_preference','message','created_at'];
+  const header=cols.join(',');
+  const rows=allRsvps.map(r=>cols.map(c=>'"'+(r[c]||'').toString().replace(/"/g,'""')+'"').join(','));
+  const csv=[header,...rows].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='chelsea-gabriel-rsvps-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  showToast('CSV exported!');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
