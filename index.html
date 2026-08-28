@@ -692,6 +692,16 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 .locked-msg{font-size:.98rem;color:var(--text);opacity:.82;line-height:1.75;font-weight:500}
 .locked-cta{display:inline-block;margin-top:22px;padding:9px 26px;border:1px solid rgba(201,168,76,.3);color:rgba(201,168,76,.6);font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;font-family:'Jost',sans-serif;transition:all .3s}
 .locked-card:hover .locked-cta{background:rgba(201,168,76,.1);border-color:var(--gold);color:var(--gold)}
+
+/* ═══ ATTIRE ORDER FORM ═══ */
+.attire-order-wrap{max-width:520px;margin:40px auto 0;padding:40px 36px;text-align:left;background:var(--ivory);border:1px solid rgba(201,168,76,.35);border-radius:2px;box-shadow:0 2px 0 var(--gold)}
+.attire-order-intro{text-align:center;margin-bottom:34px}
+.ao-eyebrow{display:block;font-family:'Jost',sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.ao-heading{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:600;color:var(--ink);margin-bottom:14px}
+.ao-lede{font-size:1.02rem;font-weight:500;color:var(--text);opacity:.92;line-height:1.7}
+.ao-lede strong{color:var(--olive-dk);font-weight:700}
+.attire-order-form{gap:26px}
+.ao-lbl{font-weight:600;color:rgba(107,112,69,1);opacity:1}
 </style>
 </head>
 <body>
@@ -1109,6 +1119,43 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
       <span class="locked-unlock" data-en="Shared with confirmed guests" data-ig="Ekekọrịtara ya na ndị ọbịa kwadoro" data-yo="A ó pín pẹ̀lú àwọn àlejò tí wọ́n jẹ́rìí">Shared with confirmed guests</span>
       <p class="locked-msg" data-en="Our family colours and aso-ebi details are still being finalised. RSVP to receive your private access link — confirmed guests will be the first to know." data-ig="Agba ezinụlọ anyị na nkọwa aso-ebi ka na-edozi. Zaa ka ị nweta njikọ nzuzo gị — ndị ọbịa kwadoro ga-ebu ụzọ mara." data-yo="Àwọn àwọ̀ ìdílé wa àti àlàyé aso-ebi ṣì ń parí. Fèsì láti gba ọ̀nà àbáwọlé aládàáni rẹ — àwọn àlejò tí wọ́n jẹ́rìí ni yóò kọ́kọ́ mọ̀.">Our family colours and aso-ebi details are still being finalised. RSVP to receive your private access link &mdash; confirmed guests will be the first to know.</p>
       <div class="locked-cta" data-en="Complete My RSVP" data-ig="Mezuo RSVP m" data-yo="Parí RSVP mi">Complete My RSVP</div>
+    </div>
+  </div>
+
+  <div id="attire-order" class="attire-order-wrap" style="display:none">
+    <div class="attire-order-intro">
+      <span class="ao-eyebrow">For Confirmed Guests</span>
+      <div class="ao-heading">Order Your Aso-Ebi</div>
+      <p class="ao-lede">Our fabric is cut and ready in both palettes — <strong>Olive &amp; Gold</strong> for the bride's family, <strong>Burgundy &amp; Ebony</strong> for the groom's. Tell us your side, how many yards you need, and where it should go — we'll handle the rest.</p>
+    </div>
+    <form class="rsvp-form attire-order-form" id="attireOrderForm">
+      <div class="f-grp reveal">
+        <label class="f-lbl ao-lbl">Which Family's Colours?</label>
+        <div class="f-radios">
+          <label class="f-radio"><input type="radio" name="family_side" id="ao-bride" value="bride" checked/><span class="f-radio-dot"></span><span>Bride's Family</span></label>
+          <label class="f-radio"><input type="radio" name="family_side" id="ao-groom" value="groom"/><span class="f-radio-dot"></span><span>Groom's Family</span></label>
+        </div>
+      </div>
+      <div class="f-grp reveal">
+        <label class="f-lbl ao-lbl" for="ao-yards">Number of Yards</label>
+        <input class="f-in" id="ao-yards" type="number" min="1" step="1" placeholder="e.g. 4"/>
+      </div>
+      <div class="f-grp reveal">
+        <label class="f-lbl ao-lbl">Delivery</label>
+        <div class="f-radios">
+          <label class="f-radio"><input type="radio" name="delivery_method" id="ao-ship" value="ship" checked onchange="updateAttireOrderAddressLabel()"/><span class="f-radio-dot"></span><span>Ship to my address</span></label>
+          <label class="f-radio"><input type="radio" name="delivery_method" id="ao-tailor" value="tailor" onchange="updateAttireOrderAddressLabel()"/><span class="f-radio-dot"></span><span>Drop off at my tailor</span></label>
+        </div>
+      </div>
+      <div class="f-grp reveal">
+        <label class="f-lbl ao-lbl" id="ao-address-lbl" for="ao-address">Delivery Address</label>
+        <textarea class="f-ta" id="ao-address" placeholder="Street, city, state, country"></textarea>
+      </div>
+      <button type="button" class="rsvp-btn" id="attireOrderBtn" onclick="submitAttireOrder(event)"><span>Place My Order</span></button>
+    </form>
+    <div class="rsvp-thanks" id="attireOrderThanks">
+      <span class="t-name">Order Received</span>
+      <p>Thank you — your yards are reserved. We'll reach out to confirm delivery before the big day.</p>
     </div>
   </div>
 </section>

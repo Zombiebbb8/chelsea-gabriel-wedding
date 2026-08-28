@@ -34,6 +34,7 @@ export const paths = {
   link: html`<path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 1 1 0 10h-2M8 12h8"/>`,
   clock: html`<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>`,
   grid: html`<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>`,
+  tag: html`<path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.5 3.2L4 3a1 1 0 0 0-1 1l.2 5.5a2 2 0 0 0 .63 1.5l9.58 9.59a2 2 0 0 0 2.82 0l4.36-4.36a2 2 0 0 0 0-2.82Z"/><circle cx="7.5" cy="7.5" r="1.5"/>`,
 };
 
 /* ── Toast ── */
@@ -206,6 +207,7 @@ export function AdminHeader({ active, onSignOut, onOpenPassword, refreshing, onR
   const tabs = [
     { key: 'rsvps', label: 'RSVP Dashboard', href: 'admin.html', icon: paths.grid },
     { key: 'logins', label: 'Guest Logins', href: 'admin-logins.html', icon: paths.link },
+    { key: 'orders', label: 'Attire Orders', href: 'admin-orders.html', icon: paths.tag },
   ];
   return html`
     <header class="bg-charcoal px-5 sm:px-9 py-5 border-b border-gold/10">

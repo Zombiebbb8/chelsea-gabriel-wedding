@@ -108,6 +108,7 @@ function hideHeroRsvp(){
 
 /* ═══ GUEST PORTAL ═══ */
 const _guestToken=(new URLSearchParams(location.search)).get('guest');
+let _attireGuest=null;
 
 async function initGuestPortal(){
   if(!_guestToken)return;
@@ -163,6 +164,19 @@ async function initGuestPortal(){
     injectSection('photos-content','photos','March 20, 2027');
 
     if(unlocked.includes('travel')&&content.travel)requestAnimationFrame(initHotelsMap);
+
+    // Attire ordering is only offered to confirmed ("yes") guests reaching
+    // this page via their private portal link — it isn't part of the
+    // server-rendered attire content, so it's revealed here independently.
+    if(guest.attending==='yes'){
+      _attireGuest=guest;
+      const orderWrap=document.getElementById('attire-order');
+      if(orderWrap){
+        orderWrap.style.display='';
+        const done=(()=>{try{return localStorage.getItem('wdg_attire_order_done')==='1'}catch(e){return false}})();
+        if(done)applyAttireOrderThanksState();
+      }
+    }
 
   }catch(err){
     console.warn('Guest portal init failed',err);
@@ -1054,6 +1068,61 @@ async function submitRSVP(e){
   document.getElementById('rsvp').scrollIntoView({behavior:'smooth',block:'start'});
   launchConfetti();
   showToast(attending==='yes'?'We can\'t wait to see you! 💛':'We\'ll miss you!');
+}
+
+/* ═══ ATTIRE ORDER ═══ */
+function updateAttireOrderAddressLabel(){
+  const lbl=document.getElementById('ao-address-lbl');
+  const ta=document.getElementById('ao-address');
+  const tailor=document.getElementById('ao-tailor')?.checked;
+  if(lbl)lbl.textContent=tailor?"Tailor's Address / Drop-off Location":'Delivery Address';
+  if(ta)ta.placeholder=tailor?"Your tailor's name and address":'Street, city, state, country';
+}
+
+function applyAttireOrderThanksState(){
+  const form=document.getElementById('attireOrderForm');
+  const thanks=document.getElementById('attireOrderThanks');
+  if(form)form.style.display='none';
+  if(thanks)thanks.style.display='block';
+}
+
+async function submitAttireOrder(e){
+  e.preventDefault();
+  if(!_attireGuest){showToast('Please open this page via your guest link to order attire.');return}
+
+  const familySide=document.querySelector('input[name="family_side"]:checked')?.value;
+  const yards=parseFloat(document.getElementById('ao-yards').value);
+  const deliveryMethod=document.querySelector('input[name="delivery_method"]:checked')?.value;
+  const address=document.getElementById('ao-address').value.trim();
+
+  if(!yards||yards<=0){showToast('Please enter how many yards you need.');return}
+  if(!address){showToast('Please enter an address or drop-off location.');return}
+
+  const btn=document.getElementById('attireOrderBtn');
+  btn.classList.add('saving');
+  btn.querySelector('span').textContent='Saving…';
+
+  const {error}=await supabase.from('attire_orders').insert({
+    rsvp_id:_attireGuest.id,
+    first_name:_attireGuest.first_name,
+    last_name:_attireGuest.last_name,
+    email:_attireGuest.email,
+    family_side:familySide,
+    yards:yards,
+    delivery_method:deliveryMethod,
+    address:address
+  });
+
+  if(error){
+    btn.classList.remove('saving');
+    btn.querySelector('span').textContent='Place My Order';
+    showToast(error.message||'Something went wrong. Please try again.');
+    return;
+  }
+
+  applyAttireOrderThanksState();
+  try{localStorage.setItem('wdg_attire_order_done','1')}catch(e){}
+  showToast('Your attire order has been received! 🎉');
 }
 
 /* Only lock scroll if the envelope intro is still showing — for a returning

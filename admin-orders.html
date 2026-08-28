@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>C &amp; G · Attire Orders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@200;300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          olive: { DEFAULT:'#6b7045', dk:'#4a4e2e', lt:'#8a9058', pale:'#c8cc9a' },
+          gold: { DEFAULT:'#c9a84c', lt:'#e2c87a' },
+          cream: '#faf8f0', ivory: '#f4eed8', linen: '#ede5cc',
+          ink: '#2a2818', muted: '#7a7050',
+          charcoal: '#1c1a10', deep: '#0e0c08',
+          danger: '#c84a2a', success: '#4a8b2a',
+        },
+        fontFamily: {
+          serif: ['"Cormorant Garamond"','serif'],
+          sans: ['"Jost"','sans-serif'],
+        },
+      }
+    }
+  }
+</script>
+<style>
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+  ::-webkit-scrollbar { height: 8px; width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(107,112,69,.25); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(107,112,69,.4); }
+  @keyframes fade-slide-up { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+  @keyframes fade-scale-in { from { opacity:0; transform:scale(.96) } to { opacity:1; transform:scale(1) } }
+  @keyframes shimmer { 0% { background-position:-200% 0 } 100% { background-position:200% 0 } }
+  .anim-in { animation: fade-slide-up .35s cubic-bezier(.22,1,.36,1) both; }
+  .anim-pop { animation: fade-scale-in .25s cubic-bezier(.22,1,.36,1) both; }
+  .skeleton { background: linear-gradient(90deg, rgba(107,112,69,.08) 25%, rgba(107,112,69,.16) 37%, rgba(107,112,69,.08) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
+  body { -webkit-font-smoothing: antialiased; }
+</style>
+</head>
+<body class="bg-cream text-ink font-sans font-light min-h-screen">
+<div id="root"></div>
+
+<script type="module">
+import React from 'https://esm.sh/react@18';
+import ReactDOM from 'https://esm.sh/react-dom@18/client';
+import {
+  html, sb, Icon, paths, useToast, Toast, useSession,
+  PasswordModal, AdminHeader, Login,
+} from './admin-shared.js';
+
+const { useState, useEffect, useMemo, useCallback } = React;
+
+/* ── Stat Card ── */
+function StatCard({ label, value, accent, delay }) {
+  return html`
+    <div class="anim-in bg-white border border-olive/15 px-6 py-7 text-center relative overflow-hidden" style=${{ animationDelay: `${delay}ms` }}>
+      <div class=${`absolute top-0 left-0 right-0 h-[2px] ${accent}`}></div>
+      <div class="font-serif text-5xl font-light text-ink leading-none tabular-nums">${value}</div>
+      <div class="text-[.54rem] tracking-[.24em] uppercase text-muted mt-2">${label}</div>
+    </div>`;
+}
+
+function StatsGrid({ orders }) {
+  const bride = orders.filter((o) => o.family_side === 'bride');
+  const groom = orders.filter((o) => o.family_side === 'groom');
+  const totalYards = orders.reduce((sum, o) => sum + (Number(o.yards) || 0), 0);
+  return html`
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-9">
+      <${StatCard} label="Total Orders" value=${orders.length} accent="bg-gold" delay=${0}/>
+      <${StatCard} label="Bride's Family" value=${bride.length} accent="bg-olive" delay=${40}/>
+      <${StatCard} label="Groom's Family" value=${groom.length} accent="bg-olive-lt" delay=${80}/>
+      <${StatCard} label="Total Yards" value=${totalYards} accent="bg-success" delay=${120}/>
+    </div>`;
+}
+
+/* ── Skeleton rows while loading ── */
+function SkeletonRows({ count = 6 }) {
+  return html`${Array.from({ length: count }).map((_, i) => html`
+    <tr key=${i} class="border-b border-olive/8">
+      ${Array.from({ length: 7 }).map((__, j) => html`<td key=${j} class="px-3 py-3"><div class="skeleton h-3.5 rounded" style=${{ width: `${50 + ((i + j) % 4) * 12}%` }}></div></td>`)}
+    </tr>`)}`;
+}
+
+/* ── Sortable header cell ── */
+function Th({ label, sortKey, active, dir, onSort, className = '' }) {
+  const clickable = !!sortKey;
+  return html`
+    <th class=${`px-3 py-2.5 text-left text-[.5rem] tracking-[.22em] uppercase text-olive-pale/50 font-normal whitespace-nowrap ${className}`}>
+      ${clickable ? html`
+        <button onClick=${() => onSort(sortKey)}
+                class="flex items-center gap-1 cursor-pointer hover:text-olive-pale transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold rounded">
+          ${label}
+          <${Icon} path=${active ? (dir === 'asc' ? paths.chevronUp : paths.chevronDown) : paths.chevronsUpDown}
+                   className=${`w-3 h-3 ${active ? 'text-gold' : 'text-olive-pale/25'}`} strokeWidth=${2}/>
+        </button>` : label}
+    </th>`;
+}
+
+/* ── Attire Orders Table ── */
+function OrdersTable({ orders, loading, notify }) {
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all'); // all | bride | groom
+  const [sortKey, setSortKey] = useState('created_at');
+  const [sortDir, setSortDir] = useState('desc');
+  const [expanded, setExpanded] = useState(() => new Set());
+
+  const toggleExpanded = (id) => setExpanded((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
+  const onSort = (key) => {
+    if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else { setSortKey(key); setSortDir(key === 'name' ? 'asc' : 'desc'); }
+  };
+
+  const filtered = useMemo(() => {
+    let data = filter === 'all' ? orders : orders.filter((o) => o.family_side === filter);
+    const q = search.trim().toLowerCase();
+    if (q) data = data.filter((o) => `${o.first_name} ${o.last_name} ${o.email}`.toLowerCase().includes(q));
+    const dir = sortDir === 'asc' ? 1 : -1;
+    return [...data].sort((a, b) => {
+      if (sortKey === 'name') return dir * `${a.first_name} ${a.last_name || ''}`.localeCompare(`${b.first_name} ${b.last_name || ''}`);
+      if (sortKey === 'yards') return dir * ((a.yards || 0) - (b.yards || 0));
+      return dir * (new Date(a.created_at) - new Date(b.created_at));
+    });
+  }, [orders, filter, search, sortKey, sortDir]);
+
+  const esc = (s) => String(s ?? '');
+
+  const exportCSV = () => {
+    if (!orders.length) { notify('No data to export.', 'error'); return; }
+    const cols = ['first_name', 'last_name', 'email', 'family_side', 'yards', 'delivery_method', 'address', 'created_at'];
+    const header = cols.join(',');
+    const rows = orders.map((o) => cols.map((c) => `"${String(o[c] ?? '').replace(/"/g, '""')}"`).join(','));
+    const csv = [header, ...rows].join('\n');
+    const a = document.createElement('a');
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = `chelsea-gabriel-attire-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    notify('CSV exported!');
+  };
+
+  return html`
+    <div>
+      <div class="font-serif text-xl font-light text-ink mb-4 pb-2.5 border-b border-olive/15">Attire Orders</div>
+      <p class="text-sm text-muted mb-4 -mt-2 max-w-2xl">Aso-ebi orders placed by confirmed guests through their private portal link — which family's colours, how many yards, and where to send it.</p>
+      <div class="bg-white border border-olive/15">
+        <div class="p-4 flex flex-wrap items-center gap-2.5 border-b border-olive/10">
+          <div class="relative">
+            <${Icon} path=${paths.search} className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" strokeWidth=${2}/>
+            <input type="text" value=${search} onInput=${(e) => setSearch(e.target.value)}
+                   placeholder="Search by name or email…"
+                   class="border border-olive/20 bg-cream pl-8 pr-3 py-2 font-serif text-sm text-ink outline-none min-w-[220px] focus:border-olive transition-colors placeholder:text-muted/70"/>
+          </div>
+          ${[['all', 'All'], ['bride', "Bride's Family"], ['groom', "Groom's Family"]].map(([f, label]) => html`
+            <button key=${f} onClick=${() => setFilter(f)}
+                    class=${`px-4 py-2 border text-[.52rem] tracking-[.2em] uppercase cursor-pointer transition-colors ${filter === f ? 'bg-olive text-white border-olive' : 'border-olive/20 text-muted hover:border-olive/40'}`}>
+              ${label}
+            </button>`)}
+          <div class="ml-auto flex gap-2">
+            <button onClick=${exportCSV} title="Export CSV"
+                    class="flex items-center gap-1.5 px-4 py-2 bg-olive-dk text-ivory text-[.52rem] tracking-[.2em] uppercase cursor-pointer hover:bg-olive transition-colors">
+              <${Icon} path=${paths.download} className="w-3 h-3" strokeWidth=${2}/> Export
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse min-w-[860px]">
+            <thead class="bg-charcoal">
+              <tr>
+                <${Th} label="#"/>
+                <${Th} label="Name" sortKey="name" active=${sortKey === 'name'} dir=${sortDir} onSort=${onSort}/>
+                <${Th} label="Email"/>
+                <${Th} label="Family"/>
+                <${Th} label="Yards" sortKey="yards" active=${sortKey === 'yards'} dir=${sortDir} onSort=${onSort} className="text-center"/>
+                <${Th} label="Delivery"/>
+                <${Th} label="Address"/>
+                <${Th} label="Ordered" sortKey="created_at" active=${sortKey === 'created_at'} dir=${sortDir} onSort=${onSort}/>
+              </tr>
+            </thead>
+            <tbody>
+              ${loading ? html`<${SkeletonRows}/>` : filtered.length === 0 ? html`
+                <tr>
+                  <td colSpan="8" class="py-16 text-center">
+                    <div class="flex flex-col items-center gap-2 text-muted">
+                      <${Icon} path=${paths.inbox} className="w-8 h-8 text-olive/30" strokeWidth=${1.3}/>
+                      <span class="font-serif italic text-lg">${orders.length === 0 ? 'No attire orders yet.' : 'No orders match your search.'}</span>
+                    </div>
+                  </td>
+                </tr>` : filtered.map((o, i) => html`
+                <tr key=${o.id} class="border-b border-olive/8 last:border-0 hover:bg-olive/[.03] transition-colors">
+                  <td class="px-3 py-3 text-[.72rem] text-muted tabular-nums">${i + 1}</td>
+                  <td class="px-3 py-3 text-sm"><strong class="font-medium">${esc(o.first_name)}</strong> ${esc(o.last_name)}</td>
+                  <td class="px-3 py-3 text-sm text-muted">${esc(o.email)}</td>
+                  <td class="px-3 py-3">
+                    <span class=${`inline-flex items-center gap-1 px-2.5 py-1 text-[.5rem] tracking-[.15em] uppercase rounded-sm ${o.family_side === 'bride' ? 'bg-olive/10 text-olive-dk' : 'bg-gold/10 text-gold'}`}>
+                      ${o.family_side === 'bride' ? "Bride's" : "Groom's"}
+                    </span>
+                  </td>
+                  <td class="px-3 py-3 text-center text-sm tabular-nums">${o.yards ?? '—'}</td>
+                  <td class="px-3 py-3">
+                    <span class=${`inline-flex items-center gap-1 px-2.5 py-1 text-[.5rem] tracking-[.15em] uppercase rounded-sm ${o.delivery_method === 'ship' ? 'bg-success/10 text-success' : 'bg-muted/10 text-muted'}`}>
+                      ${o.delivery_method === 'ship' ? 'Ship' : 'Tailor drop-off'}
+                    </span>
+                  </td>
+                  <td class=${`px-3 py-3 text-[.76rem] text-muted ${expanded.has(o.id) ? 'max-w-[280px] whitespace-normal' : 'max-w-[180px] truncate whitespace-nowrap'} ${o.address ? 'cursor-pointer hover:text-ink transition-colors' : ''}`}
+                      onClick=${() => o.address && toggleExpanded(o.id)}
+                      title=${o.address && !expanded.has(o.id) ? 'Click to read full address' : ''}>
+                    ${esc(o.address || '—')}
+                  </td>
+                  <td class="px-3 py-3 text-[.72rem] text-muted whitespace-nowrap">${new Date(o.created_at).toLocaleDateString('en-GB')}</td>
+                </tr>`)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── Dashboard ── */
+function Dashboard({ onSignOut, notify }) {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pwOpen, setPwOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async (isRefresh) => {
+    if (isRefresh) setRefreshing(true); else setLoading(true);
+    const { data, error } = await sb.from('attire_orders').select('*').order('created_at', { ascending: false });
+    if (error) notify('Failed to load data: ' + error.message, 'error');
+    else setOrders(data || []);
+    setLoading(false); setRefreshing(false);
+  }, [notify]);
+
+  useEffect(() => { load(false); }, [load]);
+
+  const dateStr = new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  return html`
+    <div class="min-h-screen">
+      <${AdminHeader} active="orders" onSignOut=${onSignOut} onOpenPassword=${() => setPwOpen(true)}
+        refreshing=${refreshing} onRefresh=${() => load(true)} extraDate=${dateStr}/>
+
+      <main class="p-5 sm:p-9 max-w-[1440px] mx-auto">
+        <${StatsGrid} orders=${orders}/>
+        <${OrdersTable} orders=${orders} loading=${loading} notify=${notify}/>
+      </main>
+
+      <${PasswordModal} open=${pwOpen} onClose=${() => setPwOpen(false)} notify=${notify}/>
+    </div>`;
+}
+
+/* ── Root App ── */
+function App() {
+  const { session, signOut } = useSession();
+  const [toast, notify] = useToast();
+
+  if (session === undefined) {
+    return html`<div class="min-h-screen flex items-center justify-center"><div class="skeleton w-40 h-6 rounded"></div></div>`;
+  }
+
+  return html`
+    <div>
+      ${session ? html`<${Dashboard} onSignOut=${signOut} notify=${notify}/>` : html`<${Login}/>`}
+      <${Toast} toast=${toast}/>
+    </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script>
+</body>
+</html>
