@@ -565,7 +565,7 @@ function showToast(msg){
 let _lbPhotos=[],_lbIndex=0,_lbTimer=null;
 
 function _lbCollect(){
-  _lbPhotos=[...document.querySelectorAll('#galleryMosaic .g-cell[data-full]')].map(c=>c.dataset.full);
+  _lbPhotos=[...document.querySelectorAll('#galleryMosaic .g-cell[data-full]:not([aria-hidden="true"])')].map(c=>c.dataset.full);
 }
 function _lbShow(i,instant){
   if(!_lbPhotos.length)return;

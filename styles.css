@@ -274,22 +274,39 @@ section{padding:120px 32px}
 #gallery .s-eye{color:rgba(200,204,154,.45)}
 #gallery .s-title{color:rgba(250,248,240,.8)}
 #gallery .s-title em{color:var(--olive-pale)}
-.gallery-mosaic{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:190px;gap:3px;max-width:1000px;margin:0 auto}
-.g-cell{overflow:hidden;position:relative;background:var(--black);cursor:pointer;transition:transform .5s var(--ease)}
-.g-cell.tall{grid-row:span 2}.g-cell.wide{grid-column:span 2}
-.g-cell:hover{transform:scale(1.02)}
+/* Continuously sliding filmstrip — the track holds the photo set twice
+   back-to-back and animates exactly -50% so the loop is seamless; the
+   second copy is aria-hidden and excluded from the lightbox's photo list
+   (see _lbCollect in main.js) so it doesn't skew "X of N" or next/prev. */
+.gallery-viewport{overflow:hidden;max-width:1100px;margin:0 auto;-webkit-mask-image:linear-gradient(to right,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(to right,transparent,#000 6%,#000 94%,transparent)}
+.gallery-track{display:flex;gap:14px;width:max-content;animation:gallerySlide 38s linear infinite}
+.gallery-track:hover{animation-play-state:paused}
+.g-cell{overflow:hidden;position:relative;background:var(--black);cursor:pointer;flex-shrink:0;width:280px;height:340px;border-radius:2px;transition:transform .5s var(--ease)}
+.g-cell:hover{transform:scale(1.035)}
 .g-placeholder-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Great Vibes',cursive;font-size:2rem;color:rgba(200,204,154,.1)}
 .g-overlay{position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .4s}
 .g-cell:hover .g-overlay{background:rgba(107,112,69,.15)}
-.g-cell:nth-child(1){background:linear-gradient(150deg,#2a2a10,#0a0a04)}
-.g-cell:nth-child(2){background:linear-gradient(150deg,#1e1e08,#0c0c04)}
-.g-cell:nth-child(3){background:linear-gradient(150deg,#38380a,#181804)}
-.g-cell:nth-child(4){background:linear-gradient(150deg,#22220a,#0a0a04)}
-.g-cell:nth-child(5){background:linear-gradient(150deg,#1c1c08,#0a0a04)}
-.g-cell:nth-child(6){background:linear-gradient(150deg,#30300c,#141404)}
-.g-cell:nth-child(7){background:linear-gradient(150deg,#28280a,#100e04)}
+.gallery-track .g-cell:nth-child(1){background:linear-gradient(150deg,#2a2a10,#0a0a04)}
+.gallery-track .g-cell:nth-child(2){background:linear-gradient(150deg,#1e1e08,#0c0c04)}
+.gallery-track .g-cell:nth-child(3){background:linear-gradient(150deg,#38380a,#181804)}
+.gallery-track .g-cell:nth-child(4){background:linear-gradient(150deg,#22220a,#0a0a04)}
+.gallery-track .g-cell:nth-child(5){background:linear-gradient(150deg,#1c1c08,#0a0a04)}
+.gallery-track .g-cell:nth-child(6){background:linear-gradient(150deg,#30300c,#141404)}
+.gallery-track .g-cell:nth-child(7){background:linear-gradient(150deg,#28280a,#100e04)}
+/* Staggered entrance — each card fades/rises in on its own beat as the
+   section first scrolls into view (main.js already observes every
+   .reveal element individually), before the continuous slide takes over. */
+.gallery-track .g-cell.reveal:nth-child(1){transition-delay:0s}
+.gallery-track .g-cell.reveal:nth-child(2){transition-delay:.09s}
+.gallery-track .g-cell.reveal:nth-child(3){transition-delay:.18s}
+.gallery-track .g-cell.reveal:nth-child(4){transition-delay:.27s}
+.gallery-track .g-cell.reveal:nth-child(5){transition-delay:.36s}
+.gallery-track .g-cell.reveal:nth-child(6){transition-delay:.45s}
+.gallery-track .g-cell.reveal:nth-child(7){transition-delay:.54s}
+@keyframes gallerySlide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.gallery-track{animation:none}}
 .g-add-hint{text-align:center;color:rgba(200,204,154,.22);font-size:.56rem;letter-spacing:.28em;text-transform:uppercase;margin-top:16px}
-@media(max-width:720px){.gallery-mosaic{grid-template-columns:repeat(2,1fr);grid-auto-rows:150px}.g-cell.wide{grid-column:span 1}}
+@media(max-width:720px){.g-cell{width:200px;height:260px}}
 
 /* LIGHTBOX */
 #lightbox{position:fixed;inset:0;z-index:50000;background:rgba(0,0,0,.94);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s var(--ease)}
