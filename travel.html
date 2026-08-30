@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Travel &amp; Hotels · Chelsea &amp; Gabriel · March 20, 2027 · Enugu, Nigeria</title>
+<meta name="description" content="Travel, hotel, and stay information for Chelsea & Gabriel's wedding."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://rsvphub.cc/travel"/>
+<meta property="og:title" content="Travel &amp; Hotels · Chelsea &amp; Gabriel · March 20, 2027 · Enugu, Nigeria"/>
+<meta property="og:description" content="Travel, hotel, and stay information for Chelsea & Gabriel's wedding."/>
+<meta property="og:image" content="https://rsvphub.cc/photos/og-cover.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:locale" content="en_US"/>
+<meta property="og:site_name" content="Chelsea &amp; Gabriel Wedding"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Travel &amp; Hotels · Chelsea &amp; Gabriel · March 20, 2027 · Enugu, Nigeria"/>
+<meta name="twitter:description" content="Travel, hotel, and stay information for Chelsea & Gabriel's wedding."/>
+<meta name="twitter:image" content="https://rsvphub.cc/photos/og-cover.jpg"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%235c1828'/%3E%3Ccircle cx='32' cy='32' r='24' fill='none' stroke='%23c9a84c' stroke-width='1.6' opacity='.8'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='Georgia,serif' font-style='italic' font-size='19' fill='%23e2c87a'%3EC%26G%3C/text%3E%3C/svg%3E"/>
+<link rel="apple-touch-icon" href="/photos/apple-touch-icon.png"/>
+<meta name="theme-color" content="#faf8f0"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/styles.css"/>
+<script src="/guard.js"></script>
+</head>
+<body>
+<!-- GRAIN OVERLAY -->
+<canvas id="grain" aria-hidden="true"></canvas>
+<!-- SCROLL PROGRESS -->
+<div id="scroll-progress"></div>
+<!-- TOAST -->
+<div id="toast"></div>
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()" role="dialog" aria-label="Photo viewer">
+  <button class="lb-close" aria-label="Close" onclick="event.stopPropagation();closeLightbox()">&times;</button>
+  <button class="lb-arrow lb-prev" aria-label="Previous photo" onclick="event.stopPropagation();lbStep(-1)">&#8249;</button>
+  <button class="lb-arrow lb-next" aria-label="Next photo" onclick="event.stopPropagation();lbStep(1)">&#8250;</button>
+  <div class="lb-stage" onclick="event.stopPropagation()">
+    <img class="lb-img" id="lbImg" src="" alt="Chelsea and Gabriel wedding photo"/>
+  </div>
+  <div class="lb-bottom" onclick="event.stopPropagation()">
+    <span class="lb-counter" id="lbCounter">1 of 13</span>
+    <button class="lb-play" id="lbPlay" onclick="lbToggleSlideshow()">Slideshow</button>
+  </div>
+</div>
+
+<!-- ═══ PASSWORD GATE ═══ -->
+<div id="gate">
+  <div class="gate-mono">C &amp; G</div>
+  <div class="gate-title" id="gate-title">Enter your invitation code<br>to access this celebration</div>
+  <div class="gate-form">
+    <input class="gate-input" id="gate-input" type="password" placeholder="Enter code" autocomplete="off"/>
+    <div class="gate-error" id="gate-error">Incorrect code. Please try again.</div>
+    <button class="gate-btn" onclick="checkPassword()">Enter</button>
+    <p class="gate-hint">Hint: the bride's name</p>
+  </div>
+</div>
+
+<!-- ═══ LANG BAR ═══ -->
+<div id="lang-bar">
+  <div style="margin-right:auto"></div>
+  <button class="lang-btn active" onclick="setLang('en')">English</button>
+  <span class="lang-sep">&middot;</span>
+  <button class="lang-btn" onclick="setLang('ig')">Igbo</button>
+  <span class="lang-sep">&middot;</span>
+  <button class="lang-btn" onclick="setLang('yo')">Yor&ugrave;b&aacute;</button>
+</div>
+
+<!-- ═══ MUSIC ═══ -->
+<button id="music-btn" onclick="toggleMusic()" title="Music">
+  <svg class="icon-play" viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" stroke-linejoin="round"/></svg>
+  <svg class="icon-pause" viewBox="0 0 24 24"><line x1="6" y1="4" x2="6" y2="20"/><line x1="18" y1="4" x2="18" y2="20"/></svg>
+</button>
+<div class="music-ring"></div>
+<div class="music-track">&hearts; Mma &mdash; Chike</div>
+<button id="music-pill" onclick="startMusicFromPill()" aria-label="Play music">
+  <span class="pill-note">&#9834;</span>
+  <span data-en="Play the music" data-ig="Kpọọ egwu" data-yo="Tẹ orin">Play the music</span>
+</button>
+<audio id="bgMusic" loop><source src="mma-chike.m4a" type="audio/mp4"/></audio>
+
+<!-- ═══ ENVELOPE INTRO ═══ -->
+<div id="intro">
+  <canvas id="env-canvas"></canvas>
+  <div id="guest-greeting"></div>
+  <p class="intro-eyebrow" data-en="You have received a private invitation" data-ig="Ọ nyefere gị nkwado nzuzo" data-yo="A fi ìwé ìdásílẹ̀ àkọ́kọ́ fún ọ">You have received a private invitation</p>
+  <div class="env-scene" id="envScene" onclick="openEnvelope()">
+    <div class="env-body">
+      <svg class="env-svg" viewBox="0 0 380 260" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="envMain" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f8f2e0"/><stop offset="55%" style="stop-color:#f0e8d0"/><stop offset="100%" style="stop-color:#e6ddc0"/></linearGradient>
+          <linearGradient id="envFlapG" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#f6efdb"/><stop offset="100%" style="stop-color:#e4dcbd"/></linearGradient>
+          <linearGradient id="envL" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#e9e1c4"/><stop offset="100%" style="stop-color:#f3ecd6"/></linearGradient>
+          <linearGradient id="envR" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#f3ecd6"/><stop offset="100%" style="stop-color:#e7dfc2"/></linearGradient>
+          <linearGradient id="envB" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:#f0e8cf"/><stop offset="100%" style="stop-color:#e0d8b8"/></linearGradient>
+          <radialGradient id="waxG" cx="42%" cy="38%" r="70%"><stop offset="0%" style="stop-color:#6e2032"/><stop offset="60%" style="stop-color:#5c1828"/><stop offset="100%" style="stop-color:#48101e"/></radialGradient>
+        </defs>
+        <rect x="0" y="0" width="380" height="260" rx="3" fill="url(#envMain)"/>
+        <!-- Hidden gold sprigs on the paper beneath the flap — revealed only when it opens -->
+        <g opacity=".45" stroke="#c9a84c" stroke-width=".9" fill="none">
+          <path d="M40,30 q22,14 48,16" /><ellipse cx="52" cy="34" rx="7" ry="3" transform="rotate(28 52 34)"/><ellipse cx="66" cy="40" rx="7" ry="3" transform="rotate(18 66 40)"/><ellipse cx="80" cy="44" rx="6" ry="2.6" transform="rotate(8 80 44)"/>
+          <path d="M340,30 q-22,14 -48,16"/><ellipse cx="328" cy="34" rx="7" ry="3" transform="rotate(-28 328 34)"/><ellipse cx="314" cy="40" rx="7" ry="3" transform="rotate(-18 314 40)"/><ellipse cx="300" cy="44" rx="6" ry="2.6" transform="rotate(-8 300 44)"/>
+        </g>
+        <!-- Side and bottom folds -->
+        <polygon points="0,0 0,260 176,142" fill="url(#envL)"/>
+        <polygon points="380,0 380,260 204,142" fill="url(#envR)"/>
+        <polygon points="0,260 380,260 190,144" fill="url(#envB)"/>
+        <line x1="0" y1="260" x2="190" y2="144" stroke="rgba(150,138,95,.28)" stroke-width=".8"/>
+        <line x1="380" y1="260" x2="190" y2="144" stroke="rgba(150,138,95,.28)" stroke-width=".8"/>
+        <!-- Gold foil double frame -->
+        <rect x="9" y="9" width="362" height="242" rx="2" fill="none" stroke="rgba(201,168,76,.5)" stroke-width="1"/>
+        <rect x="13" y="13" width="354" height="234" rx="2" fill="none" stroke="rgba(201,168,76,.22)" stroke-width=".7"/>
+        <!-- Calligraphy on the front -->
+        <text x="190" y="226" text-anchor="middle" font-family="'Great Vibes',cursive" font-size="21" fill="#8a7a3c" opacity=".85">Chelsea &amp; Gabriel</text>
+        <text x="190" y="243" text-anchor="middle" font-family="'Jost',sans-serif" font-size="6.5" letter-spacing="3.5" fill="rgba(138,122,60,.65)">ENUGU · NIGERIA · 20.03.2027</text>
+        <g opacity=".55" fill="#c9a84c">
+          <rect x="118" y="222" width="4" height="4" transform="rotate(45 120 224)"/>
+          <rect x="258" y="222" width="4" height="4" transform="rotate(45 260 224)"/>
+        </g>
+        <g id="flap-group">
+          <polygon points="0,0 380,0 190,152" fill="url(#envFlapG)"/>
+          <polygon points="0,0 380,0 190,152" fill="none" stroke="rgba(201,168,76,.45)" stroke-width="1"/>
+          <polygon points="10,6 370,6 190,146" fill="none" stroke="rgba(201,168,76,.22)" stroke-width=".7"/>
+          <line x1="0" y1="0" x2="190" y2="152" stroke="rgba(150,138,95,.3)" stroke-width="1"/>
+          <line x1="380" y1="0" x2="190" y2="152" stroke="rgba(150,138,95,.3)" stroke-width="1"/>
+          <!-- Foil-dot liner pattern -->
+          <g opacity=".4" fill="#c9a84c">
+            <rect x="118" y="34" width="3" height="3" transform="rotate(45 119.5 35.5)"/>
+            <rect x="188" y="52" width="3" height="3" transform="rotate(45 189.5 53.5)"/>
+            <rect x="258" y="34" width="3" height="3" transform="rotate(45 259.5 35.5)"/>
+            <rect x="152" y="80" width="3" height="3" transform="rotate(45 153.5 81.5)"/>
+            <rect x="226" y="80" width="3" height="3" transform="rotate(45 227.5 81.5)"/>
+            <rect x="188" y="112" width="3" height="3" transform="rotate(45 189.5 113.5)"/>
+          </g>
+        </g>
+        <!-- Poured wax seal -->
+        <g class="wax-glow">
+          <circle cx="190" cy="160" r="36" fill="url(#waxG)"/>
+          <circle cx="160" cy="146" r="9" fill="#531524"/>
+          <circle cx="222" cy="172" r="8" fill="#4c1220"/>
+          <circle cx="176" cy="192" r="7" fill="#531524"/>
+          <circle cx="212" cy="132" r="6.5" fill="#5c1828"/>
+          <circle cx="156" cy="176" r="5.5" fill="#4c1220"/>
+          <circle cx="190" cy="160" r="29" fill="none" stroke="rgba(201,168,76,.4)" stroke-width="1"/>
+          <circle cx="190" cy="160" r="26" fill="none" stroke="rgba(120,50,60,.55)" stroke-width=".8"/>
+          <text x="190" y="168" text-anchor="middle" font-family="'Great Vibes',cursive" font-size="22" fill="rgba(230,190,150,.9)">C &amp; G</text>
+          <ellipse cx="178" cy="146" rx="12" ry="6" fill="rgba(255,255,255,.09)" transform="rotate(-24 178 146)"/>
+          <ellipse cx="204" cy="180" rx="8" ry="4" fill="rgba(0,0,0,.14)" transform="rotate(-24 204 180)"/>
+        </g>
+        <rect x="0" y="0" width="380" height="260" rx="3" fill="none" stroke="rgba(201,168,76,.45)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="env-letter" id="envLetter">
+      <span class="el-names">Chelsea &amp; Gabriel</span>
+      <div class="el-line"></div>
+      <span class="el-date" data-en="Wedding Invitation · March 20, 2027" data-ig="Nkwado Alụmdi · March 20, 2027" data-yo="Ìdásílẹ̀ Ìgbéyàwó · March 20, 2027">Wedding Invitation · March 20, 2027</span>
+    </div>
+    <div class="env-tap" id="envTap">
+      <span data-en="Tap to open" data-ig="Pịa ịmeghe" data-yo="Tẹ láti ṣí">Tap to open</span>
+      <div class="env-tap-line"></div>
+    </div>
+  </div>
+  <p style="position:relative;z-index:3;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.85rem;color:rgba(200,204,154,.3);letter-spacing:.12em;margin-top:52px;">Enugu, Nigeria &middot; March 2027</p>
+</div>
+
+<!-- ══════════════════ MAIN SITE ══════════════════ -->
+<div id="site">
+
+<!-- GUEST PORTAL BANNER -->
+<div id="guest-portal-banner">
+  <div class="gp-inner">
+    <div>
+      <span class="gp-name" id="gp-name">Welcome</span>
+      <span class="gp-sep">·</span>
+      <span class="gp-status" id="gp-status">Confirmed Guest</span>
+    </div>
+    <div class="gp-badge">
+      <span class="gp-dot"></span>
+      <span id="gp-countdown">loading</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WEATHER WIDGET ══ -->
+<div id="weather-widget" role="complementary" aria-label="Current weather in Enugu, Nigeria">
+  <div class="wx-header">
+    <span class="wx-city">Enugu · Nigeria</span>
+    <div class="wx-live"><div class="wx-live-dot" aria-hidden="true"></div>Live</div>
+  </div>
+  <div class="wx-main">
+    <div class="wx-icon" id="wx-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </div>
+    <div class="wx-temp-block">
+      <div class="wx-temp"><span id="wx-temp">—</span><span class="wx-unit">°C</span></div>
+      <div class="wx-cond" id="wx-cond">Loading…</div>
+    </div>
+  </div>
+  <div class="wx-meta">
+    <div class="wx-meta-item">
+      <svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>
+      Feels <span id="wx-feels">—</span>
+    </div>
+    <div class="wx-meta-item">
+      <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      <span id="wx-hum">—</span>% RH
+    </div>
+    <div class="wx-meta-item">
+      <svg viewBox="0 0 24 24"><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></svg>
+      <span id="wx-wind">—</span> km/h
+    </div>
+  </div>
+</div>
+
+<div id="petalLayer"></div>
+<nav id="mainNav">
+  <a href="/" class="nav-mono">C &amp; G</a>
+  <div class="nav-right">
+  <a class="nav-rsvp" href="/#rsvp" data-en="RSVP" data-ig="RSVP" data-yo="RSVP">RSVP</a>
+  <div class="nav-dd-wrap" id="navDDWrap">
+    <button class="nav-dd-btn" id="navDDBtn" onclick="toggleNavDD()" aria-expanded="false" aria-haspopup="true">
+      <span id="navDDLabel" data-en="Explore" data-ig="Chọpụta" data-yo="Ṣàwárí">Explore</span>
+      <svg class="nav-dd-chevron" viewBox="0 0 9 5"><polyline points="1,1 4.5,4 8,1"/></svg>
+    </button>
+    <div class="nav-dd-menu" id="navDDMenu" role="menu">
+      <a class="nav-dd-item" href="/#story" data-en="Our Story" data-ig="Akụkọ Anyị" data-yo="Ìtàn Wa" role="menuitem"><span class="nav-dd-dot"></span>Our Story</a>
+      <a class="nav-dd-item" href="/#details" data-en="Details" data-ig="Nkọwa" data-yo="Àlàyé" role="menuitem"><span class="nav-dd-dot"></span>Details</a>
+      <a class="nav-dd-item" href="/attire" data-en="Dress Code" data-ig="Uwe" data-yo="Aṣọ" role="menuitem"><span class="nav-dd-dot"></span>Dress Code</a>
+      <a class="nav-dd-item" href="/#venue" data-en="Venue" data-ig="Ebe ọzọ" data-yo="Ibi" role="menuitem"><span class="nav-dd-dot"></span>Venue</a>
+      <a class="nav-dd-item" href="/travel" data-en="Travel" data-ig="Njem" data-yo="Ìrìnàjò" role="menuitem"><span class="nav-dd-dot"></span>Travel</a>
+      <a class="nav-dd-item" href="/#timeline" data-en="Timeline" data-ig="Usoro Oge" data-yo="Àkókò" role="menuitem"><span class="nav-dd-dot"></span>Timeline</a>
+      <div class="nav-dd-sep"></div>
+      <a class="nav-dd-item" href="/#gallery" data-en="Gallery" data-ig="Foto Ememe" data-yo="Àwòrán Àyẹyẹ" role="menuitem"><span class="nav-dd-dot"></span>Gallery</a>
+      <a class="nav-dd-item" href="/#rsvp" data-en="RSVP" data-ig="RSVP" data-yo="RSVP" role="menuitem"><span class="nav-dd-dot"></span>RSVP</a>
+      <a class="nav-dd-item" href="/#photos" data-en="Photos" data-ig="Foto" data-yo="Àwòrán" role="menuitem"><span class="nav-dd-dot"></span>Photos</a>
+      <div class="nav-dd-sep"></div>
+      <a class="nav-dd-item" href="/#faq" data-en="FAQ" data-ig="Ajụjụ" data-yo="FAQ" role="menuitem"><span class="nav-dd-dot"></span>FAQ</a>
+      <a class="nav-dd-item" href="/gifts" data-en="Gifts" data-ig="Onyinye" data-yo="Ẹbùn" role="menuitem"><span class="nav-dd-dot"></span>Gifts</a>
+    </div>
+  </div>
+  </div>
+</nav>
+
+<section id="travel">
+  <span class="s-eye reveal" data-en="Getting Here" data-ig="Ịbịa Ebe A" data-yo="Bí o ṣe wà níbí">Getting Here</span>
+  <h2 class="s-title reveal" data-en="Travel &amp; <em>Stay</em>" data-ig="Njem na <em>Obibi</em>" data-yo="Ìrìnàjò àti <em>Ibùgbé</em>">Travel &amp; <em>Stay</em></h2>
+  <div class="s-rule reveal"><span></span><i></i><span></span></div>
+  <div id="travel-content">
+    <div class="locked-card reveal" onclick="location.href='/#rsvp'">
+      <span class="locked-icon">🔒</span>
+      <div class="locked-title">Hotels &amp; Travel</div>
+      <span class="locked-unlock">Shared with confirmed guests</span>
+      <p class="locked-msg">RSVP to receive your private access link — accommodation options, flight routes, and local tips will be shared with confirmed guests.</p>
+      <div class="locked-cta">Complete My RSVP</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="f-names">Chelsea &amp; Gabriel</span>
+  <p class="f-det" data-en="March 20, 2027 · Enugu, Nigeria" data-ig="March 20, 2027 · Enugwu, Naịjịrịa" data-yo="March 20, 2027 · Enugu, Nàìjíríà">March 20, 2027 &middot; Enugu, Nigeria</p>
+  <div class="f-sep"><span></span><i></i><span></span></div>
+  <div class="f-qr">
+    <p class="f-qr-label">Scan to share this invitation</p>
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Frsvphub.cc&color=8a9058&bgcolor=1c1a10" alt="QR code — Chelsea and Gabriel wedding invitation" loading="lazy" width="110" height="110"/>
+    <a class="f-qr-dl" href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=https%3A%2F%2Frsvphub.cc&color=8a9058&bgcolor=1c1a10&format=png" download="chelsea-gabriel-wedding-qr.png" target="_blank" rel="noopener">Download QR Code</a>
+  </div>
+  <div class="f-sep" style="margin-top:22px"><span></span><i></i><span></span></div>
+  <p class="f-credit">Crafted with love</p>
+</footer>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+(function(){
+  var g=document.getElementById('gate');if(g)g.style.display='none';
+  var i=document.getElementById('intro');if(i)i.style.display='none';
+  document.getElementById('site').classList.add('visible');
+  document.body.style.overflow='';
+})();
+fetch('/main.js?v=6').then(function(r){return r.text()}).then(function(src){
+  (0,eval)(src);
+  if(typeof initSite==='function')initSite();
+}).catch(function(e){console.error('main.js load failed',e)});
+</script>
+</body>
+</html>

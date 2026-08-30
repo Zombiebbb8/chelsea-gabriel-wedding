@@ -106,8 +106,14 @@ function hideHeroRsvp(){
   document.querySelectorAll('.h-rsvp').forEach(el=>{el.style.display='none'});
 }
 
-/* ═══ GUEST PORTAL ═══ */
-const _guestToken=(new URLSearchParams(location.search)).get('guest');
+/* ═══ GUEST PORTAL ═══
+   The token is now sticky across pages: a token in the URL is cached to
+   localStorage, and every page (including ones reached by clicking around
+   rather than via the original portal link) falls back to that cached
+   value so the guest doesn't need ?guest=... threaded through every link. */
+const _urlGuestToken=(new URLSearchParams(location.search)).get('guest');
+if(_urlGuestToken){try{localStorage.setItem('wdg_guest_token',_urlGuestToken)}catch(e){}}
+const _guestToken=_urlGuestToken||(function(){try{return localStorage.getItem('wdg_guest_token')}catch(e){return null}})();
 let _attireGuest=null;
 
 async function initGuestPortal(){
@@ -173,6 +179,9 @@ async function initGuestPortal(){
       const orderWrap=document.getElementById('attire-order');
       if(orderWrap){
         orderWrap.style.display='';
+        const fEl=document.getElementById('ao-first'),lEl=document.getElementById('ao-last');
+        if(fEl&&!fEl.value)fEl.value=guest.first_name||'';
+        if(lEl&&!lEl.value)lEl.value=guest.last_name||'';
         const done=(()=>{try{return localStorage.getItem('wdg_attire_order_done')==='1'}catch(e){return false}})();
         if(done)applyAttireOrderThanksState();
       }
@@ -262,6 +271,25 @@ function setLang(lang){
   const hints={en:"Hint: the bride's name",ig:'Ọtụtụ: aha nwunye',yo:'Ìtọ́kasí: orúkọ ìyàwó'};
   const h=document.querySelector('.gate-hint');if(h)h.textContent=hints[lang]||hints.en;
 }
+
+/* ═══ NAV DROPDOWN ═══
+   Lives here (rather than only in index.html's isolated gate script) since
+   every page's nav needs it, not just the homepage. */
+function toggleNavDD(){
+  const wrap=document.getElementById('navDDWrap');
+  const btn=document.getElementById('navDDBtn');
+  if(!wrap)return;
+  const isOpen=wrap.classList.toggle('open');
+  if(btn)btn.setAttribute('aria-expanded',String(isOpen));
+}
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('navDDWrap');
+  if(wrap&&wrap.classList.contains('open')&&!wrap.contains(e.target)){
+    wrap.classList.remove('open');
+    const btn=document.getElementById('navDDBtn');
+    if(btn)btn.setAttribute('aria-expanded','false');
+  }
+});
 
 /* ═══ MUSIC + BEAT-SYNCED DANCE ENGINE ═══
    All timing is derived live from the loaded track via the Web Audio API —
@@ -516,24 +544,16 @@ function spawnPetal(parent,cls){
 for(let i=0;i<6;i++)spawnPetal(null,'ipetal');
 const ipt=setInterval(()=>spawnPetal(null,'ipetal'),1500);
 
-/* ═══ ENVELOPE ═══ */
-let opened=false;
-function openEnvelope(){
-  if(opened)return;opened=true;
-  const scene=document.getElementById('envScene');
-  document.getElementById('envTap').style.opacity='0';
-  scene.classList.add('flap-open');
-  const envBody=document.querySelector('.env-body');
-  setTimeout(()=>{if(envBody)envBody.style.animation='none';envBody.style.transform='scale(1.7) translateY(-180px)';envBody.style.opacity='0';envBody.style.transition='all 1.1s cubic-bezier(.22,1,.36,1)'},1300);
-  setTimeout(()=>{
-    clearInterval(ipt);
-    document.getElementById('intro').classList.add('gone');
-    document.getElementById('site').classList.add('visible');
-    document.body.style.overflow='';
-    initSite();
-    audio.play().then(()=>{document.getElementById('music-btn').classList.add('playing');musicStarted=true}).catch(()=>{});
-  },2200);
-}
+/* ═══ ENVELOPE ═══
+   Opening the envelope itself (setting localStorage, revealing #site,
+   calling initSite()) is owned entirely by index.html's isolated gate
+   script (window.openEnvelope=openEnv) — that copy also knows how to
+   continue to a subpage via ?next=. A near-duplicate implementation used
+   to live here too; since main.js loads after the gate script and both
+   declare a top-level `openEnvelope`, this one would silently win the
+   race and clobber window.openEnvelope, skipping the ?next= continuation
+   (and never marking the envelope as opened in localStorage). Removed —
+   single source of truth now. */
 
 /* ═══ TOAST ═══ */
 function showToast(msg){
@@ -637,6 +657,10 @@ function spawnFireflies(container,count){
 
 /* ═══ SITE INIT ═══ */
 function initSite(){
+  // Stop the envelope-intro petal shower — the intro is gone by now
+  // regardless of which path revealed the site.
+  clearInterval(ipt);
+
   // Countdown with flip
   const target=new Date('2027-03-20T11:00:00');
   let prevVals={d:'',h:'',m:'',s:''};
@@ -650,11 +674,12 @@ function initSite(){
     };
     ['d','h','m','s'].forEach(k=>{
       const el=document.getElementById('cd-'+k);
-      if(vals[k]!==prevVals[k]){el.textContent=vals[k];el.classList.remove('flip');void el.offsetWidth;el.classList.add('flip')}
+      if(el&&vals[k]!==prevVals[k]){el.textContent=vals[k];el.classList.remove('flip');void el.offsetWidth;el.classList.add('flip')}
     });
     prevVals=vals;
   }
-  tick();setInterval(tick,1000);
+  // Countdown only exists in the hero section — skip entirely on other pages
+  if(document.getElementById('cd-d')){tick();setInterval(tick,1000)}
 
   // Scroll reveal
   const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}})},{threshold:.1});
@@ -762,6 +787,7 @@ async function initNames3D(){
   }
 
   const hero=document.getElementById('hero');
+  if(!hero)return; // hero only exists on the homepage
   const namesEl=hero.querySelector('.h-names');
   if(!namesEl)return;
 
@@ -1086,31 +1112,111 @@ function applyAttireOrderThanksState(){
   if(thanks)thanks.style.display='block';
 }
 
+/* ── Pricing: $9/yard (5 yards = $45), +$5 for a matching gele or cap —
+   converted to the guest's local currency via free, keyless public APIs.
+   Both calls are best-effort: if either fails (offline, rate-limited),
+   the USD total still displays correctly and the local-currency line is
+   just omitted rather than blocking the order. ── */
+const AO_YARD_PRICE_USD=9;
+const AO_HEAD_WRAP_PRICE_USD=5;
+let _aoCurrency=null,_aoRate=null;
+
+async function aoGetGuestCurrency(){
+  if(_aoCurrency)return _aoCurrency;
+  try{
+    const res=await fetch('https://ipapi.co/json/');
+    const data=await res.json();
+    _aoCurrency=(data&&data.currency)||'USD';
+  }catch(e){_aoCurrency='USD'}
+  return _aoCurrency;
+}
+
+async function aoGetUsdRate(currency){
+  if(currency==='USD')return 1;
+  if(_aoRate&&_aoRate.currency===currency)return _aoRate.rate;
+  try{
+    const res=await fetch('https://open.er-api.com/v6/latest/USD');
+    const data=await res.json();
+    const rate=data&&data.rates&&data.rates[currency];
+    if(rate){_aoRate={currency,rate};return rate}
+  }catch(e){}
+  return null;
+}
+
+function aoOrderTotals(){
+  const yards=parseInt(document.getElementById('ao-yards')?.value,10)||0;
+  const headWrap=document.querySelector('input[name="head_wrap"]:checked')?.value||'none';
+  const yardsCost=yards*AO_YARD_PRICE_USD;
+  const headWrapCost=headWrap!=='none'?AO_HEAD_WRAP_PRICE_USD:0;
+  return {yards,headWrap,yardsCost,headWrapCost,totalUsd:yardsCost+headWrapCost};
+}
+
+async function updateAttireOrderLocalPrice(totalUsd){
+  const localEl=document.getElementById('ao-price-local');
+  if(!localEl)return;
+  if(!totalUsd){localEl.textContent='';return}
+  localEl.textContent='Converting…';
+  const currency=await aoGetGuestCurrency();
+  if(currency==='USD'){localEl.textContent='';return}
+  const rate=await aoGetUsdRate(currency);
+  if(!rate){localEl.textContent='';return}
+  const local=totalUsd*rate;
+  try{
+    localEl.textContent='≈ '+new Intl.NumberFormat(undefined,{style:'currency',currency}).format(local);
+  }catch(e){
+    localEl.textContent='≈ '+local.toFixed(2)+' '+currency;
+  }
+}
+
+function updateAttireOrderPrice(){
+  const {yards,yardsCost,headWrapCost,totalUsd}=aoOrderTotals();
+
+  const yEl=document.getElementById('ao-price-yards');
+  if(yEl)yEl.textContent=yards?`${yards} × $${AO_YARD_PRICE_USD.toFixed(2)} = $${yardsCost.toFixed(2)}`:'—';
+  const hwRow=document.getElementById('ao-price-hw-row');
+  if(hwRow)hwRow.style.display=headWrapCost?'flex':'none';
+  const totalEl=document.getElementById('ao-price-total');
+  if(totalEl)totalEl.textContent=`$${totalUsd.toFixed(2)}`;
+
+  updateAttireOrderLocalPrice(totalUsd);
+}
+
 async function submitAttireOrder(e){
   e.preventDefault();
   if(!_attireGuest){showToast('Please open this page via your guest link to order attire.');return}
 
+  const firstName=document.getElementById('ao-first').value.trim();
+  const lastName=document.getElementById('ao-last').value.trim();
   const familySide=document.querySelector('input[name="family_side"]:checked')?.value;
-  const yards=parseFloat(document.getElementById('ao-yards').value);
+  const {yards,headWrap,totalUsd}=aoOrderTotals();
   const deliveryMethod=document.querySelector('input[name="delivery_method"]:checked')?.value;
   const address=document.getElementById('ao-address').value.trim();
 
-  if(!yards||yards<=0){showToast('Please enter how many yards you need.');return}
+  if(!firstName||!lastName){showToast('Please fill in your first and last name.');return}
+  if(!yards||yards<=0){showToast('Please select how many yards you need.');return}
   if(!address){showToast('Please enter an address or drop-off location.');return}
 
   const btn=document.getElementById('attireOrderBtn');
   btn.classList.add('saving');
   btn.querySelector('span').textContent='Saving…';
 
+  const currency=await aoGetGuestCurrency();
+  const rate=currency!=='USD'?await aoGetUsdRate(currency):1;
+  const priceLocal=rate?totalUsd*rate:null;
+
   const {error}=await supabase.from('attire_orders').insert({
     rsvp_id:_attireGuest.id,
-    first_name:_attireGuest.first_name,
-    last_name:_attireGuest.last_name,
+    first_name:firstName,
+    last_name:lastName,
     email:_attireGuest.email,
     family_side:familySide,
     yards:yards,
+    head_wrap:headWrap,
     delivery_method:deliveryMethod,
-    address:address
+    address:address,
+    price_usd:totalUsd,
+    currency:currency,
+    price_local:priceLocal
   });
 
   if(error){

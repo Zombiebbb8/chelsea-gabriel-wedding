@@ -140,7 +140,7 @@ function OrdersTable({ orders, loading, notify }) {
 
   const exportCSV = () => {
     if (!orders.length) { notify('No data to export.', 'error'); return; }
-    const cols = ['first_name', 'last_name', 'email', 'family_side', 'yards', 'delivery_method', 'address', 'created_at'];
+    const cols = ['first_name', 'last_name', 'email', 'family_side', 'yards', 'head_wrap', 'price_usd', 'currency', 'price_local', 'delivery_method', 'address', 'created_at'];
     const header = cols.join(',');
     const rows = orders.map((o) => cols.map((c) => `"${String(o[c] ?? '').replace(/"/g, '""')}"`).join(','));
     const csv = [header, ...rows].join('\n');
@@ -177,7 +177,7 @@ function OrdersTable({ orders, loading, notify }) {
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full border-collapse min-w-[860px]">
+          <table class="w-full border-collapse min-w-[1020px]">
             <thead class="bg-charcoal">
               <tr>
                 <${Th} label="#"/>
@@ -185,6 +185,8 @@ function OrdersTable({ orders, loading, notify }) {
                 <${Th} label="Email"/>
                 <${Th} label="Family"/>
                 <${Th} label="Yards" sortKey="yards" active=${sortKey === 'yards'} dir=${sortDir} onSort=${onSort} className="text-center"/>
+                <${Th} label="Gele/Cap"/>
+                <${Th} label="Price"/>
                 <${Th} label="Delivery"/>
                 <${Th} label="Address"/>
                 <${Th} label="Ordered" sortKey="created_at" active=${sortKey === 'created_at'} dir=${sortDir} onSort=${onSort}/>
@@ -193,7 +195,7 @@ function OrdersTable({ orders, loading, notify }) {
             <tbody>
               ${loading ? html`<${SkeletonRows}/>` : filtered.length === 0 ? html`
                 <tr>
-                  <td colSpan="8" class="py-16 text-center">
+                  <td colSpan="10" class="py-16 text-center">
                     <div class="flex flex-col items-center gap-2 text-muted">
                       <${Icon} path=${paths.inbox} className="w-8 h-8 text-olive/30" strokeWidth=${1.3}/>
                       <span class="font-serif italic text-lg">${orders.length === 0 ? 'No attire orders yet.' : 'No orders match your search.'}</span>
@@ -210,6 +212,11 @@ function OrdersTable({ orders, loading, notify }) {
                     </span>
                   </td>
                   <td class="px-3 py-3 text-center text-sm tabular-nums">${o.yards ?? '—'}</td>
+                  <td class="px-3 py-3 text-[.76rem] text-muted">${o.head_wrap === 'gele' ? 'Gele' : o.head_wrap === 'cap' ? 'Cap' : '—'}</td>
+                  <td class="px-3 py-3 text-[.76rem] text-ink tabular-nums whitespace-nowrap">
+                    ${o.price_usd != null ? `$${Number(o.price_usd).toFixed(2)}` : '—'}
+                    ${o.price_local != null && o.currency && o.currency !== 'USD' ? html`<div class="text-muted text-[.68rem]">≈ ${Number(o.price_local).toFixed(2)} ${o.currency}</div>` : null}
+                  </td>
                   <td class="px-3 py-3">
                     <span class=${`inline-flex items-center gap-1 px-2.5 py-1 text-[.5rem] tracking-[.15em] uppercase rounded-sm ${o.delivery_method === 'ship' ? 'bg-success/10 text-success' : 'bg-muted/10 text-muted'}`}>
                       ${o.delivery_method === 'ship' ? 'Ship' : 'Tailor drop-off'}
