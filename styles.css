@@ -89,7 +89,11 @@ svg.env-svg{width:100%;display:block;overflow:visible}
 
 /* NAV */
 nav{position:fixed;top:36px;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:14px 48px;background:rgba(250,248,240,.96);backdrop-filter:blur(18px);border-bottom:1px solid rgba(107,112,69,.14);transition:padding .4s,top .4s;-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform}
-nav.compact{top:0;padding:10px 48px}
+/* Stays pinned just below the always-fixed language bar (~36px tall) at
+   every scroll position — it used to snap to top:0 here, which slid it
+   directly behind the language bar's much higher z-index and hid Explore
+   and RSVP once the page scrolled past 60px. */
+nav.compact{top:36px;padding:10px 48px}
 .nav-mono{font-family:'Great Vibes',cursive;font-size:1.7rem;color:var(--olive);text-decoration:none}
 /* Nav right cluster + RSVP button */
 .nav-right{display:flex;align-items:center;gap:10px}
