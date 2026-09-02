@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/styles.css?v=2"/>
+<link rel="stylesheet" href="/styles.css?v=3"/>
 <script src="/guard.js?v=1"></script>
 </head>
 <body>
@@ -263,7 +263,7 @@
     <div class="attire-order-intro">
       <span class="ao-eyebrow">For Confirmed Guests</span>
       <div class="ao-heading">Order Your Aso-Ebi</div>
-      <p class="ao-lede">Our fabric is cut and ready in both palettes — <strong>Olive &amp; Gold</strong> for the bride's family, <strong>Burgundy &amp; Ebony</strong> for the groom's. Tell us your side, how many yards you need, and where it should go — we'll handle the rest.</p>
+      <p class="ao-lede">Our fabric is cut and ready for both sides. Choose your side below to see your colours, gele/cap, and how to order.</p>
     </div>
     <form class="rsvp-form attire-order-form" id="attireOrderForm">
       <div class="f-row reveal">
@@ -271,12 +271,10 @@
         <div class="f-grp"><label class="f-lbl ao-lbl" for="ao-last">Last Name</label><input class="f-in" id="ao-last" type="text" placeholder="Your last name"/></div>
       </div>
       <div class="f-grp reveal">
-        <label class="f-lbl ao-lbl">Which Family's Colours?</label>
-        <div class="f-radios">
-          <label class="f-radio"><input type="radio" name="family_side" id="ao-bride" value="bride" checked/><span class="f-radio-dot"></span><span>Bride's Family</span></label>
-          <label class="f-radio"><input type="radio" name="family_side" id="ao-groom" value="groom"/><span class="f-radio-dot"></span><span>Groom's Family</span></label>
-        </div>
+        <span class="ao-eyebrow-small">Choose Your Side</span>
+        <div class="ao-family-cards" id="ao-family-cards"></div>
       </div>
+      <div class="ao-family-detail" id="ao-family-detail" style="display:none"></div>
       <div class="f-grp reveal">
         <label class="f-lbl ao-lbl" for="ao-yards">Number of Yards <span class="ao-price-hint">($9 / yard)</span></label>
         <div class="f-sel-wrap">
@@ -353,7 +351,7 @@
   document.getElementById('site').classList.add('visible');
   document.body.style.overflow='';
 })();
-fetch('/main.js?v=7').then(function(r){return r.text()}).then(function(src){
+fetch('/main.js?v=8').then(function(r){return r.text()}).then(function(src){
   (0,eval)(src);
   if(typeof initSite==='function')initSite();
 }).catch(function(e){console.error('main.js load failed',e)});

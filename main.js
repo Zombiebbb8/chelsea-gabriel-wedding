@@ -1096,7 +1096,103 @@ async function submitRSVP(e){
   showToast(attending==='yes'?'We can\'t wait to see you! 💛':'We\'ll miss you!');
 }
 
-/* ═══ ATTIRE ORDER ═══ */
+/* ═══ ATTIRE ORDER ═══
+   Family/colour/payment content is data-driven — add a family by pushing
+   one object onto ASO_EBI_FAMILIES, add a payment method by adding one key
+   to ASO_EBI_PAYMENT. Nothing else in this file or in attire.html needs to
+   change; the cards and detail panel are rendered entirely from these. */
+const ASO_EBI_FAMILIES=[
+  {
+    id:'groom',
+    label:"Groom's Family/Friends",
+    colorName:'Emerald Green',
+    swatch:['#3f5c22','#dcd9b0'],
+    image:'photos/asoebi-groom.jpg',
+    imageAlt:"Groom's family aso-ebi fabric — emerald green sequinned lace",
+    geleCap:{
+      image:'photos/asoebi-gele-cap.jpg',
+      imageAlt:'Aso-ebi gele and cap fabric',
+      note:'A matching cap for the men and gele for the women can be made from this fabric — add one to your order below.'
+    },
+    instructions:"This is the fabric for the groom's side — friends and family joining from his side of the aisle. It's sold by the yard; most adult outfits use 4–6 yards depending on style."
+  },
+  {
+    id:'bride',
+    label:"Bride's Family/Friends",
+    colorName:'Burgundy & Gold',
+    swatch:['#6b1f3a','#c9a84c'],
+    image:'photos/asoebi-bride.jpg',
+    imageAlt:"Bride's family aso-ebi fabric — burgundy and gold sequinned lace",
+    geleCap:{
+      image:'photos/asoebi-gele-cap.jpg',
+      imageAlt:'Aso-ebi gele and cap fabric',
+      note:'A matching cap for the men and gele for the women can be made from this fabric — add one to your order below.'
+    },
+    instructions:"This is the fabric for the bride's side — friends and family joining from her side of the aisle. It's sold by the yard; most adult outfits use 4–6 yards depending on style."
+  }
+];
+
+const ASO_EBI_PAYMENT={
+  us:{flag:'🇺🇸',label:'United States',fields:[]},
+  nigeria:{flag:'🇳🇬',label:'Nigeria',fields:[]}
+};
+
+function copyAoText(btn,text){
+  const orig=btn.textContent;
+  const done=()=>{btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent=orig;btn.classList.remove('copied')},1500)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>showToast('Could not copy — please copy manually.'));
+  }else{
+    showToast('Could not copy — please copy manually.');
+  }
+}
+
+function renderAsoEbiPayment(){
+  const card=(acct)=>{
+    const rows=acct.fields.length
+      ? acct.fields.map(f=>`<div class="ao-pay-row"><span class="ao-pay-lbl">${f.label}</span><span class="ao-pay-val">${f.value}<button type="button" class="ao-pay-copy" onclick="copyAoText(this,'${String(f.value).replace(/'/g,"\\'")}')">Copy</button></span></div>`).join('')
+      : `<p class="ao-pay-soon">Account details coming soon — check back before placing your order.</p>`;
+    return `<div class="ao-pay-card"><div class="ao-pay-country">${acct.flag} ${acct.label}</div>${rows}</div>`;
+  };
+  return `<div class="ao-payment">
+    <div class="ao-eyebrow-small">Send Payment</div>
+    <div class="ao-payment-grid">${card(ASO_EBI_PAYMENT.us)}${card(ASO_EBI_PAYMENT.nigeria)}</div>
+  </div>`;
+}
+
+function renderAsoEbiFamilyCards(){
+  const wrap=document.getElementById('ao-family-cards');
+  if(!wrap)return;
+  wrap.innerHTML=ASO_EBI_FAMILIES.map(f=>`
+    <label class="ao-family-card" data-family="${f.id}">
+      <input type="radio" name="family_side" value="${f.id}" onchange="selectAsoEbiFamily('${f.id}')"/>
+      <span class="ao-family-swatch" style="background:linear-gradient(135deg,${f.swatch[0]},${f.swatch[1]})"></span>
+      <span class="ao-family-name">${f.label}</span>
+    </label>`).join('');
+}
+renderAsoEbiFamilyCards(); // no-ops on pages without #ao-family-cards
+
+function selectAsoEbiFamily(id){
+  const fam=ASO_EBI_FAMILIES.find(f=>f.id===id);
+  const panel=document.getElementById('ao-family-detail');
+  if(!fam||!panel)return;
+  document.querySelectorAll('.ao-family-card').forEach(c=>c.classList.toggle('active',c.dataset.family===id));
+  panel.style.display='';
+  panel.innerHTML=`
+    <div class="ao-detail-head">
+      <span class="ao-detail-swatch" style="background:linear-gradient(135deg,${fam.swatch[0]},${fam.swatch[1]})"></span>
+      <div><div class="ao-detail-label">${fam.label}</div><div class="ao-detail-color">${fam.colorName}</div></div>
+    </div>
+    <img class="ao-detail-img" src="${fam.image}" alt="${fam.imageAlt}" loading="lazy"/>
+    <p class="ao-detail-instructions">${fam.instructions}</p>
+    <div class="ao-detail-gele">
+      <img class="ao-detail-gele-img" src="${fam.geleCap.image}" alt="${fam.geleCap.imageAlt}" loading="lazy"/>
+      <div><div class="ao-detail-gele-label">Gele / Cap</div><p>${fam.geleCap.note}</p></div>
+    </div>
+    ${renderAsoEbiPayment()}`;
+  panel.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+}
+
 function updateAttireOrderAddressLabel(){
   const lbl=document.getElementById('ao-address-lbl');
   const ta=document.getElementById('ao-address');
@@ -1193,6 +1289,7 @@ async function submitAttireOrder(e){
   const address=document.getElementById('ao-address').value.trim();
 
   if(!firstName||!lastName){showToast('Please fill in your first and last name.');return}
+  if(!familySide){showToast('Please select your side.');return}
   if(!yards||yards<=0){showToast('Please select how many yards you need.');return}
   if(!address){showToast('Please enter an address or drop-off location.');return}
 
