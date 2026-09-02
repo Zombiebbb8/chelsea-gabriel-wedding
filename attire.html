@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/styles.css?v=4"/>
+<link rel="stylesheet" href="/styles.css?v=5"/>
 <script src="/guard.js?v=1"></script>
 </head>
 <body>
@@ -279,11 +279,12 @@
         <label class="f-lbl ao-lbl">How Much Fabric Do You Need? <span class="ao-price-hint">($9 / yard)</span></label>
         <div class="ao-stepper">
           <button type="button" class="ao-stepper-btn" onclick="adjustAoYards(-1)" aria-label="Decrease yards">&minus;</button>
-          <span class="ao-stepper-val" id="ao-yards-val">1</span>
-          <input type="hidden" id="ao-yards" value="1"/>
+          <span class="ao-stepper-val" id="ao-yards-val">6</span>
+          <input type="hidden" id="ao-yards" value="6"/>
           <button type="button" class="ao-stepper-btn" onclick="adjustAoYards(1)" aria-label="Increase yards">+</button>
           <span class="ao-stepper-unit">yards</span>
         </div>
+        <p class="ao-field-note">Most women order 6 yards for iro &amp; buba; most men 4 for a kaftan. Full guide above.</p>
       </div>
       <div class="f-grp reveal">
         <label class="f-lbl ao-lbl">Delivery</label>
@@ -301,10 +302,11 @@
         <div class="ao-price-box" id="ao-price-box">
           <div class="ao-price-row"><span>Fabric</span><span id="ao-price-yards">—</span></div>
           <div class="ao-price-row" id="ao-price-hw-row" style="display:none"><span id="ao-price-hw-lbl">Gele</span><span id="ao-price-hw">$5.00</span></div>
-          <div class="ao-price-row"><span>Delivery</span><span>$0.00</span></div>
+          <div class="ao-price-row"><span>Delivery</span><span class="ao-price-tbd">Quoted separately</span></div>
           <div class="ao-price-row ao-price-total"><span>Total</span><span id="ao-price-total">$0.00</span></div>
           <div class="ao-price-local" id="ao-price-local"></div>
         </div>
+        <p class="ao-field-note">Delivery is quoted once we know where the cloth is going — we will confirm it with you before anything ships.</p>
       </div>
       <div class="f-grp reveal" id="ao-payment-static"></div>
       <div class="f-grp reveal">
@@ -312,6 +314,7 @@
         <input class="f-in" id="ao-payment-ref" type="text" placeholder="e.g. transfer reference or confirmation number"/>
       </div>
       <button type="button" class="rsvp-btn" id="attireOrderBtn" onclick="submitAttireOrder(event)"><span>Place My Order</span></button>
+      <p class="ao-field-note ao-field-note--center" id="ao-deadline-note"></p>
     </form>
     <div class="rsvp-thanks" id="attireOrderThanks">
       <span class="t-name">Order Received</span>
@@ -344,7 +347,7 @@
   document.getElementById('site').classList.add('visible');
   document.body.style.overflow='';
 })();
-fetch('/main.js?v=9').then(function(r){return r.text()}).then(function(src){
+fetch('/main.js?v=10').then(function(r){return r.text()}).then(function(src){
   (0,eval)(src);
   if(typeof initSite==='function')initSite();
 }).catch(function(e){console.error('main.js load failed',e)});

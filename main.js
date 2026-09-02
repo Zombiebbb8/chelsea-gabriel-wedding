@@ -164,7 +164,16 @@ async function initGuestPortal(){
       }
     }
 
-    injectSection('attire-content','attire','soon');
+    // Attire guidance is rendered client-side by renderAttireGuide() rather
+    // than taken from the server payload. It is static copy, and keeping it
+    // here means our colours are stated once (in ASO_EBI_FAMILIES) and cannot
+    // drift from the fabric actually on sale. The server still decides access.
+    const attireEl=document.getElementById('attire-content');
+    if(attireEl&&unlocked.includes('attire')){
+      attireEl.innerHTML=renderAttireGuide(guest.attending==='yes');
+      attireEl.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+    }
+
     injectSection('timeline-content','timeline','March 6, 2027');
     injectSection('travel-content','travel','December 20, 2026');
     injectSection('photos-content','photos','March 20, 2027');
@@ -1127,6 +1136,105 @@ const ASO_EBI_PAYMENT={
   nigeria:{flag:'🇳🇬',label:'Nigeria',fields:[]}
 };
 
+/* ═══ ATTIRE GUIDE ═══
+   The dress-code content guests read above the order form. Our colours are
+   derived from ASO_EBI_FAMILIES rather than written out again, so the palette
+   shown here can never drift from the fabric actually on sale.
+
+   TODO — confirm before sharing widely: ASO_EBI_ORDER_DEADLINE is a working
+   placeholder, and the yardage figures below are the usual amounts rather
+   than anything measured against our own cloth. */
+const ASO_EBI_ORDER_DEADLINE='31 October 2026';
+
+const ASO_EBI_YARDAGE=[
+  {who:'Women',look:'Iro &amp; buba, or a fitted gown',yards:'6 yards'},
+  {who:'Men',look:'Kaftan or senator',yards:'4 yards'},
+  {who:'Men',look:'Full agbada (three-piece)',yards:'6 yards'}
+];
+
+const AT_ICONS={
+  colours:'<path d="M12 2.7s6 6.2 6 10.1a6 6 0 01-12 0C6 8.9 12 2.7 12 2.7z"/>',
+  wear:'<path d="M12 4a2 2 0 012 2c0 1.2-1 1.7-2 2v2"/><path d="M12 10l-8.5 6.5a1.2 1.2 0 00.7 2.2h15.6a1.2 1.2 0 00.7-2.2L12 10z"/>',
+  looks:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.4 2"/>',
+  order:'<path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0l-7.2-7.2a2 2 0 01-.6-1.4V4.6A1.6 1.6 0 014.4 3h7.4a2 2 0 011.4.6l7.4 7.4a2 2 0 010 2.4z"/><circle cx="7.9" cy="7.9" r="1.3"/>'
+};
+
+function atBlockTitle(icon,text){
+  return `<div class="at-block-title"><svg viewBox="0 0 24 24">${AT_ICONS[icon]}</svg>${text}</div>`;
+}
+
+function renderAttireGuide(canOrder){
+  const palette=ASO_EBI_FAMILIES.map(f=>`
+    <div class="at-pal-card">
+      <div class="at-pal-swatch" style="background:linear-gradient(135deg,${f.swatch[0]},${f.swatch[1]})"></div>
+      <div class="at-pal-who">${f.label}</div>
+      <div class="at-pal-colour">${f.colorName}</div>
+    </div>`).join('');
+
+  const yardRows=ASO_EBI_YARDAGE.map(y=>`
+    <div class="at-yard-row">
+      <span class="at-yard-who">${y.who}</span>
+      <span class="at-yard-look">${y.look}</span>
+      <span class="at-yard-n">${y.yards}</span>
+    </div>`).join('');
+
+  const orderCta=canOrder
+    ? `<button type="button" class="at-cta" onclick="document.getElementById('attire-order').scrollIntoView({behavior:'smooth',block:'start'})">Order Your Aso-Ebi</button>`
+    : '';
+
+  return `
+  <p class="at-intro reveal">Aso-ebi is how our families arrive as one — the same cloth, worn together, so that when you look across the room you know exactly who you came with. Here is everything you need to dress for the day.</p>
+
+  <div class="at-block reveal">
+    ${atBlockTitle('colours','Our Colours')}
+    <div class="at-palette">${palette}</div>
+    <p class="at-note">Wear the side that invited you. If you are close to both families, take your pick — no one is counting. Please avoid <strong>white and ivory</strong>; those belong to the bride for the day.</p>
+  </div>
+
+  <div class="at-block reveal">
+    ${atBlockTitle('wear','What to Wear')}
+    <div class="at-cols">
+      <div class="at-card">
+        <div class="at-card-h">Women</div>
+        <p>Aso-ebi is most often sewn as <em>iro and buba</em> — a wrapper with a matching blouse — though a fitted gown in the same cloth is just as welcome. Finish with a gele; ours is sold below in a coordinating fabric. Gold jewellery sits well against both palettes.</p>
+      </div>
+      <div class="at-card">
+        <div class="at-card-h">Men</div>
+        <p>A kaftan or senator in the family cloth is the comfortable choice for a long, warm day. For something fuller, a three-piece agbada is very much in keeping. Isiagu with a red cap is traditional and always right for an Igbo ceremony. A matching cap is available below.</p>
+      </div>
+      <div class="at-card at-card--wide">
+        <div class="at-card-h">Not ordering aso-ebi?</div>
+        <p>You are under no obligation to. Nigerian traditional dress of any kind is warmly welcome — Ankara, isiagu, agbada, kaftan, lace. Western formal wear is perfectly fine too. Keep to our colours where you can, and please leave white to the bride.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="at-block reveal">
+    ${atBlockTitle('looks','The Two Looks')}
+    <div class="at-cols">
+      <div class="at-card">
+        <div class="at-card-h">Ceremony<span class="at-when">From 12:00 PM</span></div>
+        <p>This is the aso-ebi moment — traditional dress, family colours, gele and caps on. The kola nut and palm wine ceremonies both fall in this stretch of the day.</p>
+      </div>
+      <div class="at-card">
+        <div class="at-card-h">Reception<span class="at-when">From 4:00 PM</span></div>
+        <p>We change into our second outfits at four, and you are welcome to do the same. Plenty of guests stay in one look all day — either is entirely right.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="at-block reveal">
+    ${atBlockTitle('order','Ordering Your Fabric')}
+    <div class="at-deadline">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.4 2"/></svg>
+      <span>Orders close <strong>${ASO_EBI_ORDER_DEADLINE}</strong> — the cloth has to reach you with enough time to be sewn.</span>
+    </div>
+    <div class="at-yards">${yardRows}</div>
+    <p class="at-note">Fabric is sold uncut, so you will arrange your own tailoring — allow three to four weeks, and more if you order close to the deadline. If your tailor is in Enugu, choose <strong>drop off at my tailor</strong> when you order and we will get the cloth to them directly.</p>
+    ${orderCta}
+  </div>`;
+}
+
 function copyAoText(btn,text){
   const orig=btn.textContent;
   const done=()=>{btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent=orig;btn.classList.remove('copied')},1500)};
@@ -1164,6 +1272,9 @@ renderAsoEbiFamilyCards(); // no-ops on pages without #ao-family-cards
 
 const _aoPaymentStatic=document.getElementById('ao-payment-static');
 if(_aoPaymentStatic)_aoPaymentStatic.innerHTML=renderAsoEbiPayment();
+
+const _aoDeadlineNote=document.getElementById('ao-deadline-note');
+if(_aoDeadlineNote)_aoDeadlineNote.innerHTML=`Orders close <strong>${ASO_EBI_ORDER_DEADLINE}</strong>.`;
 
 function selectAsoEbiFamily(id){
   const fam=ASO_EBI_FAMILIES.find(f=>f.id===id);
