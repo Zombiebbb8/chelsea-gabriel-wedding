@@ -1109,12 +1109,7 @@ const ASO_EBI_FAMILIES=[
     swatch:['#3f5c22','#dcd9b0'],
     image:'photos/asoebi-groom.jpg',
     imageAlt:"Groom's family aso-ebi fabric — emerald green sequinned lace",
-    geleCap:{
-      image:'photos/asoebi-gele-cap.jpg',
-      imageAlt:'Aso-ebi gele and cap fabric',
-      note:'A matching cap for the men and gele for the women can be made from this fabric — add one to your order below.'
-    },
-    instructions:"This is the fabric for the groom's side — friends and family joining from his side of the aisle. It's sold by the yard; most adult outfits use 4–6 yards depending on style."
+    geleCap:{ image:'photos/asoebi-gele-cap.jpg', imageAlt:'Aso-ebi gele and cap fabric' }
   },
   {
     id:'bride',
@@ -1123,12 +1118,7 @@ const ASO_EBI_FAMILIES=[
     swatch:['#6b1f3a','#c9a84c'],
     image:'photos/asoebi-bride.jpg',
     imageAlt:"Bride's family aso-ebi fabric — burgundy and gold sequinned lace",
-    geleCap:{
-      image:'photos/asoebi-gele-cap.jpg',
-      imageAlt:'Aso-ebi gele and cap fabric',
-      note:'A matching cap for the men and gele for the women can be made from this fabric — add one to your order below.'
-    },
-    instructions:"This is the fabric for the bride's side — friends and family joining from her side of the aisle. It's sold by the yard; most adult outfits use 4–6 yards depending on style."
+    geleCap:{ image:'photos/asoebi-gele-cap.jpg', imageAlt:'Aso-ebi gele and cap fabric' }
   }
 ];
 
@@ -1150,12 +1140,12 @@ function copyAoText(btn,text){
 function renderAsoEbiPayment(){
   const card=(acct)=>{
     const rows=acct.fields.length
-      ? acct.fields.map(f=>`<div class="ao-pay-row"><span class="ao-pay-lbl">${f.label}</span><span class="ao-pay-val">${f.value}<button type="button" class="ao-pay-copy" onclick="copyAoText(this,'${String(f.value).replace(/'/g,"\\'")}')">Copy</button></span></div>`).join('')
+      ? acct.fields.map(f=>`<div class="ao-pay-row"><span class="ao-pay-lbl">${f.label}</span><span class="ao-pay-val">${f.value}<button type="button" class="ao-pay-copy" onclick="copyAoText(this,'${String(f.value).replace(/'/g,"\\'")}')">Copy Account Details</button></span></div>`).join('')
       : `<p class="ao-pay-soon">Account details coming soon — check back before placing your order.</p>`;
     return `<div class="ao-pay-card"><div class="ao-pay-country">${acct.flag} ${acct.label}</div>${rows}</div>`;
   };
   return `<div class="ao-payment">
-    <div class="ao-eyebrow-small">Send Payment</div>
+    <span class="ao-eyebrow-small">Payment Information</span>
     <div class="ao-payment-grid">${card(ASO_EBI_PAYMENT.us)}${card(ASO_EBI_PAYMENT.nigeria)}</div>
   </div>`;
 }
@@ -1172,10 +1162,15 @@ function renderAsoEbiFamilyCards(){
 }
 renderAsoEbiFamilyCards(); // no-ops on pages without #ao-family-cards
 
+const _aoPaymentStatic=document.getElementById('ao-payment-static');
+if(_aoPaymentStatic)_aoPaymentStatic.innerHTML=renderAsoEbiPayment();
+
 function selectAsoEbiFamily(id){
   const fam=ASO_EBI_FAMILIES.find(f=>f.id===id);
   const panel=document.getElementById('ao-family-detail');
   if(!fam||!panel)return;
+  // Preserve whatever gele/cap choice was already made if the guest switches sides
+  const prevHeadWrap=document.querySelector('input[name="head_wrap"]:checked')?.value||'none';
   document.querySelectorAll('.ao-family-card').forEach(c=>c.classList.toggle('active',c.dataset.family===id));
   panel.style.display='';
   panel.innerHTML=`
@@ -1184,13 +1179,30 @@ function selectAsoEbiFamily(id){
       <div><div class="ao-detail-label">${fam.label}</div><div class="ao-detail-color">${fam.colorName}</div></div>
     </div>
     <img class="ao-detail-img" src="${fam.image}" alt="${fam.imageAlt}" loading="lazy"/>
-    <p class="ao-detail-instructions">${fam.instructions}</p>
+    <p class="ao-detail-caption">${fam.label} Aso-Ebi in ${fam.colorName}. <strong>$${AO_YARD_PRICE_USD} / yard</strong></p>
     <div class="ao-detail-gele">
       <img class="ao-detail-gele-img" src="${fam.geleCap.image}" alt="${fam.geleCap.imageAlt}" loading="lazy"/>
-      <div><div class="ao-detail-gele-label">Gele / Cap</div><p>${fam.geleCap.note}</p></div>
-    </div>
-    ${renderAsoEbiPayment()}`;
+      <div class="ao-detail-gele-body">
+        <div class="ao-detail-gele-label">Matching Gele / Cap <span class="ao-price-hint">(+$${AO_HEAD_WRAP_PRICE_USD} each)</span></div>
+        <div class="f-radios">
+          <label class="f-radio"><input type="radio" name="head_wrap" value="none" ${prevHeadWrap==='none'?'checked':''} onchange="updateAttireOrderPrice()"/><span class="f-radio-dot"></span><span>No, thanks</span></label>
+          <label class="f-radio"><input type="radio" name="head_wrap" value="gele" ${prevHeadWrap==='gele'?'checked':''} onchange="updateAttireOrderPrice()"/><span class="f-radio-dot"></span><span>Gele — Women</span></label>
+          <label class="f-radio"><input type="radio" name="head_wrap" value="cap" ${prevHeadWrap==='cap'?'checked':''} onchange="updateAttireOrderPrice()"/><span class="f-radio-dot"></span><span>Cap — Men</span></label>
+        </div>
+      </div>
+    </div>`;
   panel.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+  updateAttireOrderPrice();
+}
+
+function adjustAoYards(delta){
+  const input=document.getElementById('ao-yards');
+  const valEl=document.getElementById('ao-yards-val');
+  if(!input)return;
+  const next=Math.min(20,Math.max(1,(parseInt(input.value,10)||1)+delta));
+  input.value=next;
+  if(valEl)valEl.textContent=next;
+  updateAttireOrderPrice();
 }
 
 function updateAttireOrderAddressLabel(){
@@ -1265,12 +1277,16 @@ async function updateAttireOrderLocalPrice(totalUsd){
 }
 
 function updateAttireOrderPrice(){
-  const {yards,yardsCost,headWrapCost,totalUsd}=aoOrderTotals();
+  const {yards,headWrap,yardsCost,headWrapCost,totalUsd}=aoOrderTotals();
 
   const yEl=document.getElementById('ao-price-yards');
-  if(yEl)yEl.textContent=yards?`${yards} × $${AO_YARD_PRICE_USD.toFixed(2)} = $${yardsCost.toFixed(2)}`:'—';
+  if(yEl)yEl.textContent=yards?`${yards} yards × $${AO_YARD_PRICE_USD} = $${yardsCost.toFixed(2)}`:'—';
   const hwRow=document.getElementById('ao-price-hw-row');
   if(hwRow)hwRow.style.display=headWrapCost?'flex':'none';
+  const hwLbl=document.getElementById('ao-price-hw-lbl');
+  if(hwLbl)hwLbl.textContent=headWrap==='cap'?'Cap':'Gele';
+  const hwVal=document.getElementById('ao-price-hw');
+  if(hwVal)hwVal.textContent=`1 × $${AO_HEAD_WRAP_PRICE_USD} = $${headWrapCost.toFixed(2)}`;
   const totalEl=document.getElementById('ao-price-total');
   if(totalEl)totalEl.textContent=`$${totalUsd.toFixed(2)}`;
 
@@ -1287,6 +1303,7 @@ async function submitAttireOrder(e){
   const {yards,headWrap,totalUsd}=aoOrderTotals();
   const deliveryMethod=document.querySelector('input[name="delivery_method"]:checked')?.value;
   const address=document.getElementById('ao-address').value.trim();
+  const paymentReference=document.getElementById('ao-payment-ref').value.trim()||null;
 
   if(!firstName||!lastName){showToast('Please fill in your first and last name.');return}
   if(!familySide){showToast('Please select your side.');return}
@@ -1313,7 +1330,8 @@ async function submitAttireOrder(e){
     address:address,
     price_usd:totalUsd,
     currency:currency,
-    price_local:priceLocal
+    price_local:priceLocal,
+    payment_reference:paymentReference
   });
 
   if(error){

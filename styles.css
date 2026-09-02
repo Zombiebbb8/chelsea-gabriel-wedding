@@ -714,12 +714,19 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 .ao-detail-label{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--ink)}
 .ao-detail-color{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .ao-detail-img{width:100%;height:auto;display:block;border-radius:2px;box-shadow:0 8px 30px rgba(14,12,8,.14)}
-.ao-detail-instructions{font-size:.94rem;line-height:1.7;color:var(--text);opacity:.88}
-.ao-detail-gele{display:flex;gap:16px;align-items:center;background:rgba(107,112,69,.06);border:1px solid rgba(107,112,69,.15);border-radius:2px;padding:14px}
+.ao-detail-caption{font-size:.94rem;line-height:1.7;color:var(--text);opacity:.88}
+.ao-detail-caption strong{color:var(--olive-dk);opacity:1}
+.ao-detail-gele{display:flex;gap:16px;align-items:flex-start;background:rgba(107,112,69,.06);border:1px solid rgba(107,112,69,.15);border-radius:2px;padding:16px}
 .ao-detail-gele-img{width:88px;height:88px;object-fit:contain;flex-shrink:0;border-radius:2px;background:var(--cream)}
-.ao-detail-gele-label{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--olive-dk);font-weight:600;margin-bottom:4px}
-.ao-detail-gele p{font-size:.86rem;line-height:1.6;color:var(--text);opacity:.85;margin:0}
-@media(max-width:600px){.ao-detail-gele{flex-direction:column;text-align:center}}
+.ao-detail-gele-body{flex:1;display:flex;flex-direction:column;gap:10px}
+.ao-detail-gele-label{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--olive-dk);font-weight:600}
+@media(max-width:600px){.ao-detail-gele{flex-direction:column;text-align:center}.ao-detail-gele-body{align-items:center}}
+
+.ao-stepper{display:flex;align-items:center;gap:16px}
+.ao-stepper-btn{width:38px;height:38px;flex-shrink:0;border:1px solid rgba(107,112,69,.3);background:var(--cream);color:var(--olive-dk);font-size:1.2rem;line-height:1;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.ao-stepper-btn:hover{border-color:var(--olive);background:rgba(107,112,69,.08)}
+.ao-stepper-val{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:var(--ink);min-width:1.5em;text-align:center}
+.ao-stepper-unit{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 
 .ao-payment{border-top:1px dashed rgba(107,112,69,.25);padding-top:22px}
 .ao-payment-grid{display:flex;gap:14px}
