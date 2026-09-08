@@ -734,6 +734,19 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 .ao-sum-row span:first-child{color:var(--muted);flex-shrink:0}
 .ao-sum-row span:last-child{color:var(--ink);font-weight:600;text-align:right}
 
+/* ── Price ── */
+.ao-price-card{background:var(--cream);border:1px solid rgba(201,168,76,.35);border-radius:3px;padding:16px 18px;margin:18px 0}
+.ao-price-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.ao-price-top .ao-sum-title{margin-bottom:0}
+.ao-cur{display:flex;align-items:center;gap:7px}
+.ao-cur-lbl{font-family:'Jost',sans-serif;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.ao-cur-sel{font-family:'Jost',sans-serif;font-size:.72rem;color:var(--ink);background:var(--ivory);border:1px solid rgba(107,112,69,.28);border-radius:2px;padding:7px 8px;min-height:36px;cursor:pointer;outline:none}
+.ao-cur-sel:focus{border-color:var(--gold)}
+.ao-sum-row--total{border-top:1px solid rgba(107,112,69,.25);margin-top:4px;padding-top:11px}
+.ao-sum-row--total span:first-child{color:var(--ink);font-weight:600}
+.ao-sum-row--total span:last-child{font-family:'Cormorant Garamond',serif;font-size:1.42rem;color:var(--olive-dk)}
+.ao-price-note{font-size:.74rem;line-height:1.6;color:var(--muted);font-style:italic;margin:10px 0 0}
+
 /* ── Form ── */
 .ao-form{display:grid;grid-template-columns:1fr;gap:16px}
 .ao-f{display:flex;flex-direction:column}

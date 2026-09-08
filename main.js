@@ -185,6 +185,7 @@ async function initGuestPortal(){
         aoState.guest.lastName=aoState.guest.lastName||guest.last_name||'';
         aoState.guest.email=aoState.guest.email||guest.email||'';
         aoRender();
+        aoInitPricing();
         const done=(()=>{try{return localStorage.getItem('wdg_attire_order_done')==='1'}catch(e){return false}})();
         if(done)applyAttireOrderThanksState();
       }
@@ -1118,15 +1119,15 @@ const AO_CATALOG={
     askGender:true,
     variants:{
       male:{
-        fabric:{name:'Emerald Green',colour:'Emerald green sequinned lace',image:'photos/asoebi-groom.jpg',
-          detail:'A deep emerald lace with a coordinating pale mint, cut for kaftans, senators and agbada.'},
-        accessory:{type:'cap',name:'Emerald Green Cap',image:'photos/asoebi-gele-cap.jpg',
+        fabric:{name:'Pale Mint',colour:'Soft mint green, woven texture',image:'photos/asoebi-groom-male.jpg',
+          detail:'A soft mint green with a subtle woven damask, cut for kaftans, senators and agbada.'},
+        accessory:{type:'cap',name:'Matching Cap',image:'photos/asoebi-gele-cap.jpg',
           blurb:'The matching cap, cut from the same run of cloth.'}
       },
       female:{
-        fabric:{name:'Emerald Green',colour:'Emerald green sequinned lace',image:'photos/asoebi-groom.jpg',
-          detail:'A deep emerald lace with a coordinating pale mint, cut for iro and buba or a fitted gown.'},
-        accessory:{type:'gele',name:'Emerald Green Gele',image:'photos/asoebi-gele-cap.jpg',
+        fabric:{name:'Emerald Green',colour:'Emerald green sequinned lace',image:'photos/asoebi-groom-female.jpg',
+          detail:'A deep emerald lace under a wash of sequins, cut for iro and buba or a fitted gown.'},
+        accessory:{type:'gele',name:'Matching Gele',image:'photos/asoebi-gele-cap.jpg',
           blurb:'The matching gele, cut from the same run of cloth.'}
       }
     }
@@ -1176,6 +1177,114 @@ const AO_FIELDS=[
   {id:'country',label:'Country',type:'text',auto:'country-name',required:true,half:true}
 ];
 
+/* Pricing. USD is the currency of record — every other figure shown is a
+   live conversion for the guest's convenience, and the server recomputes the
+   total from its own copy of these numbers rather than trusting the client. */
+const AO_FABRIC_PRICE_USD=45;
+const AO_FABRIC_YARDS=5;
+const AO_ACCESSORY_PRICE_USD=5;
+
+const AO_CURRENCIES=[
+  {code:'USD',label:'US Dollar'},
+  {code:'NGN',label:'Nigerian Naira'},
+  {code:'GBP',label:'British Pound'},
+  {code:'EUR',label:'Euro'},
+  {code:'CAD',label:'Canadian Dollar'}
+];
+
+/* Country → currency for the initial guess. Anywhere not listed falls back to
+   USD, and the guest can always override with the selector. */
+const AO_COUNTRY_CURRENCY={NG:'NGN',GB:'GBP',CA:'CAD',
+  IE:'EUR',FR:'EUR',DE:'EUR',ES:'EUR',IT:'EUR',NL:'EUR',BE:'EUR',PT:'EUR',AT:'EUR'};
+
+let _aoRates=null,_aoRatesTried=false;
+
+async function aoLoadRates(){
+  if(_aoRates||_aoRatesTried)return _aoRates;
+  _aoRatesTried=true;
+  try{
+    const r=await fetch('https://open.er-api.com/v6/latest/USD');
+    const d=await r.json();
+    if(d&&d.rates)_aoRates=d.rates;
+  }catch(e){/* offline or blocked — prices simply stay in USD */}
+  return _aoRates;
+}
+
+async function aoDetectCurrency(){
+  try{
+    const r=await fetch('https://ipapi.co/json/');
+    const d=await r.json();
+    const guess=AO_COUNTRY_CURRENCY[d&&d.country_code];
+    if(guess&&guess!==aoState.currency&&!aoState.currencyTouched){
+      aoState.currency=guess;
+      if(document.getElementById('ao-price-card'))aoRender();
+    }
+  }catch(e){/* detection is best-effort; the selector remains authoritative */}
+}
+
+/* Rates first so converted prices appear immediately, then the IP guess —
+   which only applies if the guest has not already picked a currency. */
+async function aoInitPricing(){
+  await aoLoadRates();
+  if(document.getElementById('ao-price-card'))aoRender();
+  aoDetectCurrency();
+}
+
+function aoSetCurrency(code){
+  aoState.currency=code;
+  aoState.currencyTouched=true;   // stop IP detection from overriding a choice
+  aoRender();
+}
+
+/* Formats a USD amount in the guest's chosen currency. Falls back to USD if
+   the rate table has not loaded, so a price is never blank or wrong. */
+function aoMoney(usd){
+  const cur=aoState.currency;
+  if(cur==='USD'||!_aoRates||!_aoRates[cur]){
+    return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(usd);
+  }
+  const amount=usd*_aoRates[cur];
+  // narrowSymbol only for NGN — it renders the bare code otherwise. Leaving
+  // the other currencies on the default keeps CA$ distinct from US $.
+  const opts={style:'currency',currency:cur,maximumFractionDigits:cur==='NGN'?0:2};
+  if(cur==='NGN')opts.currencyDisplay='narrowSymbol';
+  try{
+    return new Intl.NumberFormat('en-US',opts).format(amount);
+  }catch(e){
+    return `${cur} ${amount.toFixed(2)}`;
+  }
+}
+
+function aoTotals(){
+  const v=aoVariant();
+  const accessory=v&&v.accessory?AO_ACCESSORY_PRICE_USD:0;
+  return {fabric:AO_FABRIC_PRICE_USD,accessory,total:AO_FABRIC_PRICE_USD+accessory};
+}
+
+function aoPriceCard(){
+  const v=aoVariant();
+  if(!v)return '';
+  const t=aoTotals();
+  const opts=AO_CURRENCIES.map(c=>
+    `<option value="${c.code}"${aoState.currency===c.code?' selected':''}>${c.code} — ${c.label}</option>`).join('');
+  const usdNote=aoState.currency!=='USD'
+    ? `<p class="ao-price-note">Charged in US dollars (${new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(t.total)}). Converted amounts are indicative and move with the exchange rate.</p>`
+    : '';
+  return `<div class="ao-price-card" id="ao-price-card">
+      <div class="ao-price-top">
+        <span class="ao-sum-title">Your Order</span>
+        <label class="ao-cur">
+          <span class="ao-cur-lbl">Currency</span>
+          <select class="ao-cur-sel" onchange="aoSetCurrency(this.value)" aria-label="Display currency">${opts}</select>
+        </label>
+      </div>
+      <div class="ao-sum-row"><span>${aoEsc(v.fabric.name)} · ${AO_FABRIC_YARDS} yards</span><span>${aoMoney(t.fabric)}</span></div>
+      ${v.accessory?`<div class="ao-sum-row"><span>${aoEsc(v.accessory.name)}</span><span>${aoMoney(t.accessory)}</span></div>`:''}
+      <div class="ao-sum-row ao-sum-row--total"><span>Total</span><span>${aoMoney(t.total)}</span></div>
+      ${usdNote}
+    </div>`;
+}
+
 const AO_MAX_PROOF_BYTES=10*1024*1024;
 const AO_PROOF_TYPES=['image/jpeg','image/png','image/webp','image/heic','application/pdf'];
 
@@ -1184,6 +1293,8 @@ const aoState={
   family:null,
   gender:null,
   guest:{},
+  currency:'USD',
+  currencyTouched:false,
   paymentMethod:null,
   proofFile:null,
   submitting:false,
@@ -1312,6 +1423,7 @@ function aoPanelFabric(){
     </div>
     ${accBlock}
     ${aoSummaryCard()}
+    ${aoPriceCard()}
     <div class="ao-nav">
       <button type="button" class="ao-back" onclick="aoGo(${fam.askGender?2:1})">← Change selection</button>
       <button type="button" class="ao-next" onclick="aoGo(${fam.askGender?4:3})">Continue</button>
@@ -1416,6 +1528,7 @@ function aoPanelPayment(){
   return `<div class="ao-panel-head"><h4 class="ao-q">Payment Information</h4>
       <p class="ao-sub">Send your payment, then upload your receipt below.</p></div>
     ${aoSummaryCard()}
+    ${aoPriceCard()}
     <div class="ao-pay">${regions}</div>
 
     <div class="ao-instructions">
@@ -1537,6 +1650,7 @@ async function aoSubmit(){
         family:aoState.family,
         gender:aoState.gender,
         guest:aoState.guest,
+        currency:aoState.currency,
         paymentMethod:aoState.paymentMethod,
         paymentProofPath:path
       })
@@ -1572,6 +1686,7 @@ function aoPanelDone(){
       ${row('Fabric',o.fabricName)}
       ${o.accessoryName?row(o.accessoryType==='cap'?'Matching Cap':'Matching Gele',o.accessoryName):''}
       ${row('Payment Method',o.paymentLabel)}
+      ${row('Amount',o.amountLabel)}
       ${row('Payment Proof','Submitted')}
       ${row('Order Status','Order Placed')}
     </div>

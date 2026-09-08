@@ -28,16 +28,16 @@ const CATALOG: Record<string, Record<string, Variant>> = {
   groom: {
     male: {
       fabricId: 'groom-male',
-      fabricName: 'Emerald Green',
+      fabricName: 'Pale Mint',
       accessoryId: 'groom-cap',
-      accessoryName: 'Emerald Green Cap',
+      accessoryName: 'Matching Cap',
       accessoryType: 'cap',
     },
     female: {
       fabricId: 'groom-female',
       fabricName: 'Emerald Green',
       accessoryId: 'groom-gele',
-      accessoryName: 'Emerald Green Gele',
+      accessoryName: 'Matching Gele',
       accessoryType: 'gele',
     },
   },
@@ -51,6 +51,38 @@ const CATALOG: Record<string, Record<string, Variant>> = {
     },
   },
 };
+
+/* Prices live here, not on the client. The browser sends only a currency
+   preference; the amount charged is always recomputed from these figures. */
+const FABRIC_PRICE_USD = 45;
+const FABRIC_YARDS = 5;
+const ACCESSORY_PRICE_USD = 5;
+
+const ALLOWED_CURRENCIES = ['USD', 'NGN', 'GBP', 'EUR', 'CAD'];
+
+async function localAmount(usd: number, currency: string): Promise<number | null> {
+  if (currency === 'USD') return usd;
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+    const data = await res.json();
+    const rate = data?.rates?.[currency];
+    return typeof rate === 'number' ? Number((usd * rate).toFixed(2)) : null;
+  } catch {
+    return null; // conversion is informational; the USD total still stands
+  }
+}
+
+function money(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: currency === 'NGN' ? 0 : 2,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount.toFixed(2)}`;
+  }
+}
 
 const FAMILY_LABEL: Record<string, string> = {
   groom: "Groom's Family / Friends",
@@ -122,6 +154,8 @@ function orderEmailHtml(o: {
   paymentMethod: string;
   proofSubmitted: boolean;
   guest: Guest;
+  amountLabel: string;
+  fabricLabel: string;
 }): string {
   const row = (label: string, value: string) => `
     <tr>
@@ -154,8 +188,9 @@ function orderEmailHtml(o: {
         ${row('Order Number', o.orderNumber)}
         ${row('Family', o.family)}
         ${row('Attire', o.gender === 'male' ? 'Male' : 'Female')}
-        ${row('Fabric', o.variant.fabricName)}
+        ${row('Fabric', o.fabricLabel)}
         ${accessoryRow}
+        ${row('Amount', o.amountLabel)}
         ${row('Payment Method', o.paymentMethod)}
         ${row('Payment Proof', o.proofSubmitted ? 'Submitted' : 'Not yet submitted')}
         ${row('Order Status', 'Order Placed')}
@@ -225,6 +260,12 @@ Deno.serve(async (req) => {
     }
     if (!proofPath) return fail('Please upload a screenshot or receipt of your payment.');
 
+    // Price is derived here from the catalogue, never taken from the client.
+    const currency = ALLOWED_CURRENCIES.includes(str(body.currency, 8)) ? str(body.currency, 8) : 'USD';
+    const accessoryCost = variant.accessoryType ? ACCESSORY_PRICE_USD : 0;
+    const totalUsd = FABRIC_PRICE_USD + accessoryCost;
+    const priceLocal = await localAmount(totalUsd, currency);
+
     // 5. Persist. order_number is assigned by a database sequence.
     const { data: order, error: insertError } = await supabase
       .from('attire_orders')
@@ -250,6 +291,9 @@ Deno.serve(async (req) => {
         payment_proof_path: proofPath || null,
         payment_status: 'pending',
         order_status: 'placed',
+        price_usd: totalUsd,
+        currency,
+        price_local: priceLocal,
       })
       .select('order_number')
       .single();
@@ -261,6 +305,14 @@ Deno.serve(async (req) => {
 
     // 6. Confirmation email. A delivery failure must not lose a saved order,
     //    so this is reported but never fatal.
+    // Always state the USD figure that was actually charged; show the guest's
+    // own currency alongside it only when it differs and a rate was available.
+    const usdLabel = money(totalUsd, 'USD');
+    const amountLabel = currency !== 'USD' && priceLocal !== null
+      ? `${money(priceLocal, currency)} (${usdLabel})`
+      : usdLabel;
+    const fabricLabel = `${variant.fabricName} · ${FABRIC_YARDS} yards`;
+
     let emailSent = false;
     try {
       const res = await fetch('https://api.resend.com/emails', {
@@ -280,6 +332,8 @@ Deno.serve(async (req) => {
             paymentMethod: PAYMENT_LABEL[paymentMethod],
             proofSubmitted: Boolean(proofPath),
             guest,
+            amountLabel,
+            fabricLabel,
           }),
         }),
       });
@@ -299,6 +353,9 @@ Deno.serve(async (req) => {
         accessoryType: variant.accessoryType,
         familyLabel: FAMILY_LABEL[family],
         paymentLabel: PAYMENT_LABEL[paymentMethod],
+        amountLabel,
+        priceUsd: totalUsd,
+        currency,
       }),
       { headers: { ...cors, 'Content-Type': 'application/json' } },
     );
