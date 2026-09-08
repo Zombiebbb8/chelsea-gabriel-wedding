@@ -179,9 +179,12 @@ async function initGuestPortal(){
       const orderWrap=document.getElementById('attire-order');
       if(orderWrap){
         orderWrap.style.display='';
-        const fEl=document.getElementById('ao-first'),lEl=document.getElementById('ao-last');
-        if(fEl&&!fEl.value)fEl.value=guest.first_name||'';
-        if(lEl&&!lEl.value)lEl.value=guest.last_name||'';
+        // Seed the details step from the RSVP so the guest retypes as little
+        // as possible. Every field stays editable.
+        aoState.guest.firstName=aoState.guest.firstName||guest.first_name||'';
+        aoState.guest.lastName=aoState.guest.lastName||guest.last_name||'';
+        aoState.guest.email=aoState.guest.email||guest.email||'';
+        aoRender();
         const done=(()=>{try{return localStorage.getItem('wdg_attire_order_done')==='1'}catch(e){return false}})();
         if(done)applyAttireOrderThanksState();
       }
@@ -1096,254 +1099,515 @@ async function submitRSVP(e){
   showToast(attending==='yes'?'We can\'t wait to see you! 💛':'We\'ll miss you!');
 }
 
-/* ═══ ATTIRE ORDER ═══
-   Family/colour/payment content is data-driven — add a family by pushing
-   one object onto ASO_EBI_FAMILIES, add a payment method by adding one key
-   to ASO_EBI_PAYMENT. Nothing else in this file or in attire.html needs to
-   change; the cards and detail panel are rendered entirely from these. */
-const ASO_EBI_FAMILIES=[
-  {
-    id:'groom',
-    label:"Groom's Family/Friends",
-    colorName:'Emerald Green',
-    swatch:['#3f5c22','#dcd9b0'],
-    image:'photos/asoebi-groom.jpg',
-    imageAlt:"Groom's family aso-ebi fabric — emerald green sequinned lace",
-    geleCap:{ image:'photos/asoebi-gele-cap.jpg', imageAlt:'Aso-ebi gele and cap fabric' }
-  },
-  {
-    id:'bride',
-    label:"Bride's Family/Friends",
-    colorName:'Burgundy & Gold',
-    swatch:['#6b1f3a','#c9a84c'],
-    image:'photos/asoebi-bride.jpg',
-    imageAlt:"Bride's family aso-ebi fabric — burgundy and gold sequinned lace",
-    geleCap:{ image:'photos/asoebi-gele-cap.jpg', imageAlt:'Aso-ebi gele and cap fabric' }
-  }
-];
+/* ═══ ASO-EBI ORDER PORTAL ═══
+   A guided, step-by-step ordering flow. Everything below is driven by
+   AO_CATALOG and AO_PAYMENT — adding a family, a gender variant, an
+   accessory or a payment method is a data change, not a markup change.
 
-const ASO_EBI_PAYMENT={
-  us:{flag:'🇺🇸',label:'United States',fields:[]},
-  nigeria:{flag:'🇳🇬',label:'Nigeria',fields:[]}
+   AO_CATALOG here is presentation only (images, copy). The attire-order
+   edge function keeps its own authoritative copy and re-derives every name
+   it stores from that, so a new entry must be added on the server too
+   before it can actually be ordered. */
+const AO_CATALOG={
+  groom:{
+    id:'groom',
+    label:"Groom's Family / Friends",
+    blurb:'Standing with Gabriel — emerald green, worn by his family and friends.',
+    image:'photos/asoebi-groom.jpg',
+    swatch:['#3f5c22','#dcd9b0'],
+    askGender:true,
+    variants:{
+      male:{
+        fabric:{name:'Emerald Green',colour:'Emerald green sequinned lace',image:'photos/asoebi-groom.jpg',
+          detail:'A deep emerald lace with a coordinating pale mint, cut for kaftans, senators and agbada.'},
+        accessory:{type:'cap',name:'Emerald Green Cap',image:'photos/asoebi-gele-cap.jpg',
+          blurb:'The matching cap, cut from the same run of cloth.'}
+      },
+      female:{
+        fabric:{name:'Emerald Green',colour:'Emerald green sequinned lace',image:'photos/asoebi-groom.jpg',
+          detail:'A deep emerald lace with a coordinating pale mint, cut for iro and buba or a fitted gown.'},
+        accessory:{type:'gele',name:'Emerald Green Gele',image:'photos/asoebi-gele-cap.jpg',
+          blurb:'The matching gele, cut from the same run of cloth.'}
+      }
+    }
+  },
+  bride:{
+    id:'bride',
+    label:"Bride's Family / Friends",
+    blurb:"Standing with Chelsea — burgundy and gold, worn by her family and friends.",
+    image:'photos/asoebi-bride.jpg',
+    swatch:['#6b1f3a','#c9a84c'],
+    askGender:false,
+    implicitGender:'female',
+    variants:{
+      female:{
+        fabric:{name:'Burgundy & Gold',colour:'Burgundy and gold floral lace',image:'photos/asoebi-bride.jpg',
+          detail:'A burgundy and gold sequinned floral lace, cut for iro and buba or a fitted gown.'},
+        accessory:null
+      }
+    }
+  }
 };
 
-function copyAoText(btn,text){
-  const orig=btn.textContent;
-  const done=()=>{btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent=orig;btn.classList.remove('copied')},1500)};
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(done).catch(()=>showToast('Could not copy — please copy manually.'));
-  }else{
-    showToast('Could not copy — please copy manually.');
-  }
+const AO_PAYMENT=[
+  {region:'United States',flag:'🇺🇸',methods:[
+    {id:'paypal',name:'PayPal',fields:[{label:'PayPal',value:'gabriell778'}]},
+    {id:'zelle',name:'Zelle',fields:[{label:'Zelle',value:'adeyinkaaladegbemi@gmail.com'}]}
+  ]},
+  {region:'Nigeria',flag:'🇳🇬',methods:[
+    {id:'wema',name:'Wema Bank',fields:[
+      {label:'Bank',value:'Wema Bank',copy:false},
+      {label:'Account Name',value:'Gbolahan Sodiq Badejo'},
+      {label:'Account Number',value:'0253637011'}
+    ]}
+  ]}
+];
+
+const AO_FIELDS=[
+  {id:'firstName',label:'First Name',type:'text',auto:'given-name',required:true,half:true},
+  {id:'lastName',label:'Last Name',type:'text',auto:'family-name',required:true,half:true},
+  {id:'email',label:'Email Address',type:'email',auto:'email',required:true,
+    hint:'Your order confirmation is sent here.'},
+  {id:'phone',label:'Phone Number',type:'tel',auto:'tel',required:true},
+  {id:'shippingAddress',label:'Shipping Address',type:'text',auto:'street-address',required:true},
+  {id:'city',label:'City',type:'text',auto:'address-level2',required:true,half:true},
+  {id:'state',label:'State / Region',type:'text',auto:'address-level1',required:false,half:true},
+  {id:'postalCode',label:'ZIP / Postal Code',type:'text',auto:'postal-code',required:false,half:true},
+  {id:'country',label:'Country',type:'text',auto:'country-name',required:true,half:true}
+];
+
+const AO_MAX_PROOF_BYTES=10*1024*1024;
+const AO_PROOF_TYPES=['image/jpeg','image/png','image/webp','image/heic','application/pdf'];
+
+const aoState={
+  step:1,
+  family:null,
+  gender:null,
+  guest:{},
+  paymentMethod:null,
+  proofFile:null,
+  submitting:false,
+  order:null
+};
+
+function aoFam(){return aoState.family?AO_CATALOG[aoState.family]:null}
+function aoVariant(){
+  const fam=aoFam();
+  return fam&&aoState.gender?fam.variants[aoState.gender]:null;
 }
 
-function renderAsoEbiPayment(){
-  const card=(acct)=>{
-    const rows=acct.fields.length
-      ? acct.fields.map(f=>`<div class="ao-pay-row"><span class="ao-pay-lbl">${f.label}</span><span class="ao-pay-val">${f.value}<button type="button" class="ao-pay-copy" onclick="copyAoText(this,'${String(f.value).replace(/'/g,"\\'")}')">Copy Account Details</button></span></div>`).join('')
-      : `<p class="ao-pay-soon">Account details coming soon — check back before placing your order.</p>`;
-    return `<div class="ao-pay-card"><div class="ao-pay-country">${acct.flag} ${acct.label}</div>${rows}</div>`;
-  };
-  return `<div class="ao-payment">
-    <span class="ao-eyebrow-small">Payment Information</span>
-    <div class="ao-payment-grid">${card(ASO_EBI_PAYMENT.us)}${card(ASO_EBI_PAYMENT.nigeria)}</div>
+/* The bride's side has no gender step, so the indicator is built from the
+   chosen flow rather than a fixed list. */
+function aoSteps(){
+  const fam=aoFam();
+  const withGender=!fam||fam.askGender;
+  return withGender
+    ? ['Family','Attire','Fabric','Details','Payment','Confirmation']
+    : ['Family','Fabric','Details','Payment','Confirmation'];
+}
+
+function aoEsc(s){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function aoRenderSteps(){
+  const el=document.getElementById('ao-steps');
+  if(!el)return;
+  const steps=aoSteps();
+  el.innerHTML=steps.map((label,i)=>{
+    const n=i+1;
+    const cls=n===aoState.step?'ao-step is-current':n<aoState.step?'ao-step is-done':'ao-step';
+    return `<li class="${cls}"><span class="ao-step-n">${String(n).padStart(2,'0')}</span><span class="ao-step-l">${label}</span></li>`;
+  }).join('');
+  el.setAttribute('aria-label',`Step ${aoState.step} of ${steps.length}: ${steps[aoState.step-1]||''}`);
+}
+
+function aoGo(step){
+  aoState.step=step;
+  aoRender();
+  const wrap=document.getElementById('attire-order');
+  if(wrap&&step>1)wrap.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function aoSelectFamily(id){
+  if(aoState.family!==id){
+    aoState.family=id;
+    const fam=AO_CATALOG[id];
+    // Bride's side is female-only, so the gender step is skipped entirely.
+    aoState.gender=fam.askGender?null:fam.implicitGender;
+  }
+  aoGo(2);
+}
+
+function aoSelectGender(g){
+  aoState.gender=g;
+  aoGo(3);
+}
+
+/* ── Panels ───────────────────────────────────────────────────────────── */
+
+function aoPanelFamily(){
+  const cards=Object.values(AO_CATALOG).map(f=>`
+    <button type="button" class="ao-card ao-card--family${aoState.family===f.id?' is-selected':''}"
+            onclick="aoSelectFamily('${f.id}')" aria-pressed="${aoState.family===f.id}">
+      <span class="ao-card-media"><img src="${f.image}" alt="${aoEsc(f.label)} aso-ebi fabric" loading="lazy"/></span>
+      <span class="ao-card-body">
+        <span class="ao-card-swatch" style="background:linear-gradient(135deg,${f.swatch[0]},${f.swatch[1]})"></span>
+        <span class="ao-card-title">${aoEsc(f.label)}</span>
+        <span class="ao-card-blurb">${aoEsc(f.blurb)}</span>
+      </span>
+      <span class="ao-tick" aria-hidden="true">✓</span>
+    </button>`).join('');
+  return `<div class="ao-panel-head"><h4 class="ao-q">Who are you representing?</h4>
+    <p class="ao-sub">Choose the side you are standing with — it sets your colours for the day.</p></div>
+    <div class="ao-cards ao-cards--2">${cards}</div>`;
+}
+
+function aoPanelGender(){
+  const fam=aoFam();
+  const opt=(g,label,blurb)=>`
+    <button type="button" class="ao-card ao-card--gender${aoState.gender===g?' is-selected':''}"
+            onclick="aoSelectGender('${g}')" aria-pressed="${aoState.gender===g}">
+      <span class="ao-card-media"><img src="${fam.variants[g].fabric.image}" alt="${aoEsc(label)} aso-ebi" loading="lazy"/></span>
+      <span class="ao-card-body">
+        <span class="ao-card-title">${label}</span>
+        <span class="ao-card-blurb">${blurb}</span>
+      </span>
+      <span class="ao-tick" aria-hidden="true">✓</span>
+    </button>`;
+  return `<div class="ao-panel-head"><h4 class="ao-q">Select Your Attire</h4>
+    <p class="ao-sub">${aoEsc(fam.label)}</p></div>
+    <div class="ao-cards ao-cards--2">
+      ${opt('male','Male','Fabric with a matching cap.')}
+      ${opt('female','Female','Fabric with a matching gele.')}
+    </div>
+    <div class="ao-nav"><button type="button" class="ao-back" onclick="aoGo(1)">← Change family</button></div>`;
+}
+
+function aoPanelFabric(){
+  const fam=aoFam(),v=aoVariant();
+  if(!v)return aoPanelFamily();
+  const acc=v.accessory;
+
+  const accBlock=acc?`
+    <div class="ao-item ao-item--acc">
+      <div class="ao-item-media"><img src="${acc.image}" alt="${aoEsc(acc.name)}" loading="lazy"/></div>
+      <div class="ao-item-body">
+        <span class="ao-item-tag">Included with your attire</span>
+        <h5 class="ao-item-name">${aoEsc(acc.name)}</h5>
+        <p class="ao-item-desc">${aoEsc(acc.blurb)}</p>
+      </div>
+    </div>`:'';
+
+  return `<div class="ao-panel-head"><h4 class="ao-q">${aoEsc(fam.label)}</h4>
+      <p class="ao-sub">${fam.askGender?(aoState.gender==='male'?'Male attire':'Female attire'):'Female attire'}</p></div>
+    <div class="ao-item">
+      <div class="ao-item-media"><img src="${v.fabric.image}" alt="${aoEsc(v.fabric.name)} fabric" loading="lazy"/></div>
+      <div class="ao-item-body">
+        <span class="ao-item-tag">Your fabric</span>
+        <h5 class="ao-item-name">${aoEsc(v.fabric.name)}</h5>
+        <p class="ao-item-colour">${aoEsc(v.fabric.colour)}</p>
+        <p class="ao-item-desc">${aoEsc(v.fabric.detail)}</p>
+      </div>
+    </div>
+    ${accBlock}
+    ${aoSummaryCard()}
+    <div class="ao-nav">
+      <button type="button" class="ao-back" onclick="aoGo(${fam.askGender?2:1})">← Change selection</button>
+      <button type="button" class="ao-next" onclick="aoGo(${fam.askGender?4:3})">Continue</button>
+    </div>`;
+}
+
+function aoSummaryCard(){
+  const fam=aoFam(),v=aoVariant();
+  if(!fam||!v)return '';
+  const row=(k,val)=>`<div class="ao-sum-row"><span>${k}</span><span>${aoEsc(val)}</span></div>`;
+  return `<div class="ao-summary">
+    <span class="ao-sum-title">Your Attire Selection</span>
+    ${row('Family',fam.label)}
+    ${fam.askGender?row('Attire',aoState.gender==='male'?'Male':'Female'):''}
+    ${row('Fabric',v.fabric.name)}
+    ${v.accessory?row(v.accessory.type==='cap'?'Matching Cap':'Matching Gele',v.accessory.name):''}
   </div>`;
 }
 
-function renderAsoEbiFamilyCards(){
-  const wrap=document.getElementById('ao-family-cards');
-  if(!wrap)return;
-  wrap.innerHTML=ASO_EBI_FAMILIES.map(f=>`
-    <label class="ao-family-card" data-family="${f.id}">
-      <input type="radio" name="family_side" value="${f.id}" onchange="selectAsoEbiFamily('${f.id}')"/>
-      <span class="ao-family-swatch" style="background:linear-gradient(135deg,${f.swatch[0]},${f.swatch[1]})"></span>
-      <span class="ao-family-name">${f.label}</span>
-    </label>`).join('');
-}
-renderAsoEbiFamilyCards(); // no-ops on pages without #ao-family-cards
-
-const _aoPaymentStatic=document.getElementById('ao-payment-static');
-if(_aoPaymentStatic)_aoPaymentStatic.innerHTML=renderAsoEbiPayment();
-
-function selectAsoEbiFamily(id){
-  const fam=ASO_EBI_FAMILIES.find(f=>f.id===id);
-  const panel=document.getElementById('ao-family-detail');
-  if(!fam||!panel)return;
-  // Preserve whatever gele/cap choice was already made if the guest switches sides
-  const prevHeadWrap=document.querySelector('input[name="head_wrap"]:checked')?.value||'none';
-  document.querySelectorAll('.ao-family-card').forEach(c=>c.classList.toggle('active',c.dataset.family===id));
-  panel.style.display='';
-  panel.innerHTML=`
-    <div class="ao-detail-head">
-      <span class="ao-detail-swatch" style="background:linear-gradient(135deg,${fam.swatch[0]},${fam.swatch[1]})"></span>
-      <div><div class="ao-detail-label">${fam.label}</div><div class="ao-detail-color">${fam.colorName}</div></div>
-    </div>
-    <img class="ao-detail-img" src="${fam.image}" alt="${fam.imageAlt}" loading="lazy"/>
-    <p class="ao-detail-caption">${fam.label} Aso-Ebi in ${fam.colorName}. <strong>$${AO_YARD_PRICE_USD} / yard</strong></p>
-    <div class="ao-detail-gele">
-      <img class="ao-detail-gele-img" src="${fam.geleCap.image}" alt="${fam.geleCap.imageAlt}" loading="lazy"/>
-      <div class="ao-detail-gele-body">
-        <div class="ao-detail-gele-label">Matching Gele / Cap <span class="ao-price-hint">(+$${AO_HEAD_WRAP_PRICE_USD} each)</span></div>
-        <div class="f-radios">
-          <label class="f-radio"><input type="radio" name="head_wrap" value="none" ${prevHeadWrap==='none'?'checked':''} onchange="updateAttireOrderPrice()"/><span class="f-radio-dot"></span><span>No, thanks</span></label>
-          <label class="f-radio"><input type="radio" name="head_wrap" value="gele" ${prevHeadWrap==='gele'?'checked':''} onchange="updateAttireOrderPrice()"/><span class="f-radio-dot"></span><span>Gele — Women</span></label>
-          <label class="f-radio"><input type="radio" name="head_wrap" value="cap" ${prevHeadWrap==='cap'?'checked':''} onchange="updateAttireOrderPrice()"/><span class="f-radio-dot"></span><span>Cap — Men</span></label>
-        </div>
-      </div>
+function aoPanelDetails(){
+  const fam=aoFam();
+  const fields=AO_FIELDS.map(f=>{
+    const val=aoState.guest[f.id]||'';
+    return `<div class="ao-f${f.half?' ao-f--half':''}">
+      <label class="ao-f-lbl" for="aof-${f.id}">${f.label}${f.required?'':' <span class="ao-opt">(optional)</span>'}</label>
+      <input class="ao-f-in" id="aof-${f.id}" type="${f.type}" autocomplete="${f.auto}"
+             value="${aoEsc(val)}" oninput="aoField('${f.id}',this.value)"/>
+      ${f.hint?`<span class="ao-f-hint">${f.hint}</span>`:''}
     </div>`;
-  panel.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
-  updateAttireOrderPrice();
+  }).join('');
+  return `<div class="ao-panel-head"><h4 class="ao-q">Your Details</h4>
+      <p class="ao-sub">Where your aso-ebi should be sent, and how we reach you.</p></div>
+    ${aoSummaryCard()}
+    <div class="ao-form">${fields}</div>
+    <div class="ao-err" id="ao-err-details" hidden></div>
+    <div class="ao-nav">
+      <button type="button" class="ao-back" onclick="aoGo(${fam.askGender?3:2})">← Back</button>
+      <button type="button" class="ao-next" onclick="aoValidateDetails()">Continue to Payment</button>
+    </div>`;
 }
 
-function adjustAoYards(delta){
-  const input=document.getElementById('ao-yards');
-  const valEl=document.getElementById('ao-yards-val');
-  if(!input)return;
-  const next=Math.min(20,Math.max(1,(parseInt(input.value,10)||1)+delta));
-  input.value=next;
-  if(valEl)valEl.textContent=next;
-  updateAttireOrderPrice();
+function aoField(id,val){aoState.guest[id]=val}
+
+function aoValidateDetails(){
+  const err=document.getElementById('ao-err-details');
+  for(const f of AO_FIELDS){
+    if(f.required&&!(aoState.guest[f.id]||'').trim()){
+      if(err){err.textContent=`${f.label} is required.`;err.hidden=false}
+      const el=document.getElementById('aof-'+f.id);
+      if(el){el.classList.add('is-bad');el.focus()}
+      return;
+    }
+  }
+  const email=(aoState.guest.email||'').trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
+    if(err){err.textContent='Please enter a valid email address.';err.hidden=false}
+    const el=document.getElementById('aof-email');
+    if(el){el.classList.add('is-bad');el.focus()}
+    return;
+  }
+  if(err)err.hidden=true;
+  aoGo(aoFam().askGender?5:4);
 }
 
-function updateAttireOrderAddressLabel(){
-  const lbl=document.getElementById('ao-address-lbl');
-  const ta=document.getElementById('ao-address');
-  const tailor=document.getElementById('ao-tailor')?.checked;
-  if(lbl)lbl.textContent=tailor?"Tailor's Address / Drop-off Location":'Delivery Address';
-  if(ta)ta.placeholder=tailor?"Your tailor's name and address":'Street, city, state, country';
+function aoPanelPayment(){
+  const fam=aoFam();
+  const regions=AO_PAYMENT.map(r=>`
+    <div class="ao-pay-region">
+      <div class="ao-pay-region-h">${r.flag} ${r.region}</div>
+      ${r.methods.map(m=>`
+        <label class="ao-pay-method${aoState.paymentMethod===m.id?' is-selected':''}">
+          <input type="radio" name="ao_pay" value="${m.id}" ${aoState.paymentMethod===m.id?'checked':''}
+                 onchange="aoSetPayment('${m.id}')"/>
+          <span class="ao-pay-dot" aria-hidden="true"></span>
+          <span class="ao-pay-body">
+            <span class="ao-pay-name">${m.name}</span>
+            ${m.fields.map(f=>`
+              <span class="ao-pay-row">
+                <span class="ao-pay-k">${f.label}</span>
+                <span class="ao-pay-v">${aoEsc(f.value)}</span>
+                ${f.copy===false?'':`<button type="button" class="ao-copy" data-copy="${aoEsc(f.value)}"
+                   onclick="event.preventDefault();event.stopPropagation();aoCopy(this)">Copy</button>`}
+              </span>`).join('')}
+          </span>
+        </label>`).join('')}
+    </div>`).join('');
+
+  const file=aoState.proofFile;
+  const fileBlock=file?`
+    <div class="ao-file-picked">
+      <span class="ao-file-name">${aoEsc(file.name)}</span>
+      <span class="ao-file-size">${(file.size/1024).toFixed(0)} KB</span>
+      <button type="button" class="ao-file-x" onclick="aoRemoveFile()">Remove File</button>
+    </div>`:`
+    <label class="ao-file">
+      <input type="file" id="ao-proof" accept="image/jpeg,image/png,image/webp,image/heic,application/pdf"
+             onchange="aoPickFile(this)"/>
+      <span class="ao-file-cta">Upload Payment Screenshot</span>
+      <span class="ao-file-hint">PNG · JPG · WebP · HEIC · PDF · Max 10MB</span>
+    </label>`;
+
+  return `<div class="ao-panel-head"><h4 class="ao-q">Payment Information</h4>
+      <p class="ao-sub">Send your payment, then upload your receipt below.</p></div>
+    ${aoSummaryCard()}
+    <div class="ao-pay">${regions}</div>
+
+    <div class="ao-instructions">
+      <span class="ao-sum-title">Payment Instructions</span>
+      <ol>
+        <li>Select the payment method you will use.</li>
+        <li>Send the payment to the account shown.</li>
+        <li>Save a screenshot or receipt of the completed payment.</li>
+        <li>Upload that screenshot below.</li>
+        <li>Place your order.</li>
+        <li>We review your payment before your order is prepared for shipping.</li>
+      </ol>
+    </div>
+
+    <div class="ao-proof">
+      <span class="ao-sum-title">Proof of Payment</span>
+      ${fileBlock}
+    </div>
+
+    <div class="ao-notice">
+      <strong>Important:</strong> once you place your order you will receive a confirmation email
+      saying it has been placed. Your payment must be verified before your order can be processed
+      for shipping, so please include a screenshot or receipt as proof of payment.
+    </div>
+
+    <div class="ao-err" id="ao-err-pay" hidden></div>
+    <div class="ao-nav">
+      <button type="button" class="ao-back" onclick="aoGo(${fam.askGender?4:3})">← Back</button>
+      <button type="button" class="ao-next ao-next--go" id="ao-submit" onclick="aoSubmit()">Place My Order</button>
+    </div>`;
+}
+
+function aoSetPayment(id){
+  aoState.paymentMethod=id;
+  document.querySelectorAll('.ao-pay-method').forEach(l=>{
+    l.classList.toggle('is-selected',l.querySelector('input').value===id);
+  });
+}
+
+/* The value is read from a data attribute rather than inlined into the
+   onclick, so an apostrophe in an account name can never break out of a
+   string literal. */
+function aoCopy(btn){
+  const text=btn.dataset.copy||'';
+  const done=()=>{
+    const orig=btn.textContent;
+    btn.textContent='Copied!';
+    btn.classList.add('is-copied');
+    setTimeout(()=>{btn.textContent=orig;btn.classList.remove('is-copied')},1600);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>aoCopyFallback(text,done));
+  }else{
+    aoCopyFallback(text,done);
+  }
+}
+
+function aoCopyFallback(text,done){
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.setAttribute('readonly','');
+    ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    ok?done():showToast('Could not copy — please copy it manually.');
+  }catch(e){showToast('Could not copy — please copy it manually.')}
+}
+
+function aoPickFile(input){
+  const f=input.files&&input.files[0];
+  const err=document.getElementById('ao-err-pay');
+  if(!f)return;
+  if(!AO_PROOF_TYPES.includes(f.type)){
+    if(err){err.textContent='Please upload a PNG, JPG, WebP, HEIC or PDF.';err.hidden=false}
+    input.value='';return;
+  }
+  if(f.size>AO_MAX_PROOF_BYTES){
+    if(err){err.textContent='That file is over 10MB. Please upload a smaller one.';err.hidden=false}
+    input.value='';return;
+  }
+  if(err)err.hidden=true;
+  aoState.proofFile=f;
+  aoRender();
+}
+
+function aoRemoveFile(){
+  aoState.proofFile=null;
+  aoRender();
+}
+
+async function aoSubmit(){
+  const err=document.getElementById('ao-err-pay');
+  const btn=document.getElementById('ao-submit');
+  const show=m=>{if(err){err.textContent=m;err.hidden=false}};
+
+  if(aoState.submitting)return;            // guards against a double tap
+  if(!_attireGuest){show('Please open this page from your private invitation link.');return}
+  if(!aoState.paymentMethod){show('Please choose a payment method.');return}
+  if(!aoState.proofFile){show('Please upload a screenshot or receipt of your payment.');return}
+
+  aoState.submitting=true;
+  if(err)err.hidden=true;
+  if(btn){btn.disabled=true;btn.textContent='Placing your order…'}
+
+  try{
+    const f=aoState.proofFile;
+    const ext=(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'jpg';
+    const path=`proofs/${Date.now()}-${Math.random().toString(36).slice(2,10)}.${ext}`;
+
+    const up=await supabase.storage.from('payment-proofs').upload(path,f,{contentType:f.type});
+    if(up.error)throw new Error('We could not upload your screenshot. Please try again.');
+
+    const res=await fetch('https://nakadctpdszskvooftln.supabase.co/functions/v1/attire-order',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        token:_guestToken,
+        family:aoState.family,
+        gender:aoState.gender,
+        guest:aoState.guest,
+        paymentMethod:aoState.paymentMethod,
+        paymentProofPath:path
+      })
+    });
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error||'We could not place your order. Please try again.');
+
+    aoState.order=data;
+    try{localStorage.setItem('wdg_attire_order_done','1')}catch(e){}
+    aoGo(aoFam().askGender?6:5);
+  }catch(e){
+    show(e.message||'Something went wrong. Please try again.');
+    if(btn){btn.disabled=false;btn.textContent='Place My Order'}
+    aoState.submitting=false;
+  }
+}
+
+function aoPanelDone(){
+  const o=aoState.order||{};
+  const g=aoState.guest;
+  const row=(k,v)=>v?`<div class="ao-sum-row"><span>${k}</span><span>${aoEsc(v)}</span></div>`:'';
+  return `<div class="ao-done">
+      <span class="ao-done-mark" aria-hidden="true">✓</span>
+      <h4 class="ao-q">Order Received</h4>
+      <p class="ao-sub">Thank you — your Aso-Ebi order has been submitted.</p>
+      <span class="ao-order-no">${aoEsc(o.orderNumber||'')}</span>
+    </div>
+    <div class="ao-summary ao-summary--final">
+      ${row('Guest',`${g.firstName||''} ${g.lastName||''}`.trim())}
+      ${row('Email',g.email)}
+      ${row('Family',o.familyLabel)}
+      ${aoFam()&&aoFam().askGender?row('Attire',aoState.gender==='male'?'Male':'Female'):''}
+      ${row('Fabric',o.fabricName)}
+      ${o.accessoryName?row(o.accessoryType==='cap'?'Matching Cap':'Matching Gele',o.accessoryName):''}
+      ${row('Payment Method',o.paymentLabel)}
+      ${row('Payment Proof','Submitted')}
+      ${row('Order Status','Order Placed')}
+    </div>
+    <div class="ao-track">
+      ${['Order Placed','Payment Verification','Payment Confirmed','Preparing Order','Shipped','Delivered']
+        .map((s,i)=>`<span class="ao-track-step${i===0?' is-current':''}">${s}</span>`).join('')}
+    </div>
+    <p class="ao-done-note">${o.emailSent
+      ? `A confirmation has been sent to <strong>${aoEsc(g.email||'')}</strong>.`
+      : `Your order is saved. If the confirmation email does not arrive, reply to any of our emails and we will resend it.`}
+      Your payment will be verified before your order is prepared for shipping.</p>`;
+}
+
+function aoRender(){
+  const panel=document.getElementById('ao-panel');
+  if(!panel)return;
+  const fam=aoFam();
+  const gendered=!fam||fam.askGender;
+  const s=aoState.step;
+  let html;
+  if(s===1)html=aoPanelFamily();
+  else if(gendered&&s===2)html=aoPanelGender();
+  else if(s===(gendered?3:2))html=aoPanelFabric();
+  else if(s===(gendered?4:3))html=aoPanelDetails();
+  else if(s===(gendered?5:4))html=aoPanelPayment();
+  else html=aoPanelDone();
+  panel.innerHTML=html;
+  aoRenderSteps();
+  if(aoState.paymentMethod)aoSetPayment(aoState.paymentMethod);
 }
 
 function applyAttireOrderThanksState(){
-  const form=document.getElementById('attireOrderForm');
+  const portal=document.getElementById('ao-portal-body');
   const thanks=document.getElementById('attireOrderThanks');
-  if(form)form.style.display='none';
-  if(thanks)thanks.style.display='block';
-}
-
-/* ── Pricing: $9/yard (5 yards = $45), +$5 for a matching gele or cap —
-   converted to the guest's local currency via free, keyless public APIs.
-   Both calls are best-effort: if either fails (offline, rate-limited),
-   the USD total still displays correctly and the local-currency line is
-   just omitted rather than blocking the order. ── */
-const AO_YARD_PRICE_USD=9;
-const AO_HEAD_WRAP_PRICE_USD=5;
-let _aoCurrency=null,_aoRate=null;
-
-async function aoGetGuestCurrency(){
-  if(_aoCurrency)return _aoCurrency;
-  try{
-    const res=await fetch('https://ipapi.co/json/');
-    const data=await res.json();
-    _aoCurrency=(data&&data.currency)||'USD';
-  }catch(e){_aoCurrency='USD'}
-  return _aoCurrency;
-}
-
-async function aoGetUsdRate(currency){
-  if(currency==='USD')return 1;
-  if(_aoRate&&_aoRate.currency===currency)return _aoRate.rate;
-  try{
-    const res=await fetch('https://open.er-api.com/v6/latest/USD');
-    const data=await res.json();
-    const rate=data&&data.rates&&data.rates[currency];
-    if(rate){_aoRate={currency,rate};return rate}
-  }catch(e){}
-  return null;
-}
-
-function aoOrderTotals(){
-  const yards=parseInt(document.getElementById('ao-yards')?.value,10)||0;
-  const headWrap=document.querySelector('input[name="head_wrap"]:checked')?.value||'none';
-  const yardsCost=yards*AO_YARD_PRICE_USD;
-  const headWrapCost=headWrap!=='none'?AO_HEAD_WRAP_PRICE_USD:0;
-  return {yards,headWrap,yardsCost,headWrapCost,totalUsd:yardsCost+headWrapCost};
-}
-
-async function updateAttireOrderLocalPrice(totalUsd){
-  const localEl=document.getElementById('ao-price-local');
-  if(!localEl)return;
-  if(!totalUsd){localEl.textContent='';return}
-  localEl.textContent='Converting…';
-  const currency=await aoGetGuestCurrency();
-  if(currency==='USD'){localEl.textContent='';return}
-  const rate=await aoGetUsdRate(currency);
-  if(!rate){localEl.textContent='';return}
-  const local=totalUsd*rate;
-  try{
-    localEl.textContent='≈ '+new Intl.NumberFormat(undefined,{style:'currency',currency}).format(local);
-  }catch(e){
-    localEl.textContent='≈ '+local.toFixed(2)+' '+currency;
-  }
-}
-
-function updateAttireOrderPrice(){
-  const {yards,headWrap,yardsCost,headWrapCost,totalUsd}=aoOrderTotals();
-
-  const yEl=document.getElementById('ao-price-yards');
-  if(yEl)yEl.textContent=yards?`${yards} yards × $${AO_YARD_PRICE_USD} = $${yardsCost.toFixed(2)}`:'—';
-  const hwRow=document.getElementById('ao-price-hw-row');
-  if(hwRow)hwRow.style.display=headWrapCost?'flex':'none';
-  const hwLbl=document.getElementById('ao-price-hw-lbl');
-  if(hwLbl)hwLbl.textContent=headWrap==='cap'?'Cap':'Gele';
-  const hwVal=document.getElementById('ao-price-hw');
-  if(hwVal)hwVal.textContent=`1 × $${AO_HEAD_WRAP_PRICE_USD} = $${headWrapCost.toFixed(2)}`;
-  const totalEl=document.getElementById('ao-price-total');
-  if(totalEl)totalEl.textContent=`$${totalUsd.toFixed(2)}`;
-
-  updateAttireOrderLocalPrice(totalUsd);
-}
-
-async function submitAttireOrder(e){
-  e.preventDefault();
-  if(!_attireGuest){showToast('Please open this page via your guest link to order attire.');return}
-
-  const firstName=document.getElementById('ao-first').value.trim();
-  const lastName=document.getElementById('ao-last').value.trim();
-  const familySide=document.querySelector('input[name="family_side"]:checked')?.value;
-  const {yards,headWrap,totalUsd}=aoOrderTotals();
-  const deliveryMethod=document.querySelector('input[name="delivery_method"]:checked')?.value;
-  const address=document.getElementById('ao-address').value.trim();
-  const paymentReference=document.getElementById('ao-payment-ref').value.trim()||null;
-
-  if(!firstName||!lastName){showToast('Please fill in your first and last name.');return}
-  if(!familySide){showToast('Please select your side.');return}
-  if(!yards||yards<=0){showToast('Please select how many yards you need.');return}
-  if(!address){showToast('Please enter an address or drop-off location.');return}
-
-  const btn=document.getElementById('attireOrderBtn');
-  btn.classList.add('saving');
-  btn.querySelector('span').textContent='Saving…';
-
-  const currency=await aoGetGuestCurrency();
-  const rate=currency!=='USD'?await aoGetUsdRate(currency):1;
-  const priceLocal=rate?totalUsd*rate:null;
-
-  const {error}=await supabase.from('attire_orders').insert({
-    rsvp_id:_attireGuest.id,
-    first_name:firstName,
-    last_name:lastName,
-    email:_attireGuest.email,
-    family_side:familySide,
-    yards:yards,
-    head_wrap:headWrap,
-    delivery_method:deliveryMethod,
-    address:address,
-    price_usd:totalUsd,
-    currency:currency,
-    price_local:priceLocal,
-    payment_reference:paymentReference
-  });
-
-  if(error){
-    btn.classList.remove('saving');
-    btn.querySelector('span').textContent='Place My Order';
-    showToast(error.message||'Something went wrong. Please try again.');
-    return;
-  }
-
-  applyAttireOrderThanksState();
-  try{localStorage.setItem('wdg_attire_order_done','1')}catch(e){}
-  showToast('Your attire order has been received! 🎉');
+  if(portal)portal.style.display='none';
+  if(thanks)thanks.classList.add('visible');
 }
 
 /* Only lock scroll if the envelope intro is still showing — for a returning
