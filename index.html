@@ -874,7 +874,7 @@
        cache regardless of the max-age=0 header in netlify.toml. Bump this
        version number whenever main.js changes so every guest gets the fix
        immediately instead of waiting out a stale edge/browser cache. */
-    fetch('main.js?v=19').then(function(r){return r.text();}).then(function(src){
+    fetch('main.js?v=20').then(function(r){return r.text();}).then(function(src){
       (0,eval)(src);
       /* If we already skipped the intro, kick off site init now that main.js is ready */
       if(alreadyOpened){

@@ -194,6 +194,7 @@ async function initGuestPortal(){
         aoState.guest.email=aoState.guest.email||guest.email||'';
         aoRender();
         aoInitPricing();
+        aoPreloadImages();
         const done=(()=>{try{return localStorage.getItem('wdg_attire_order_done')==='1'}catch(e){return false}})();
         if(done)applyAttireOrderThanksState();
       }
@@ -1297,6 +1298,20 @@ async function aoDetectCurrency(){
   }catch(e){/* detection is best-effort; the selector remains authoritative */}
 }
 
+/* Warm every fabric and accessory image while the guest is still choosing a
+   side, so the cloth is on screen the instant they get to it rather than
+   arriving at an empty frame. */
+function aoPreloadImages(){
+  const urls=new Set();
+  Object.values(AO_CATALOG).forEach(fam=>{
+    Object.values(fam.variants).forEach(v=>{
+      if(v.fabric&&v.fabric.image)urls.add(v.fabric.image);
+      if(v.accessory&&v.accessory.image)urls.add(v.accessory.image);
+    });
+  });
+  urls.forEach(src=>{const img=new Image();img.decoding='async';img.src=src});
+}
+
 /* Rates first so converted prices appear immediately, then the IP guess —
    which only applies if the guest has not already picked a currency. */
 async function aoInitPricing(){
@@ -1489,7 +1504,7 @@ function aoPanelGender(){
   const opt=(g,label,blurb)=>`
     <button type="button" class="ao-card ao-card--gender${aoState.gender===g?' is-selected':''}"
             onclick="aoSelectGender('${g}')" aria-pressed="${aoState.gender===g}">
-      <span class="ao-card-media"><img src="${fam.variants[g].fabric.image}" alt="${aoEsc(label)} aso-ebi" loading="lazy"/></span>
+      <span class="ao-card-media"><img src="${fam.variants[g].fabric.image}" alt="${aoEsc(label)} aso-ebi" decoding="async"/></span>
       <span class="ao-card-body">
         <span class="ao-card-title">${label}</span>
         <span class="ao-card-blurb">${blurb}</span>
@@ -1512,7 +1527,7 @@ function aoPanelFabric(){
 
   const accBlock=acc?`
     <div class="ao-item ao-item--acc">
-      <div class="ao-item-media"><img src="${acc.image}" alt="${aoEsc(acc.name)}" loading="lazy"/></div>
+      <div class="ao-item-media"><img src="${acc.image}" alt="${aoEsc(acc.name)}" decoding="async"/></div>
       <div class="ao-item-body">
         <span class="ao-item-tag">Included with your attire</span>
         <h5 class="ao-item-name">${aoEsc(acc.name)}</h5>
@@ -1524,7 +1539,7 @@ function aoPanelFabric(){
       <p class="ao-sub">${fam.askGender?(aoState.gender==='male'?'Male attire':'Female attire'):'Female attire'}</p></div>
     ${aoDeadlineBanner()}
     <div class="ao-item">
-      <div class="ao-item-media"><img src="${v.fabric.image}" alt="${aoEsc(v.fabric.name)} fabric" loading="lazy"/></div>
+      <div class="ao-item-media"><img src="${v.fabric.image}" alt="${aoEsc(v.fabric.name)} fabric" decoding="async"/></div>
       <div class="ao-item-body">
         <span class="ao-item-tag">Your fabric</span>
         <h5 class="ao-item-name">${aoEsc(v.fabric.name)}</h5>

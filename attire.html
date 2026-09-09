@@ -299,7 +299,7 @@
   document.getElementById('site').classList.add('visible');
   document.body.style.overflow='';
 })();
-fetch('/main.js?v=19').then(function(r){return r.text()}).then(function(src){
+fetch('/main.js?v=20').then(function(r){return r.text()}).then(function(src){
   (0,eval)(src);
   if(typeof initSite==='function')initSite();
 }).catch(function(e){console.error('main.js load failed',e)});
