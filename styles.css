@@ -708,6 +708,10 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 .ao-card-media{display:block;aspect-ratio:16/10;overflow:hidden;background:var(--linen)}
 .ao-card-media img{width:100%;height:100%;object-fit:cover;display:block}
 .ao-card-body{display:block;padding:16px 18px 18px}
+/* The family step is text-only, so its cards need their own breathing room
+   rather than inheriting spacing meant to sit under a photo. */
+.ao-card--family .ao-card-body{padding:24px 22px}
+.ao-card--family .ao-card-swatch{width:56px;height:6px;margin-bottom:14px}
 .ao-card-swatch{display:block;width:44px;height:5px;border-radius:3px;margin-bottom:10px}
 .ao-card-title{display:block;font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--ink);margin-bottom:5px}
 .ao-card-blurb{display:block;font-size:.83rem;line-height:1.6;color:var(--muted)}
@@ -733,6 +737,20 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 .ao-sum-row:first-of-type{border-top:none}
 .ao-sum-row span:first-child{color:var(--muted);flex-shrink:0}
 .ao-sum-row span:last-child{color:var(--ink);font-weight:600;text-align:right}
+
+/* ── Yards ── */
+.ao-yards{background:rgba(107,112,69,.05);border:1px solid rgba(107,112,69,.16);border-radius:3px;padding:16px 18px;margin:18px 0}
+.ao-yards-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:14px}
+.ao-yards-head .ao-sum-title{margin-bottom:0}
+.ao-yards-rate{font-size:.78rem;color:var(--muted)}
+.ao-stepper{display:flex;align-items:center;justify-content:center;gap:20px}
+.ao-step-btn{width:48px;height:48px;flex-shrink:0;border:1px solid rgba(107,112,69,.3);background:var(--cream);color:var(--olive-dk);font-size:1.3rem;line-height:1;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .2s,background .2s}
+.ao-step-btn:hover:not(:disabled){border-color:var(--olive);background:rgba(107,112,69,.08)}
+.ao-step-btn:disabled{opacity:.35;cursor:default}
+.ao-stepper-val{display:flex;flex-direction:column;align-items:center;min-width:5.5em}
+.ao-stepper-n{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;color:var(--ink);line-height:1}
+.ao-stepper-u{font-family:'Jost',sans-serif;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.ao-yards-hint{font-size:.78rem;line-height:1.6;color:var(--muted);font-style:italic;margin:14px 0 0;text-align:center}
 
 /* ── Price ── */
 .ao-price-card{background:var(--cream);border:1px solid rgba(201,168,76,.35);border-radius:3px;padding:16px 18px;margin:18px 0}

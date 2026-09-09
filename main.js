@@ -1180,9 +1180,11 @@ const AO_FIELDS=[
 /* Pricing. USD is the currency of record — every other figure shown is a
    live conversion for the guest's convenience, and the server recomputes the
    total from its own copy of these numbers rather than trusting the client. */
-const AO_FABRIC_PRICE_USD=45;
-const AO_FABRIC_YARDS=5;
-const AO_ACCESSORY_PRICE_USD=5;
+const AO_PRICE_PER_YARD_USD=9;      // $45 for the standard 5 yards
+const AO_DEFAULT_YARDS=5;
+const AO_MIN_YARDS=1;
+const AO_MAX_YARDS=20;
+const AO_ACCESSORY_PRICE_USD=5;     // flat, regardless of yardage
 
 const AO_CURRENCIES=[
   {code:'USD',label:'US Dollar'},
@@ -1258,7 +1260,33 @@ function aoMoney(usd){
 function aoTotals(){
   const v=aoVariant();
   const accessory=v&&v.accessory?AO_ACCESSORY_PRICE_USD:0;
-  return {fabric:AO_FABRIC_PRICE_USD,accessory,total:AO_FABRIC_PRICE_USD+accessory};
+  const fabric=aoState.yards*AO_PRICE_PER_YARD_USD;
+  return {fabric,accessory,total:fabric+accessory};
+}
+
+function aoAdjustYards(delta){
+  const next=Math.min(AO_MAX_YARDS,Math.max(AO_MIN_YARDS,aoState.yards+delta));
+  if(next===aoState.yards)return;
+  aoState.yards=next;
+  aoRender();
+}
+
+function aoYardsPicker(){
+  const y=aoState.yards;
+  return `<div class="ao-yards">
+      <div class="ao-yards-head">
+        <span class="ao-sum-title">How Many Yards?</span>
+        <span class="ao-yards-rate">${aoMoney(AO_PRICE_PER_YARD_USD)} per yard</span>
+      </div>
+      <div class="ao-stepper">
+        <button type="button" class="ao-step-btn" onclick="aoAdjustYards(-1)"
+                ${y<=AO_MIN_YARDS?'disabled':''} aria-label="Fewer yards">&minus;</button>
+        <span class="ao-stepper-val"><span class="ao-stepper-n">${y}</span><span class="ao-stepper-u">yards</span></span>
+        <button type="button" class="ao-step-btn" onclick="aoAdjustYards(1)"
+                ${y>=AO_MAX_YARDS?'disabled':''} aria-label="More yards">+</button>
+      </div>
+      <p class="ao-yards-hint">Most guests order ${AO_DEFAULT_YARDS} yards — enough for iro and buba, a gown, or a kaftan. Ask your tailor if you are unsure.</p>
+    </div>`;
 }
 
 function aoPriceCard(){
@@ -1278,7 +1306,7 @@ function aoPriceCard(){
           <select class="ao-cur-sel" onchange="aoSetCurrency(this.value)" aria-label="Display currency">${opts}</select>
         </label>
       </div>
-      <div class="ao-sum-row"><span>${aoEsc(v.fabric.name)} · ${AO_FABRIC_YARDS} yards</span><span>${aoMoney(t.fabric)}</span></div>
+      <div class="ao-sum-row"><span>${aoEsc(v.fabric.name)} · ${aoState.yards} ${aoState.yards===1?'yard':'yards'}</span><span>${aoMoney(t.fabric)}</span></div>
       ${v.accessory?`<div class="ao-sum-row"><span>${aoEsc(v.accessory.name)}</span><span>${aoMoney(t.accessory)}</span></div>`:''}
       <div class="ao-sum-row ao-sum-row--total"><span>Total</span><span>${aoMoney(t.total)}</span></div>
       ${usdNote}
@@ -1293,6 +1321,7 @@ const aoState={
   family:null,
   gender:null,
   guest:{},
+  yards:AO_DEFAULT_YARDS,
   currency:'USD',
   currencyTouched:false,
   paymentMethod:null,
@@ -1361,7 +1390,6 @@ function aoPanelFamily(){
   const cards=Object.values(AO_CATALOG).map(f=>`
     <button type="button" class="ao-card ao-card--family${aoState.family===f.id?' is-selected':''}"
             onclick="aoSelectFamily('${f.id}')" aria-pressed="${aoState.family===f.id}">
-      <span class="ao-card-media"><img src="${f.image}" alt="${aoEsc(f.label)} aso-ebi fabric" loading="lazy"/></span>
       <span class="ao-card-body">
         <span class="ao-card-swatch" style="background:linear-gradient(135deg,${f.swatch[0]},${f.swatch[1]})"></span>
         <span class="ao-card-title">${aoEsc(f.label)}</span>
@@ -1422,6 +1450,7 @@ function aoPanelFabric(){
       </div>
     </div>
     ${accBlock}
+    ${aoYardsPicker()}
     ${aoSummaryCard()}
     ${aoPriceCard()}
     <div class="ao-nav">
@@ -1438,7 +1467,7 @@ function aoSummaryCard(){
     <span class="ao-sum-title">Your Attire Selection</span>
     ${row('Family',fam.label)}
     ${fam.askGender?row('Attire',aoState.gender==='male'?'Male':'Female'):''}
-    ${row('Fabric',v.fabric.name)}
+    ${row('Fabric',`${v.fabric.name} · ${aoState.yards} ${aoState.yards===1?'yard':'yards'}`)}
     ${v.accessory?row(v.accessory.type==='cap'?'Matching Cap':'Matching Gele',v.accessory.name):''}
   </div>`;
 }
@@ -1650,6 +1679,7 @@ async function aoSubmit(){
         family:aoState.family,
         gender:aoState.gender,
         guest:aoState.guest,
+        yards:aoState.yards,
         currency:aoState.currency,
         paymentMethod:aoState.paymentMethod,
         paymentProofPath:path

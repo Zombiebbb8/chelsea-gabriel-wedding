@@ -54,9 +54,20 @@ const CATALOG: Record<string, Record<string, Variant>> = {
 
 /* Prices live here, not on the client. The browser sends only a currency
    preference; the amount charged is always recomputed from these figures. */
-const FABRIC_PRICE_USD = 45;
-const FABRIC_YARDS = 5;
-const ACCESSORY_PRICE_USD = 5;
+const PRICE_PER_YARD_USD = 9;   // $45 for the standard 5 yards
+const DEFAULT_YARDS = 5;
+const MIN_YARDS = 1;
+const MAX_YARDS = 20;
+const ACCESSORY_PRICE_USD = 5;  // flat, regardless of yardage
+
+/* Yardage is the one quantity the guest controls, so it is clamped to a sane
+   range here rather than trusted — a forged 10,000-yard order cannot price
+   itself, and a missing or non-numeric value falls back to the default. */
+function readYards(raw: unknown): number {
+  const n = Math.floor(Number(raw));
+  if (!Number.isFinite(n)) return DEFAULT_YARDS;
+  return Math.min(MAX_YARDS, Math.max(MIN_YARDS, n));
+}
 
 const ALLOWED_CURRENCIES = ['USD', 'NGN', 'GBP', 'EUR', 'CAD'];
 
@@ -262,8 +273,9 @@ Deno.serve(async (req) => {
 
     // Price is derived here from the catalogue, never taken from the client.
     const currency = ALLOWED_CURRENCIES.includes(str(body.currency, 8)) ? str(body.currency, 8) : 'USD';
+    const yards = readYards(body.yards);
     const accessoryCost = variant.accessoryType ? ACCESSORY_PRICE_USD : 0;
-    const totalUsd = FABRIC_PRICE_USD + accessoryCost;
+    const totalUsd = yards * PRICE_PER_YARD_USD + accessoryCost;
     const priceLocal = await localAmount(totalUsd, currency);
 
     // 5. Persist. order_number is assigned by a database sequence.
@@ -291,6 +303,7 @@ Deno.serve(async (req) => {
         payment_proof_path: proofPath || null,
         payment_status: 'pending',
         order_status: 'placed',
+        yards,
         price_usd: totalUsd,
         currency,
         price_local: priceLocal,
@@ -311,7 +324,7 @@ Deno.serve(async (req) => {
     const amountLabel = currency !== 'USD' && priceLocal !== null
       ? `${money(priceLocal, currency)} (${usdLabel})`
       : usdLabel;
-    const fabricLabel = `${variant.fabricName} · ${FABRIC_YARDS} yards`;
+    const fabricLabel = `${variant.fabricName} · ${yards} ${yards === 1 ? 'yard' : 'yards'}`;
 
     let emailSent = false;
     try {
@@ -356,6 +369,7 @@ Deno.serve(async (req) => {
         amountLabel,
         priceUsd: totalUsd,
         currency,
+        yards,
       }),
       { headers: { ...cors, 'Content-Type': 'application/json' } },
     );
