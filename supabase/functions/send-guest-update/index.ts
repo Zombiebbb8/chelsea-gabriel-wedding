@@ -63,13 +63,11 @@ function buildEmail(guest: Guest): string {
       ${fabricRow('Bride&rsquo;s side', 'Burgundy &amp; Gold', true)}
     </table>
 
-    <p style="font-size:15px;line-height:1.7">Fabric is <strong>$9 per yard</strong> (most guests order 5 yards) with a matching cap or gele for <strong>$5</strong>. You can pay in dollars or naira, and see the cloth itself, on your private page below.</p>
+    <p style="font-size:15px;line-height:1.7">You can see the cloth itself, and place your order, on your private page below.</p>
 
     <div style="background:#f6f2e4;border-left:3px solid #c9a84c;padding:16px 18px;margin:22px 0">
       <p style="font-size:14px;line-height:1.7;margin:0"><strong>Please order by ${ORDER_DEADLINE}.</strong> The cloth has to be cut, shipped and sewn in time, so we cannot promise anything ordered after that date will reach you before the wedding.</p>
     </div>
-
-    <p style="font-size:15px;line-height:1.7">And if aso-ebi is not something you would like to take on, please do not give it a second thought &mdash; simply wear anything in our colours and you will match us perfectly. What matters to us is that you are there.</p>
 
     <p style="font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#8a8a72;margin:28px 0 8px;font-family:sans-serif">Need a Tailor?</p>
     <p style="font-size:15px;line-height:1.7">If you would like your fabric sewn for you, we know a few very good designers and would be glad to introduce you. Just reply to this email and we will connect you.</p>

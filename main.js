@@ -1228,6 +1228,17 @@ const AO_MIN_YARDS=1;
 const AO_MAX_YARDS=20;
 const AO_ACCESSORY_PRICE_USD=5;     // flat, regardless of yardage
 
+/* Stated wherever a guest is deciding or about to pay, so the cutoff is never
+   something they only learn from the announcement email. */
+const AO_ORDER_DEADLINE='30 November 2026';
+
+function aoDeadlineBanner(){
+  return `<div class="ao-deadline">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.4 2"/></svg>
+      <span>Orders close <strong>${AO_ORDER_DEADLINE}</strong> — the cloth has to be cut, shipped and sewn in time for the day.</span>
+    </div>`;
+}
+
 const AO_CURRENCIES=[
   {code:'USD',label:'US Dollar',flag:'🇺🇸'},
   {code:'NGN',label:'Nigerian Naira',flag:'🇳🇬'},
@@ -1491,6 +1502,7 @@ function aoPanelFabric(){
 
   return `<div class="ao-panel-head"><h4 class="ao-q">${aoEsc(fam.label)}</h4>
       <p class="ao-sub">${fam.askGender?(aoState.gender==='male'?'Male attire':'Female attire'):'Female attire'}</p></div>
+    ${aoDeadlineBanner()}
     <div class="ao-item">
       <div class="ao-item-media"><img src="${v.fabric.image}" alt="${aoEsc(v.fabric.name)} fabric" loading="lazy"/></div>
       <div class="ao-item-body">
@@ -1640,6 +1652,7 @@ function aoPanelPayment(){
       for shipping, so please include a screenshot or receipt as proof of payment.
     </div>
 
+    ${aoDeadlineBanner()}
     <div class="ao-err" id="ao-err-pay" hidden></div>
     <div class="ao-nav">
       <button type="button" class="ao-back" onclick="aoGo(${fam.askGender?4:3})">← Back</button>
