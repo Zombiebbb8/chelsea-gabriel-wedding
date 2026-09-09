@@ -33,7 +33,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/styles.css?v=13"/>
+<link rel="stylesheet" href="/styles.css?v=14"/>
 </head>
 <body>
 <!-- GRAIN OVERLAY -->
@@ -186,6 +186,7 @@
       <span class="gp-sep">·</span>
       <span class="gp-status" id="gp-status">Confirmed Guest</span>
     </div>
+    <a class="gp-cta" href="/attire">Order Aso-Ebi</a>
     <div class="gp-badge">
       <span class="gp-dot"></span>
       <span id="gp-countdown">loading</span>
@@ -845,6 +846,20 @@
       alreadyUnlocked= localStorage.getItem(LS_UNLOCKED) === '1';
     }catch(e){}
 
+    /* A private invitation link is itself proof of access. The password gate
+       exists to keep strangers out, not to challenge a guest who arrived on
+       their own token — being asked for a code they were never given is a
+       dead end. Record the unlock so guard.js lets them into the Attire,
+       Travel and Gifts pages too. */
+    var arrivedOnGuestLink=false;
+    try{
+      arrivedOnGuestLink = !!new URLSearchParams(location.search).get('guest');
+    }catch(e){}
+    if(arrivedOnGuestLink && !alreadyUnlocked){
+      try{localStorage.setItem(LS_UNLOCKED,'1')}catch(e){}
+      alreadyUnlocked=true;
+    }
+
     if(alreadyOpened){
       /* Returning guest who already opened the envelope — skip everything, go straight to site */
       skipIntro();
@@ -859,7 +874,7 @@
        cache regardless of the max-age=0 header in netlify.toml. Bump this
        version number whenever main.js changes so every guest gets the fix
        immediately instead of waiting out a stale edge/browser cache. */
-    fetch('main.js?v=18').then(function(r){return r.text();}).then(function(src){
+    fetch('main.js?v=19').then(function(r){return r.text();}).then(function(src){
       (0,eval)(src);
       /* If we already skipped the intro, kick off site init now that main.js is ready */
       if(alreadyOpened){

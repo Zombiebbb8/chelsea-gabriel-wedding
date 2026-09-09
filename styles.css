@@ -489,7 +489,8 @@ section{padding:120px 32px}
 .faq-icon::after{width:1px;height:12px;top:50%;left:50%;transform:translate(-50%,-50%)}
 .faq-item.open .faq-icon::after{transform:translate(-50%,-50%) rotate(90deg);opacity:0}
 .faq-a{max-height:0;overflow:hidden;transition:max-height .45s var(--ease)}
-.faq-item.open .faq-a{max-height:300px}
+/* Generous fallback only — the exact height is measured in faqFit(). */
+.faq-item.open .faq-a{max-height:1400px}
 .faq-a-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:1rem;color:rgba(250,248,240,.76);line-height:2;padding-bottom:22px}
 
 /* GIFTS */
@@ -668,6 +669,16 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 .gp-status{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(200,204,154,.6)}
 .gp-badge{display:flex;align-items:center;gap:7px;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(200,204,154,.42)}
 .gp-dot{width:5px;height:5px;border-radius:50%;background:var(--gold-lt);box-shadow:0 0 5px var(--gold);flex-shrink:0}
+/* The emailed update asks guests to order their aso-ebi, so give that a direct
+   route rather than leaving it two taps deep in the Explore menu. */
+.gp-cta{font-family:'Jost',sans-serif;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-lt);border:1px solid rgba(201,168,76,.45);border-radius:999px;padding:7px 14px;text-decoration:none;white-space:nowrap;transition:background .25s,border-color .25s,color .25s}
+.gp-cta:hover{background:rgba(201,168,76,.16);border-color:var(--gold);color:#fff}
+/* The banner wraps to two rows on narrow screens; give it room so nothing is
+   clipped by the collapsed height. */
+@media(max-width:560px){
+  #guest-portal-banner.visible{max-height:120px}
+  .gp-inner{justify-content:center;text-align:center}
+}
 
 /* ═══ LOCKED SECTION CARDS ═══ */
 .locked-card{max-width:500px;margin:36px auto;padding:50px 32px;text-align:center;border:1px dashed rgba(201,168,76,.2);cursor:pointer;transition:border-color .3s,background .3s}

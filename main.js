@@ -1030,12 +1030,32 @@ function shareWhatsApp(){
 }
 
 /* ═══ FAQ TOGGLE ═══ */
+/* The answer height is measured rather than capped at a fixed value — a long
+   answer (the dress code, for one) was being clipped mid-sentence by the old
+   300px ceiling. */
+function faqFit(item){
+  const a=item.querySelector('.faq-a');
+  if(a)a.style.maxHeight=item.classList.contains('open')?a.scrollHeight+'px':'';
+}
+
 function toggleFaq(btn){
   const item=btn.closest('.faq-item');
   const isOpen=item.classList.contains('open');
-  document.querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open'));
-  if(!isOpen)item.classList.add('open');
+  document.querySelectorAll('.faq-item.open').forEach(el=>{
+    el.classList.remove('open');
+    faqFit(el);
+  });
+  if(!isOpen){
+    item.classList.add('open');
+    faqFit(item);
+  }
 }
+
+/* Re-measure on resize so a rotation or width change cannot leave an open
+   answer clipped at its old height. */
+window.addEventListener('resize',()=>{
+  document.querySelectorAll('.faq-item.open').forEach(faqFit);
+});
 
 /* ═══ COPY TO CLIPBOARD ═══ */
 function copyText(text,btnId){
