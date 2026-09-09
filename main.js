@@ -164,7 +164,15 @@ async function initGuestPortal(){
       }
     }
 
-    injectSection('attire-content','attire','soon');
+    // The attire announcement is built here rather than taken from the server
+    // payload, so our colours are stated once — in AO_CATALOG — and cannot
+    // drift from the fabric actually on sale. Access is still server-decided.
+    const attireEl=document.getElementById('attire-content');
+    if(attireEl&&unlocked.includes('attire')){
+      attireEl.innerHTML=renderAttireCard();
+      attireEl.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+    }
+
     injectSection('timeline-content','timeline','March 6, 2027');
     injectSection('travel-content','travel','December 20, 2026');
     injectSection('photos-content','photos','March 20, 2027');
@@ -1173,6 +1181,22 @@ const AO_PAYMENT=[
 
 /* Regions valid for the chosen currency. Falls back to showing everything if
    a currency has no dedicated account, so a guest is never left with none. */
+/* Colour names come from AO_CATALOG, so this card can never contradict the
+   fabric shown in the order form directly beneath it. */
+function renderAttireCard(){
+  const g=AO_CATALOG.groom.variants, b=AO_CATALOG.bride.variants;
+  const groomColours=`${aoEsc(g.male.fabric.name)} and ${aoEsc(g.female.fabric.name)}`;
+  return `
+  <p class="dc-note reveal in">Thank you for confirming — as one of our confirmed guests, this is your space for attire details.</p>
+  <div class="locked-card reveal in" onclick="document.getElementById('attire-order').scrollIntoView({behavior:'smooth',block:'start'})">
+    <span class="locked-icon">🧵</span>
+    <div class="locked-title">Our Fabrics Are In!</div>
+    <span class="locked-unlock">You already have access</span>
+    <p class="locked-msg">Our aso-ebi is here — <strong>${groomColours}</strong> for the groom's side, <strong>${aoEsc(b.female.fabric.name)}</strong> for the bride's. Choose your side below to see the cloth and place your order.</p>
+    <div class="locked-cta">Place My Order</div>
+  </div>`;
+}
+
 function aoPaymentRegions(){
   const matched=AO_PAYMENT.filter(r=>r.currencies.includes(aoState.currency));
   return matched.length?matched:AO_PAYMENT;
