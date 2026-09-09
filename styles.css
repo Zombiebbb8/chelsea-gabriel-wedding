@@ -749,6 +749,9 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 .ao-sum-row span:first-child{color:var(--muted);flex-shrink:0}
 .ao-sum-row span:last-child{color:var(--ink);font-weight:600;text-align:right}
 
+.ao-prior-note{background:rgba(107,112,69,.08);border:1px solid rgba(107,112,69,.2);border-radius:3px;padding:13px 16px;margin:0 0 22px;font-size:.86rem;line-height:1.65;color:var(--ink)}
+.ao-prior-note strong{color:var(--olive-dk)}
+
 /* ── Order deadline ── */
 .ao-deadline{display:flex;align-items:center;gap:12px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.35);border-radius:3px;padding:14px 16px;margin:0 0 18px;font-size:.86rem;line-height:1.65;color:var(--ink)}
 .ao-deadline svg{width:18px;height:18px;stroke:var(--gold-dk);fill:none;stroke-width:1.4;stroke-linecap:round;flex-shrink:0}

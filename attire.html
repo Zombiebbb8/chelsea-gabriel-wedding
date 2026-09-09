@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Great+Vibes&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/styles.css?v=14"/>
+<link rel="stylesheet" href="/styles.css?v=15"/>
 <script src="/guard.js?v=2"></script>
 </head>
 <body>
@@ -268,10 +268,6 @@
       <ol class="ao-steps" id="ao-steps" role="list"></ol>
       <div class="ao-panel" id="ao-panel"></div>
     </div>
-    <div class="rsvp-thanks" id="attireOrderThanks">
-      <span class="t-name">Order Received</span>
-      <p>Your Aso-Ebi order is already in — we'll be in touch once your payment is verified.</p>
-    </div>
   </div>
 </section>
 
@@ -299,7 +295,7 @@
   document.getElementById('site').classList.add('visible');
   document.body.style.overflow='';
 })();
-fetch('/main.js?v=20').then(function(r){return r.text()}).then(function(src){
+fetch('/main.js?v=21').then(function(r){return r.text()}).then(function(src){
   (0,eval)(src);
   if(typeof initSite==='function')initSite();
 }).catch(function(e){console.error('main.js load failed',e)});

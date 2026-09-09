@@ -1853,11 +1853,18 @@ function aoRender(){
   if(aoState.paymentMethod)aoSetPayment(aoState.paymentMethod);
 }
 
+/* A guest who has ordered before gets a note, not a locked door — people
+   order again for a partner, for extra yards, or to correct a mistake.
+   Hiding the whole portal also meant one stale flag left nothing on screen
+   but an empty card, which is exactly how this surfaced. */
 function applyAttireOrderThanksState(){
-  const portal=document.getElementById('ao-portal-body');
-  const thanks=document.getElementById('attireOrderThanks');
-  if(portal)portal.style.display='none';
-  if(thanks)thanks.classList.add('visible');
+  const body=document.getElementById('ao-portal-body');
+  if(!body||document.getElementById('ao-prior-note'))return;
+  const note=document.createElement('div');
+  note.id='ao-prior-note';
+  note.className='ao-prior-note';
+  note.innerHTML='<strong>You have already placed an order.</strong> You are welcome to place another — for a partner, or for extra yards.';
+  body.insertBefore(note,body.firstChild);
 }
 
 /* Only lock scroll if the envelope intro is still showing — for a returning
