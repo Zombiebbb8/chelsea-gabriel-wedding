@@ -1150,19 +1150,37 @@ const AO_CATALOG={
   }
 };
 
+/* Each region declares the currencies it serves, so choosing naira shows the
+   Nigerian account and nothing else. `mark`/`brand` render a small brand tile
+   beside each method — drawn from letterforms and brand colours rather than
+   the providers' own artwork. */
 const AO_PAYMENT=[
-  {region:'United States',flag:'🇺🇸',methods:[
-    {id:'paypal',name:'PayPal',fields:[{label:'PayPal',value:'gabriell778'}]},
-    {id:'zelle',name:'Zelle',fields:[{label:'Zelle',value:'adeyinkaaladegbemi@gmail.com'}]}
+  {region:'United States',flag:'🇺🇸',currencies:['USD','GBP','EUR','CAD'],methods:[
+    {id:'paypal',name:'PayPal',mark:'P',brand:'linear-gradient(135deg,#009CDE,#002F86)',
+     fields:[{label:'PayPal',value:'gabriell778'}]},
+    {id:'zelle',name:'Zelle',mark:'Z',brand:'linear-gradient(135deg,#8A47E0,#6D1ED4)',
+     fields:[{label:'Zelle',value:'adeyinkaaladegbemi@gmail.com'}]}
   ]},
-  {region:'Nigeria',flag:'🇳🇬',methods:[
-    {id:'wema',name:'Wema Bank',fields:[
+  {region:'Nigeria',flag:'🇳🇬',currencies:['NGN'],methods:[
+    {id:'wema',name:'Wema Bank',mark:'W',brand:'linear-gradient(135deg,#8E3B8E,#5B1F55)',
+     fields:[
       {label:'Bank',value:'Wema Bank',copy:false},
       {label:'Account Name',value:'Gbolahan Sodiq Badejo'},
       {label:'Account Number',value:'0253637011'}
     ]}
   ]}
 ];
+
+/* Regions valid for the chosen currency. Falls back to showing everything if
+   a currency has no dedicated account, so a guest is never left with none. */
+function aoPaymentRegions(){
+  const matched=AO_PAYMENT.filter(r=>r.currencies.includes(aoState.currency));
+  return matched.length?matched:AO_PAYMENT;
+}
+
+function aoVisiblePaymentIds(){
+  return aoPaymentRegions().reduce((ids,r)=>ids.concat(r.methods.map(m=>m.id)),[]);
+}
 
 const AO_FIELDS=[
   {id:'firstName',label:'First Name',type:'text',auto:'given-name',required:true,half:true},
@@ -1235,6 +1253,11 @@ async function aoInitPricing(){
 function aoSetCurrency(code){
   aoState.currency=code;
   aoState.currencyTouched=true;   // stop IP detection from overriding a choice
+  // Switching currency can withdraw the account a guest already picked; drop
+  // it rather than letting a hidden method stay selected.
+  if(aoState.paymentMethod&&aoVisiblePaymentIds().indexOf(aoState.paymentMethod)===-1){
+    aoState.paymentMethod=null;
+  }
   aoRender();
 }
 
@@ -1519,7 +1542,7 @@ function aoValidateDetails(){
 
 function aoPanelPayment(){
   const fam=aoFam();
-  const regions=AO_PAYMENT.map(r=>`
+  const regions=aoPaymentRegions().map(r=>`
     <div class="ao-pay-region">
       <div class="ao-pay-region-h">${r.flag} ${r.region}</div>
       ${r.methods.map(m=>`
@@ -1528,7 +1551,10 @@ function aoPanelPayment(){
                  onchange="aoSetPayment('${m.id}')"/>
           <span class="ao-pay-dot" aria-hidden="true"></span>
           <span class="ao-pay-body">
-            <span class="ao-pay-name">${m.name}</span>
+            <span class="ao-pay-head">
+              <span class="ao-pay-logo" style="background:${m.brand}" aria-hidden="true">${m.mark}</span>
+              <span class="ao-pay-name">${m.name}</span>
+            </span>
             ${m.fields.map(f=>`
               <span class="ao-pay-row">
                 <span class="ao-pay-k">${f.label}</span>
@@ -1554,11 +1580,10 @@ function aoPanelPayment(){
       <span class="ao-file-hint">PNG · JPG · WebP · HEIC · PDF · Max 10MB</span>
     </label>`;
 
-  return `<div class="ao-panel-head"><h4 class="ao-q">Payment Information</h4>
-      <p class="ao-sub">Send your payment, then upload your receipt below.</p></div>
+  return `<div class="ao-panel-head"><h4 class="ao-q">Payment</h4>
+      <p class="ao-sub">Follow the steps below, then upload your receipt to place your order.</p></div>
     ${aoSummaryCard()}
     ${aoPriceCard()}
-    <div class="ao-pay">${regions}</div>
 
     <div class="ao-instructions">
       <span class="ao-sum-title">Payment Instructions</span>
@@ -1571,6 +1596,10 @@ function aoPanelPayment(){
         <li>We review your payment before your order is prepared for shipping.</li>
       </ol>
     </div>
+
+    <span class="ao-sum-title ao-pay-title">Payment Information</span>
+    <p class="ao-pay-scope">Showing the account for <strong>${aoState.currency}</strong>. Change the currency above to see other options.</p>
+    <div class="ao-pay">${regions}</div>
 
     <div class="ao-proof">
       <span class="ao-sum-title">Proof of Payment</span>
