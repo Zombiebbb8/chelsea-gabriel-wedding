@@ -1205,11 +1205,11 @@ const AO_MAX_YARDS=20;
 const AO_ACCESSORY_PRICE_USD=5;     // flat, regardless of yardage
 
 const AO_CURRENCIES=[
-  {code:'USD',label:'US Dollar'},
-  {code:'NGN',label:'Nigerian Naira'},
-  {code:'GBP',label:'British Pound'},
-  {code:'EUR',label:'Euro'},
-  {code:'CAD',label:'Canadian Dollar'}
+  {code:'USD',label:'US Dollar',flag:'🇺🇸'},
+  {code:'NGN',label:'Nigerian Naira',flag:'🇳🇬'},
+  {code:'GBP',label:'British Pound',flag:'🇬🇧'},
+  {code:'EUR',label:'Euro',flag:'🇪🇺'},
+  {code:'CAD',label:'Canadian Dollar',flag:'🇨🇦'}
 ];
 
 /* Country → currency for the initial guess. Anywhere not listed falls back to
@@ -1316,18 +1316,22 @@ function aoPriceCard(){
   const v=aoVariant();
   if(!v)return '';
   const t=aoTotals();
-  const opts=AO_CURRENCIES.map(c=>
-    `<option value="${c.code}"${aoState.currency===c.code?' selected':''}>${c.code} — ${c.label}</option>`).join('');
+  const chips=AO_CURRENCIES.map(c=>{
+    const on=aoState.currency===c.code;
+    return `<button type="button" class="ao-cur-chip${on?' is-selected':''}" title="${aoEsc(c.label)}"
+              onclick="aoSetCurrency('${c.code}')" aria-pressed="${on}">
+        <span class="ao-cur-flag" aria-hidden="true">${c.flag}</span>
+        <span class="ao-cur-code">${c.code}</span>
+      </button>`;
+  }).join('');
   const usdNote=aoState.currency!=='USD'
     ? `<p class="ao-price-note">Charged in US dollars (${new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(t.total)}). Converted amounts are indicative and move with the exchange rate.</p>`
     : '';
   return `<div class="ao-price-card" id="ao-price-card">
-      <div class="ao-price-top">
-        <span class="ao-sum-title">Your Order</span>
-        <label class="ao-cur">
-          <span class="ao-cur-lbl">Currency</span>
-          <select class="ao-cur-sel" onchange="aoSetCurrency(this.value)" aria-label="Display currency">${opts}</select>
-        </label>
+      <span class="ao-sum-title">Your Order</span>
+      <div class="ao-cur">
+        <span class="ao-cur-lbl">Show prices in</span>
+        <div class="ao-cur-chips" role="group" aria-label="Display currency">${chips}</div>
       </div>
       <div class="ao-sum-row"><span>${aoEsc(v.fabric.name)} · ${aoState.yards} ${aoState.yards===1?'yard':'yards'}</span><span>${aoMoney(t.fabric)}</span></div>
       ${v.accessory?`<div class="ao-sum-row"><span>${aoEsc(v.accessory.name)}</span><span>${aoMoney(t.accessory)}</span></div>`:''}

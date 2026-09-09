@@ -754,12 +754,17 @@ footer::before{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;
 
 /* ── Price ── */
 .ao-price-card{background:var(--cream);border:1px solid rgba(201,168,76,.35);border-radius:3px;padding:16px 18px;margin:18px 0}
-.ao-price-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-.ao-price-top .ao-sum-title{margin-bottom:0}
-.ao-cur{display:flex;align-items:center;gap:7px}
-.ao-cur-lbl{font-family:'Jost',sans-serif;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.ao-cur-sel{font-family:'Jost',sans-serif;font-size:.72rem;color:var(--ink);background:var(--ivory);border:1px solid rgba(107,112,69,.28);border-radius:2px;padding:7px 8px;min-height:36px;cursor:pointer;outline:none}
-.ao-cur-sel:focus{border-color:var(--gold)}
+/* Currency chips mirror the payment method tiles — a rounded mark beside a
+   short label — so the two choices read as the same kind of control. */
+.ao-cur{margin:2px 0 14px}
+.ao-cur-lbl{display:block;font-family:'Jost',sans-serif;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.ao-cur-chips{display:flex;flex-wrap:wrap;gap:8px}
+.ao-cur-chip{display:flex;align-items:center;gap:7px;padding:6px 13px 6px 6px;min-height:42px;border:1px solid rgba(107,112,69,.22);border-radius:999px;background:var(--ivory);cursor:pointer;font:inherit;transition:border-color .2s,background .2s,box-shadow .2s}
+.ao-cur-chip:hover{border-color:rgba(201,168,76,.6)}
+.ao-cur-chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ao-cur-chip.is-selected{border-color:var(--olive);background:rgba(107,112,69,.09);box-shadow:0 0 0 1px var(--olive)}
+.ao-cur-flag{width:28px;height:28px;flex-shrink:0;border-radius:7px;display:flex;align-items:center;justify-content:center;background:var(--cream);font-size:.95rem;line-height:1;box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.ao-cur-code{font-family:'Jost',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:.1em;color:var(--ink)}
 .ao-sum-row--total{border-top:1px solid rgba(107,112,69,.25);margin-top:4px;padding-top:11px}
 .ao-sum-row--total span:first-child{color:var(--ink);font-weight:600}
 .ao-sum-row--total span:last-child{font-family:'Cormorant Garamond',serif;font-size:1.42rem;color:var(--olive-dk)}
